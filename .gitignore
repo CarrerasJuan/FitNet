@@ -1,0 +1,105 @@
+# =====================
+# Build artifacts
+# =====================
+bin/
+obj/
+out/
+build/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+bld/
+msbuild.log
+msbuild.err
+msbuild.wrn
+
+# =====================
+# IDE / editor
+# =====================
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.idea/
+*.swp
+*.*~
+.DS_Store
+
+# =====================
+# .NET
+# =====================
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/Properties/launchSettings.json
+
+# =====================
+# Secretos / config local (NUNCA subir)
+# =====================
+appsettings.*.local.json
+appsettings.Local.json
+secrets.json
+.env
+.env.*
+!appsettings.example.json
+
+# =====================
+# Carpetas de desarrollo local / no subir (heredado de InmoDev)
+# =====================
+documentacion/
+NOPUSH/
+NO_SUBIR/
+*_NOPUSH/
+*_NO_SUBIR/
+
+# =====================
+# Agentes / herramientas locales (no forman parte del entregable)
+# =====================
+.mcp.json
+.zeroagents/
+.aider*
+.claude/
+.cline/
+.copilot/
+.continue/
+.agents/
+agent*.md
+AGENTS.md
+
+# =====================
+# OS
+# =====================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# =====================
+# Logs y temporales
+# =====================
+*.log
+logs/
+*.tmp
+*.cache
+nul
+
+# =====================
+# Uploads generados en runtime (las carpetas sí se versionan con .gitkeep)
+# =====================
+wwwroot/uploads/avatars/*
+wwwroot/uploads/progress/*
+wwwroot/uploads/exercises/*
+!wwwroot/uploads/avatars/.gitkeep
+!wwwroot/uploads/progress/.gitkeep
+!wwwroot/uploads/exercises/.gitkeep
+
+# =====================
+# Postman (se versiona la colección, no entornos con secretos)
+# =====================
+postman/*local*
