@@ -1,15 +1,454 @@
 @{
-    ViewData["Title"] = "Inicio";
+    ViewData["Title"] = "Plataforma Fitness, Rutinas y Gestión de Gimnasio";
 }
 
-<div class="text-center mt-5">
-    <h1 class="display-4 fw-bold">
-        <i class="fa-solid fa-dumbbell text-primary"></i> FitNet
-    </h1>
-    <p class="lead">Plataforma digital para gimnasios y establecimientos fitness.</p>
+<div id="fitnet-landing-app">
+    <!-- ==========================================
+         1. HERO SECTION (PORTADA PRINCIPAL)
+         ========================================== -->
+    <section class="hero-section" id="inicio">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7 col-md-10">
+                    <div class="hero-badge">
+                        <i class="fa-solid fa-fire-flame-curved"></i> Plataforma Fitness & Gestión Digital
+                    </div>
 
-    @* Prueba de integración Font Awesome local (eliminable después) *@
-    <button type="button" class="btn btn-primary" onclick="alert('Libs locales OK')">
-        <i class="fa-solid fa-gauge-high"></i> Probar integración
-    </button>
+                    <h1 class="hero-title">
+                        Superá tus límites.
+                        <span class="highlight">Entrená con propósito.</span>
+                    </h1>
+
+                    <p class="hero-subtitle">
+                        El ecosistema digital integral para socios, entrenadores y directivos. Gestioná tus rutinas, monitoreá tu evolución física con fotos de progreso y alcanzá tu mejor versión.
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="/Account/Register?plan=free" class="btn-fn-primary">
+                            <i class="fa-solid fa-bolt"></i> Comenzar Trial de 24 Horas
+                        </a>
+                        <a href="#planes" class="btn-fn-outline">
+                            <i class="fa-solid fa-tags"></i> Ver Membresías
+                        </a>
+                    </div>
+
+                    <div class="hero-stats">
+                        <div class="hero-stat-item">
+                            <h3>200<span>+</span></h3>
+                            <p>Socios Activos</p>
+                        </div>
+                        <div class="hero-stat-item">
+                            <h3>50<span>+</span></h3>
+                            <p>Rutinas Guiadas</p>
+                        </div>
+                        <div class="hero-stat-item">
+                            <h3>100<span>%</span></h3>
+                            <p>Gestión Digital</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         2. DISCIPLINAS INTERACTIVAS (VUE.JS)
+         ========================================== -->
+    <section class="py-5" id="disciplinas">
+        <div class="container py-4">
+            <div class="text-center mb-4">
+                <span class="text-primary-fn font-heading fw-bold letter-spacing-1">NUESTRAS ÁREAS DE ENTRENAMIENTO</span>
+                <h2 class="font-heading display-5 fw-bold text-white mt-1">DISCIPLINAS Y MODALIDADES</h2>
+                <p class="text-muted mx-auto" style="max-width: 620px;">
+                    Programas diseñados por profesionales para todos los niveles de experiencia, desde iniciación deportiva hasta rendimiento avanzado.
+                </p>
+            </div>
+
+            <!-- Botones de Filtro Reactivo con Vue.js -->
+            <div class="filter-btn-group">
+                <button v-for="cat in categorias" 
+                        :key="cat.id"
+                        class="filter-btn"
+                        :class="{ active: categoriaActiva === cat.id }"
+                        v-on:click="categoriaActiva = cat.id">
+                    {{ cat.nombre }}
+                </button>
+            </div>
+
+            <!-- Grilla Reactiva de Tarjetas -->
+            <div class="row g-4">
+                <div v-for="item in disciplinasFiltradas" :key="item.id" class="col-lg-4 col-md-6">
+                    <div class="category-card">
+                        <div class="category-img-wrapper">
+                            <img :src="item.imagen" :alt="item.nombre" loading="lazy" />
+                            <span class="category-badge">
+                                <i class="fa-solid fa-gauge-high me-1 text-primary-fn"></i> {{ item.intensidad }}
+                            </span>
+                        </div>
+                        <div class="category-body">
+                            <div>
+                                <h4>{{ item.nombre }}</h4>
+                                <p>{{ item.descripcion }}</p>
+                            </div>
+                            <div>
+                                <a href="/Account/Register" class="text-primary-fn text-decoration-none font-heading fw-bold small text-uppercase d-inline-flex align-items-center gap-1">
+                                    Explorar Rutina <i class="fa-solid fa-arrow-right fa-xs"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         3. PROPUESTA DE VALOR / CARACTERÍSTICAS
+         ========================================== -->
+    <section class="py-5 bg-surface-fn border-top border-bottom border-fn">
+        <div class="container py-4">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-4">
+                    <span class="text-primary-fn font-heading fw-bold">EXPERIENCIA FITNET</span>
+                    <h2 class="font-heading fs-1 fw-bold text-white mt-2 mb-3">LA TECNOLOGÍA AL SERVICIO DE TU SALUD</h2>
+                    <p class="text-muted leading-relaxed mb-4">
+                        Dejá atrás las planillas en papel y los registros manuales. En FitNet contás con un entorno centralizado para planificar, ejecutar y evaluar cada repetición.
+                    </p>
+                    <a href="/Account/Register?plan=free" class="btn-fn-primary">
+                        <i class="fa-solid fa-id-card"></i> Creá tu cuenta gratis
+                    </a>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="bg-card-fn p-4 rounded-3 border border-fn h-100">
+                                <div class="fs-1 text-primary-fn mb-3">
+                                    <i class="fa-solid fa-clipboard-list"></i>
+                                </div>
+                                <h4 class="font-heading text-white fs-4 mb-2">Rutinas Guiadas</h4>
+                                <p class="text-muted small mb-0">
+                                    Series, repeticiones, kilajes y descansos cronometrados. Llevá tu plan en el celular y no te saltees ningún ejercicio.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="bg-card-fn p-4 rounded-3 border border-fn h-100">
+                                <div class="fs-1 text-primary-fn mb-3">
+                                    <i class="fa-solid fa-camera"></i>
+                                </div>
+                                <h4 class="font-heading text-white fs-4 mb-2">Registro de Progreso</h4>
+                                <p class="text-muted small mb-0">
+                                    Cargá tu peso corporal, porcentaje de grasa y fotografías periódicas para comparar tu transformación a lo largo del tiempo.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="bg-card-fn p-4 rounded-3 border border-fn h-100">
+                                <div class="fs-1 text-primary-fn mb-3">
+                                    <i class="fa-solid fa-user-ninja"></i>
+                                </div>
+                                <h4 class="font-heading text-white fs-4 mb-2">Coach Asignado (Premium)</h4>
+                                <p class="text-muted small mb-0">
+                                    Entrenadores certificados confeccionan tu rutina personalizada y monitorean tu evolución física con observaciones técnicas.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="bg-card-fn p-4 rounded-3 border border-fn h-100">
+                                <div class="fs-1 text-primary-fn mb-3">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                                <h4 class="font-heading text-white fs-4 mb-2">Seguridad y Privacidad</h4>
+                                <p class="text-muted small mb-0">
+                                    Acceso seguro con contraseña encriptada, perfiles diferenciados por roles y protección integral de tu historial médico y deportivo.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         4. PLANES Y MEMBRESÍAS INTERACTIVAS (VUE.JS)
+         ========================================== -->
+    <section class="py-5" id="planes">
+        <div class="container py-4">
+            <div class="text-center mb-4">
+                <span class="text-primary-fn font-heading fw-bold">TRANSPARENCIA TOTAL</span>
+                <h2 class="font-heading display-5 fw-bold text-white mt-1">PLANES Y MEMBRESÍAS</h2>
+                <p class="text-muted mx-auto" style="max-width: 600px;">
+                    Elegí el plan que mejor se ajuste a tus metas deportivas. Podés iniciar hoy mismo con nuestra prueba sin costo de 24 horas.
+                </p>
+
+                <!-- Selector de Período Reactivo -->
+                <div class="d-inline-flex align-items-center bg-card-fn p-1 rounded-pill border border-fn mt-3">
+                    <button type="button" 
+                            class="btn btn-sm rounded-pill font-heading px-4 py-2"
+                            :class="periodo === 'mensual' ? 'btn-fn-primary' : 'text-muted border-0 bg-transparent'"
+                            v-on:click="periodo = 'mensual'">
+                        Facturación Mensual
+                    </button>
+                    <button type="button" 
+                            class="btn btn-sm rounded-pill font-heading px-4 py-2"
+                            :class="periodo === 'semestral' ? 'btn-fn-primary' : 'text-muted border-0 bg-transparent'"
+                            v-on:click="periodo = 'semestral'">
+                        Plan Semestral <span class="badge bg-dark text-warning ms-1">-20%</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grilla Reactiva de Planes -->
+            <div class="row g-4 justify-content-center">
+                <div v-for="p in planes" :key="p.id" class="col-lg-4 col-md-6">
+                    <div class="pricing-card" :class="{ featured: p.destacado }">
+                        <span v-if="p.destacado" class="pricing-ribbon">{{ p.badge }}</span>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="plan-name">{{ p.nombre }}</h3>
+                            <span v-if="!p.destacado && p.badge" class="badge bg-secondary font-heading text-uppercase">{{ p.badge }}</span>
+                        </div>
+
+                        <p class="plan-desc">{{ p.subtitulo }}</p>
+
+                        <div class="plan-price">
+                            <span class="currency" v-if="p.precioMensual > 0">$</span>
+                            <span>{{ periodo === 'mensual' ? (p.precioMensual === 0 ? 'GRATIS' : p.precioMensual.toLocaleString('es-AR')) : (p.precioSemestral === 0 ? 'GRATIS' : p.precioSemestral.toLocaleString('es-AR')) }}</span>
+                            <span class="period" v-if="p.precioMensual > 0">/ {{ periodo === 'mensual' ? 'mes' : 'mes (abono semestral)' }}</span>
+                        </div>
+
+                        <ul class="pricing-features">
+                            <li v-for="(f, idx) in p.caracteristicas" 
+                                :key="idx"
+                                :class="f.incluida ? 'included' : 'excluded'">
+                                <i :class="f.incluida ? 'fa-solid fa-circle-check text-primary-fn' : 'fa-solid fa-circle-xmark'"></i>
+                                <span>{{ f.texto }}</span>
+                            </li>
+                        </ul>
+
+                        <div class="mt-auto">
+                            <a :href="'/Account/Register?plan=' + p.id" 
+                               class="w-100" 
+                               :class="p.btnClase">
+                                {{ p.btnTexto }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         5. CALCULADORA INTERACTIVA DE IMC (VUE.JS)
+         ========================================== -->
+    <section class="py-5 bg-surface-fn border-top border-bottom border-fn" id="calculadora">
+        <div class="container py-4">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-6">
+                    <div class="calculator-box">
+                        <span class="text-primary-fn font-heading fw-bold">EVALUACIÓN EN VIVO</span>
+                        <h2 class="font-heading fs-2 fw-bold text-white mt-1 mb-3">CALCULADORA DE IMC & METAS</h2>
+                        <p class="text-muted small mb-4">
+                            El Índice de Masa Corporal (IMC) es un parámetro estándar que relaciona peso y estatura. Ingresá tus datos para obtener un diagnóstico inicial instantáneo:
+                        </p>
+
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label class="form-label font-heading text-white small">Altura (cm)</label>
+                                <input type="number" 
+                                       class="form-control calculator-input" 
+                                       v-model.number="altura" 
+                                       min="120" max="230" step="1" />
+                            </div>
+
+                            <div class="col-sm-6">
+                                <label class="form-label font-heading text-white small">Peso Actual (kg)</label>
+                                <input type="number" 
+                                       class="form-control calculator-input" 
+                                       v-model.number="peso" 
+                                       min="35" max="220" step="0.5" />
+                            </div>
+
+                            <div class="col-sm-6">
+                                <label class="form-label font-heading text-white small">Edad</label>
+                                <input type="number" 
+                                       class="form-control calculator-input" 
+                                       v-model.number="edad" 
+                                       min="14" max="95" />
+                            </div>
+
+                            <div class="col-sm-6">
+                                <label class="form-label font-heading text-white small">Objetivo Principal</label>
+                                <select class="form-select calculator-input" v-model="objetivo">
+                                    <option value="musculo">Ganancia Muscular</option>
+                                    <option value="peso">Pérdida de Grasa</option>
+                                    <option value="salud">Salud y Longevidad</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultado Reactivo en Vivo -->
+                <div class="col-lg-6">
+                    <div class="bmi-result-card">
+                        <span class="font-heading text-muted small text-uppercase">Tu Índice de Masa Corporal Calculado</span>
+                        <div class="bmi-value">{{ imc }}</div>
+                        <div class="bmi-category" :class="diagnosticoImc.claseColor">
+                            {{ diagnosticoImc.categoria }}
+                        </div>
+
+                        <!-- Barra Visual de Progreso -->
+                        <div class="progress my-4" style="height: 10px; background-color: #2b2b2b;">
+                            <div class="progress-bar" 
+                                 :class="diagnosticoImc.barraColor" 
+                                 role="progressbar" 
+                                 :style="{ width: diagnosticoImc.progreso + '%' }" 
+                                 aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+
+                        <p class="text-muted small leading-relaxed mb-3">
+                            {{ diagnosticoImc.consejo }}
+                        </p>
+
+                        <div class="p-3 bg-dark rounded border border-fn text-start mb-3">
+                            <span class="badge bg-primary-fn mb-1 font-heading text-uppercase">Recomendación FitNet</span>
+                            <div class="text-white fw-bold">{{ diagnosticoImc.planSugerido }}</div>
+                        </div>
+
+                        <a href="/Account/Register?plan=free" class="btn-fn-primary w-100">
+                            <i class="fa-solid fa-bullhorn"></i> Iniciar Plan de Entrenamiento
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         6. STAFF DE ENTRENADORES CERTIFICADOS
+         ========================================== -->
+    <section class="py-5" id="entrenadores">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <span class="text-primary-fn font-heading fw-bold">STAFF PROFESIONAL</span>
+                <h2 class="font-heading display-5 fw-bold text-white mt-1">NUESTROS ENTRENADORES</h2>
+                <p class="text-muted mx-auto" style="max-width: 580px;">
+                    Profesionales de la actividad física y el deporte abocados a tu seguridad técnica, motivación y superación constante.
+                </p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="trainer-card">
+                        <img src="~/img/team/team1.png" alt="Entrenador Lucas V." />
+                        <div class="trainer-info">
+                            <h4>Lucas Vázquez</h4>
+                            <p>Especialista en Hipertrofia & Fuerza</p>
+                            <span class="small text-muted d-block mb-3">Lic. en Educación Física · 8 años de trayectoria</span>
+                            <div class="footer-social-links">
+                                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                                <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="trainer-card">
+                        <img src="~/img/team/team2.png" alt="Entrenadora Sofía M." />
+                        <div class="trainer-info">
+                            <h4>Sofía Morales</h4>
+                            <p>Cross Training & Acondicionamiento</p>
+                            <span class="small text-muted d-block mb-3">Head Coach CrossFit L2 · Preparadora Física</span>
+                            <div class="footer-social-links">
+                                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                                <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="trainer-card">
+                        <img src="~/img/team/team3.png" alt="Entrenador Matías R." />
+                        <div class="trainer-info">
+                            <h4>Matías Rossi</h4>
+                            <p>Rehabilitación & Funcional</p>
+                            <span class="small text-muted d-block mb-3">Kinesiólogo y Entrenador de Movilidad Articular</span>
+                            <div class="footer-social-links">
+                                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                                <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         7. PREGUNTAS FRECUENTES (FAQ INTERACTIVO VUE)
+         ========================================== -->
+    <section class="py-5 bg-surface-fn border-top border-fn" id="faq">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <span class="text-primary-fn font-heading fw-bold">DESPEJÁ TUS DUDAS</span>
+                <h2 class="font-heading display-5 fw-bold text-white mt-1">PREGUNTAS FRECUENTES</h2>
+                <p class="text-muted mx-auto" style="max-width: 580px;">
+                    Todo lo que necesitás saber sobre la prueba gratuita, los planes y el funcionamiento de la plataforma.
+                </p>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div v-for="item in faqs" :key="item.id" class="mb-3">
+                        <div class="p-3 bg-card-fn rounded border border-fn cursor-pointer"
+                             style="cursor: pointer;"
+                             v-on:click="toggleFaq(item.id)">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="font-heading fs-6 text-white mb-0">{{ item.pregunta }}</h5>
+                                <i class="fa-solid fa-chevron-down text-primary-fn transition-all"
+                                   :class="{ 'rotate-180': faqActivo === item.id }"></i>
+                            </div>
+                            <div v-if="faqActivo === item.id" class="mt-3 pt-3 border-top border-secondary border-opacity-25 text-muted small leading-relaxed">
+                                {{ item.respuesta }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         8. LLAMADO FINAL A LA ACCIÓN (CTA)
+         ========================================== -->
+    <section class="py-5 text-center position-relative overflow-hidden" 
+             style="background: radial-gradient(circle at center, rgba(255, 53, 0, 0.25) 0%, rgba(10, 10, 10, 0.98) 75%);">
+        <div class="container py-5">
+            <span class="hero-badge">COMENZÁ HOY</span>
+            <h2 class="font-heading display-4 fw-bold text-white mb-3">
+                ¿LISTO PARA TRANSFORMAR TU ENTRENAMIENTO?
+            </h2>
+            <p class="text-muted fs-5 mx-auto mb-4" style="max-width: 600px;">
+                Registrate ahora y disfrutá de 24 horas de prueba completa sin necesidad de ingresar tarjetas de crédito.
+            </p>
+            <a href="/Account/Register?plan=free" class="btn-fn-primary btn-lg px-5 py-3 fs-5">
+                <i class="fa-solid fa-fire"></i> Empezar Mi Prueba Gratuita
+            </a>
+        </div>
+    </section>
 </div>
+
+@section Scripts {
+    <!-- Montaje de la aplicación Vue 3 en la Landing -->
+    <script src="~/js/vue-apps/landing/app.js" asp-append-version="true"></script>
+}

@@ -1,50 +1,205 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - FitNet</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - FitNet Gym & Fitness</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="~/img/logo/logo-Fitnet-sinfondo.webp" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- CSS Locales (100% Offline) -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/fontawesome/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/FitNet.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
+<body class="fitnet-landing">
+    <!-- Header / Navbar Principal -->
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">FitNet</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-lg navbar-dark fitnet-navbar fixed-top">
+            <div class="container">
+                <!-- Logotipo Oficial FitNet -->
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                    <img src="~/img/logo/logo-Fitnet-sinfondo.webp" 
+                         alt="FitNet Logo" 
+                         onerror="this.onerror=null; this.src='/img/logo/logo-Fitnet-sinfondo.png';" />
+                    <span>FIT<span class="text-primary-fn">NET</span></span>
+                </a>
+
+                <!-- Botón Hamburguesa Móvil -->
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#fitnetNavbarCollapse" aria-controls="fitnetNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <!-- Menú y Enlaces -->
+                <div class="collapse navbar-collapse" id="fitnetNavbarCollapse">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" href="#inicio">Inicio</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" href="#disciplinas">Disciplinas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#planes">Membresías</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#calculadora">Calculadora IMC</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#entrenadores">Entrenadores</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#faq">Preguntas</a>
                         </li>
                     </ul>
+
+                    <!-- Accesos de Usuario / Sesión -->
+                    <div class="d-flex align-items-center gap-2">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Member";
+                            <div class="dropdown">
+                                <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-circle-user fa-lg text-primary-fn"></i>
+                                    <span>@User.Identity.Name</span>
+                                    <span class="badge bg-primary-fn text-uppercase">@userRole</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+                                    <li><a class="dropdown-item" href="/Account/Profile"><i class="fa-solid fa-id-card me-2 text-primary-fn"></i> Mi Perfil</a></li>
+                                    @if (User.IsInRole("Trainer"))
+                                    {
+                                        <li><a class="dropdown-item" href="/Trainers/Dashboard"><i class="fa-solid fa-dumbbell me-2 text-primary-fn"></i> Panel Entrenador</a></li>
+                                    }
+                                    else if (User.IsInRole("Admin") || User.IsInRole("Owner"))
+                                    {
+                                        <li><a class="dropdown-item" href="/Admin/Dashboard"><i class="fa-solid fa-gauge-high me-2 text-primary-fn"></i> Dashboard Admin</a></li>
+                                    }
+                                    else
+                                    {
+                                        <li><a class="dropdown-item" href="/Members/Workouts"><i class="fa-solid fa-calendar-check me-2 text-primary-fn"></i> Mis Rutinas</a></li>
+                                        <li><a class="dropdown-item" href="/Members/Progress"><i class="fa-solid fa-chart-line me-2 text-primary-fn"></i> Mi Progreso</a></li>
+                                    }
+                                    <li><hr class="dropdown-divider border-secondary"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item text-danger"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Cerrar Sesión</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <a href="/Account/Login" class="btn btn-fn-outline btn-sm">
+                                <i class="fa-solid fa-right-to-bracket"></i> Ingresar
+                            </a>
+                            <a href="/Account/Register" class="btn btn-fn-primary btn-sm">
+                                <i class="fa-solid fa-bolt"></i> Probar Gratis
+                            </a>
+                        }
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
+    <!-- Contenido Principal sin contenedor restrictivo para permitir secciones 100% full-width -->
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <!-- Footer Oficial FitNet -->
+    <footer class="fitnet-footer">
         <div class="container">
-            &copy; 2026 - FitNet - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="row g-4 mb-5">
+                <!-- Columna 1: Marca y Misión -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="~/img/logo/logo-Fitnet-sinfondo.webp" 
+                             alt="FitNet" 
+                             height="48" 
+                             class="me-2"
+                             onerror="this.onerror=null; this.src='/img/logo/logo-Fitnet-sinfondo.png';" />
+                        <span class="font-heading fs-3 fw-bold text-white">FIT<span class="text-primary-fn">NET</span></span>
+                    </div>
+                    <p class="text-muted small leading-relaxed pe-lg-4">
+                        Plataforma inteligente de entrenamiento y gestión fitness. Conectamos socios, entrenadores y directivos para llevar el rendimiento físico al siguiente nivel.
+                    </p>
+                    <div class="footer-social-links mt-3">
+                        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="#" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                    </div>
+                </div>
+
+                <!-- Columna 2: Enlaces Rápidos -->
+                <div class="col-lg-2 col-md-6">
+                    <h5>Navegación</h5>
+                    <ul>
+                        <li><a href="#inicio"><i class="fa-solid fa-chevron-right fa-xs me-1 text-primary-fn"></i> Inicio</a></li>
+                        <li><a href="#disciplinas"><i class="fa-solid fa-chevron-right fa-xs me-1 text-primary-fn"></i> Disciplinas</a></li>
+                        <li><a href="#planes"><i class="fa-solid fa-chevron-right fa-xs me-1 text-primary-fn"></i> Membresías</a></li>
+                        <li><a href="#calculadora"><i class="fa-solid fa-chevron-right fa-xs me-1 text-primary-fn"></i> Calculadora IMC</a></li>
+                        <li><a href="#entrenadores"><i class="fa-solid fa-chevron-right fa-xs me-1 text-primary-fn"></i> Staff Pro</a></li>
+                    </ul>
+                </div>
+
+                <!-- Columna 3: Horarios de Atención -->
+                <div class="col-lg-3 col-md-6">
+                    <h5>Horarios del Club</h5>
+                    <ul class="small text-muted">
+                        <li class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+                            <span>Lunes a Viernes:</span>
+                            <strong class="text-white">06:00 - 23:00</strong>
+                        </li>
+                        <li class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+                            <span>Sábados:</span>
+                            <strong class="text-white">08:00 - 20:00</strong>
+                        </li>
+                        <li class="d-flex justify-content-between py-1">
+                            <span>Domingos y Feriados:</span>
+                            <strong class="text-white">09:00 - 14:00</strong>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Columna 4: Contacto & Ubicación -->
+                <div class="col-lg-3 col-md-6">
+                    <h5>Sede Central</h5>
+                    <p class="small text-muted mb-2">
+                        <i class="fa-solid fa-location-dot me-2 text-primary-fn"></i> Av. del Deporte 1250, San Luis, Argentina
+                    </p>
+                    <p class="small text-muted mb-2">
+                        <i class="fa-solid fa-envelope me-2 text-primary-fn"></i> contacto@fitnet.com.ar
+                    </p>
+                    <p class="small text-muted mb-0">
+                        <i class="fa-solid fa-phone me-2 text-primary-fn"></i> +54 (266) 400-0000
+                    </p>
+                </div>
+            </div>
+
+            <div class="border-top border-secondary border-opacity-25 pt-4 text-center text-muted small">
+                <p class="mb-0">
+                    &copy; @DateTime.Now.Year <strong>FitNet</strong>. Todos los derechos reservados. Desarrollado para Laboratorio 2.
+                </p>
+            </div>
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <!-- Scripts Locales Versionados -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/vue/vue.global.prod.js"></script>
+    <script src="~/lib/axios/axios.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
