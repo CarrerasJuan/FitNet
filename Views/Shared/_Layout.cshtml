@@ -21,6 +21,45 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="fitnet-landing">
+    <!-- ==========================================
+         FITNET CYBERPUNK HUD PRELOADER (Splash Screen)
+         ========================================== -->
+    <div id="fitnet-preloader" class="preloader-overlay">
+        <!-- Efecto Grid y Scanline de fondo -->
+        <div class="preloader-grid"></div>
+        <div class="preloader-scanline"></div>
+
+        <div class="preloader-center-content">
+            <!-- Logotipo FitNet con Efecto de Anillos HUD (Más Grande y Limpio) -->
+            <div class="preloader-logo-wrapper">
+                <div class="cyber-ring-outer"></div>
+                <div class="cyber-ring-inner"></div>
+                <img src="~/img/logo/logo-Fitnet-sinfondo.webp" 
+                     alt="FitNet" 
+                     class="preloader-logo-img"
+                     onerror="this.onerror=null; this.src='/img/logo/logo-Fitnet-sinfondo.png';" />
+            </div>
+
+            <!-- Barra de Carga Limpia con Brillo Cyberlime (Sin textos accesorios) -->
+            <div class="cyber-progress-container">
+                <div class="cyber-progress-track">
+                    <div id="preloader-progress-bar" class="cyber-progress-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <!-- Contador de Porcentaje Grande (Estilo SSeMU) -->
+            <div class="preloader-percentage-box">
+                <span id="preloader-percent-num" class="percentage-number">0</span><span class="percentage-symbol">%</span>
+            </div>
+
+            <!-- Letras de la Experiencia Abajo -->
+            <div class="preloader-status-container">
+                <div class="preloader-status-main">// INICIANDO EXPERIENCIA //</div>
+                <div id="preloader-status-sub" class="preloader-status-sub">[ CARGANDO RECURSOS BIOMECÁNICOS ]</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Header / Navbar Principal -->
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark fitnet-navbar fixed-top">
@@ -30,7 +69,7 @@
                     <img src="~/img/logo/logo-Fitnet-sinfondo.webp" 
                          alt="FitNet Logo" 
                          onerror="this.onerror=null; this.src='/img/logo/logo-Fitnet-sinfondo.png';" />
-                    <span>FIT<span class="text-primary-fn">NET</span></span>
+                    <span>Fit<span class="text-primary-fn">Net</span></span>
                 </a>
 
                 <!-- Botón Hamburguesa Móvil -->
@@ -129,7 +168,7 @@
                              height="48" 
                              class="me-2"
                              onerror="this.onerror=null; this.src='/img/logo/logo-Fitnet-sinfondo.png';" />
-                        <span class="font-heading fs-3 fw-bold text-white">FIT<span class="text-primary-fn">NET</span></span>
+                        <span class="brand-logo-text fs-3 text-white">Fit<span class="text-primary-fn">Net</span></span>
                     </div>
                     <p class="text-muted small leading-relaxed pe-lg-4">
                         Plataforma inteligente de entrenamiento y gestión fitness. Conectamos socios, entrenadores y directivos para llevar el rendimiento físico al siguiente nivel.

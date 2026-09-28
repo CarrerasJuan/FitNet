@@ -103,3 +103,9 @@ wwwroot/uploads/exercises/*
 # Postman (se versiona la colección, no entornos con secretos)
 # =====================
 postman/*local*
+
+# =====================
+# Scripts SQL locales (no subir a GitHub por ahora)
+# =====================
+*.sql
+
