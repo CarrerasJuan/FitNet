@@ -20,7 +20,7 @@ createApp({
         id: 'free',
         nombre: 'Free Trial',
         badge: 'Prueba de 24 Horas',
-        subtitulo: 'Conocé la plataforma sin costo durante 24 horas.',
+        subtitulo: 'Conocé la plataforma sin costo durante las primeras 24 horas.',
         precioMensual: 0,
         precioSemestral: 0,
         destacado: false,
@@ -38,10 +38,10 @@ createApp({
       {
         id: 'gold',
         nombre: 'Plan Gold',
-        badge: 'Más Popular',
+        badge: 'Más Elegido',
         subtitulo: 'Para quienes entrenan de forma independiente y constante.',
-        precioMensual: 18000,
-        precioSemestral: 14400, // 20% off
+        precioMensual: 32000,
+        precioSemestral: 25600, // 20% off (32.000 * 0.8)
         destacado: true,
         btnTexto: 'Elegir Plan Gold',
         btnClase: 'btn-fn-primary',
@@ -59,8 +59,8 @@ createApp({
         nombre: 'Plan Premium',
         badge: 'Máximo Nivel',
         subtitulo: 'Acompañamiento profesional 1 a 1 y planificación a medida.',
-        precioMensual: 32000,
-        precioSemestral: 25600, // 20% off
+        precioMensual: 65000,
+        precioSemestral: 52000, // 20% off (65.000 * 0.8)
         destacado: false,
         btnTexto: 'Elegir Plan Premium',
         btnClase: 'btn-fn-outline',
@@ -180,8 +180,8 @@ createApp({
       } else if (v >= 18.5 && v < 25) {
         return {
           categoria: 'Peso Saludable / Óptimo',
-          claseColor: 'text-success',
-          barraColor: 'bg-success',
+          claseColor: 'text-primary-fn',
+          barraColor: 'bg-primary-fn',
           progreso: 50,
           consejo: '¡Excelente condición inicial! Podés orientarte al desarrollo de fuerza máxima, resistencia o definición muscular según tu meta personal.',
           planSugerido: 'Plan Gold o Premium'

@@ -1,22 +1,31 @@
 /* ==========================================================================
-   FitNet - Landing Page Stylesheet (Dark Fitness Theme)
+   FitNet - Landing Page Stylesheet (Test Theme: Charcoal Violet & Cyberlime)
+   Paleta: Charcoal Violet #3C1A47 & Cyberlime #B6FF00
    Adaptado con Bootstrap 5, Font Awesome 6 y Vue.js
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap');
 
 :root {
-  --fn-bg: #0a0a0a;
-  --fn-surface: #121212;
-  --fn-card: #181818;
-  --fn-card-hover: #222222;
-  --fn-border: #262626;
-  --fn-primary: #ff3500;
-  --fn-primary-hover: #e02b00;
-  --fn-primary-glow: rgba(255, 53, 0, 0.35);
-  --fn-accent: #ff6a00;
-  --fn-text: #ffffff;
-  --fn-text-muted: #a0a0a0;
+  /* Paleta Base: Charcoal Violet & Cyberlime */
+  --fn-bg: #100817;              /* Fondo ultra oscuro con matiz Charcoal Violet */
+  --fn-surface: #190d24;         /* Superficie de contraste Charcoal */
+  --fn-card: #231233;            /* Tarjetas Charcoal Violet */
+  --fn-card-hover: #2e1743;      /* Elevación al hover */
+  --fn-border: #3C1A47;          /* Borde Charcoal Violet oficial */
+  --fn-border-light: #522561;    /* Borde más visible */
+  
+  /* Color Acento Eléctrico: Cyberlime */
+  --fn-primary: #B6FF00;         /* Cyberlime oficial */
+  --fn-primary-hover: #9fe200;   /* Tono de hover más saturado */
+  --fn-primary-glow: rgba(182, 255, 0, 0.35);
+  --fn-accent: #3C1A47;          /* Charcoal Violet corporativo */
+  
+  /* Textos de Alto Contraste (Cero gris ilegible) */
+  --fn-text: #FFFFFF;            /* Blanco puro para títulos y destacados */
+  --fn-text-muted: #DCD6E2;      /* Lavanda claro / plata para lectura óptima (contraste > 10:1) */
+  --fn-text-subtle: #AFA4B8;     /* Para detalles secundarios, siempre nítido */
+  
   --fn-font-heading: 'Oswald', sans-serif;
   --fn-font-body: 'Roboto', sans-serif;
 }
@@ -26,6 +35,11 @@ body.fitnet-landing {
   color: var(--fn-text);
   font-family: var(--fn-font-body);
   overflow-x: hidden;
+}
+
+/* Forzar que las clases utilitarias de texto gris tengan alto contraste */
+.fitnet-landing .text-muted {
+  color: var(--fn-text-muted) !important;
 }
 
 /* Tipografía */
@@ -41,6 +55,7 @@ body.fitnet-landing {
 
 .bg-primary-fn {
   background-color: var(--fn-primary) !important;
+  color: #100817 !important;
 }
 
 .bg-surface-fn {
@@ -59,10 +74,10 @@ body.fitnet-landing {
    Header & Navbar
    ========================================================================== */
 .fitnet-navbar {
-  background: rgba(10, 10, 10, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(16, 8, 23, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--fn-border);
   transition: all 0.3s ease;
 }
 
@@ -92,7 +107,7 @@ body.fitnet-landing {
   font-size: 0.95rem;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: #ccc;
+  color: var(--fn-text-muted);
   padding: 0.6rem 1rem !important;
   transition: color 0.2s ease;
 }
@@ -103,19 +118,19 @@ body.fitnet-landing {
 }
 
 /* ==========================================================================
-   Botones Personalizados
+   Botones Personalizados (Cyberlime & Charcoal)
    ========================================================================== */
 .btn-fn-primary {
-  background: linear-gradient(135deg, var(--fn-primary) 0%, var(--fn-accent) 100%);
-  color: #fff !important;
+  background: var(--fn-primary);
+  color: #100817 !important; /* Texto oscuro sobre fondo Cyberlime para máximo contraste */
   font-family: var(--fn-font-heading);
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
   padding: 0.75rem 1.75rem;
   border: none;
   border-radius: 4px;
-  box-shadow: 0 4px 18px var(--fn-primary-glow);
+  box-shadow: 0 4px 20px var(--fn-primary-glow);
   transition: all 0.25s ease;
   display: inline-flex;
   align-items: center;
@@ -124,20 +139,21 @@ body.fitnet-landing {
 }
 
 .btn-fn-primary:hover {
+  background: var(--fn-primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(255, 53, 0, 0.5);
-  color: #fff !important;
+  box-shadow: 0 6px 26px rgba(182, 255, 0, 0.55);
+  color: #100817 !important;
 }
 
 .btn-fn-outline {
   background: transparent;
-  color: #fff !important;
+  color: var(--fn-primary) !important;
   font-family: var(--fn-font-heading);
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
   padding: 0.75rem 1.75rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--fn-primary);
   border-radius: 4px;
   transition: all 0.25s ease;
   display: inline-flex;
@@ -147,10 +163,10 @@ body.fitnet-landing {
 }
 
 .btn-fn-outline:hover {
-  border-color: var(--fn-primary);
-  background: rgba(255, 53, 0, 0.1);
-  color: var(--fn-primary) !important;
+  background: var(--fn-primary);
+  color: #100817 !important;
   transform: translateY(-2px);
+  box-shadow: 0 4px 18px var(--fn-primary-glow);
 }
 
 /* ==========================================================================
@@ -161,32 +177,35 @@ body.fitnet-landing {
   min-height: 90vh;
   display: flex;
   align-items: center;
-  background-color: #070707;
+  background-color: var(--fn-bg);
   background-image: 
-    radial-gradient(circle at 80% 30%, rgba(255, 53, 0, 0.18) 0%, transparent 60%),
-    linear-gradient(to right, rgba(7, 7, 7, 0.95) 0%, rgba(7, 7, 7, 0.75) 50%, rgba(7, 7, 7, 0.4) 100%),
+    radial-gradient(circle at 80% 30%, rgba(182, 255, 0, 0.16) 0%, transparent 55%),
+    radial-gradient(circle at 20% 80%, rgba(60, 26, 71, 0.6) 0%, transparent 60%),
+    linear-gradient(to right, rgba(16, 8, 23, 0.98) 0%, rgba(16, 8, 23, 0.85) 55%, rgba(16, 8, 23, 0.45) 100%),
     url('/img/hero/h1_hero.png');
   background-size: cover;
   background-position: right center;
   background-repeat: no-repeat;
   padding: 6rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--fn-border);
 }
 
 .hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(255, 53, 0, 0.15);
-  border: 1px solid rgba(255, 53, 0, 0.4);
+  background: rgba(60, 26, 71, 0.7);
+  border: 1px solid var(--fn-primary);
   color: var(--fn-primary);
   padding: 0.4rem 1rem;
   border-radius: 50px;
   font-family: var(--fn-font-heading);
   text-transform: uppercase;
   font-size: 0.85rem;
+  font-weight: 600;
   letter-spacing: 1.5px;
   margin-bottom: 1.5rem;
+  box-shadow: 0 0 15px rgba(182, 255, 0, 0.2);
 }
 
 .hero-title {
@@ -202,6 +221,7 @@ body.fitnet-landing {
 .hero-title .highlight {
   color: var(--fn-primary);
   display: block;
+  text-shadow: 0 0 25px rgba(182, 255, 0, 0.3);
 }
 
 .hero-subtitle {
@@ -218,7 +238,7 @@ body.fitnet-landing {
   gap: 2rem;
   margin-top: 3rem;
   padding-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--fn-border);
 }
 
 .hero-stat-item h3 {
@@ -259,14 +279,14 @@ body.fitnet-landing {
 .category-card:hover {
   transform: translateY(-6px);
   border-color: var(--fn-primary);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(182, 255, 0, 0.15);
 }
 
 .category-img-wrapper {
   position: relative;
   height: 220px;
   overflow: hidden;
-  background-color: #222;
+  background-color: var(--fn-surface);
 }
 
 .category-img-wrapper img {
@@ -284,12 +304,13 @@ body.fitnet-landing {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(0, 0, 0, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background: rgba(16, 8, 23, 0.88);
+  border: 1px solid var(--fn-primary);
+  color: var(--fn-primary);
   font-family: var(--fn-font-heading);
   text-transform: uppercase;
   font-size: 0.75rem;
+  font-weight: 600;
   padding: 0.3rem 0.7rem;
   border-radius: 4px;
 }
@@ -307,12 +328,14 @@ body.fitnet-landing {
   font-size: 1.35rem;
   font-weight: 600;
   text-transform: uppercase;
+  color: #fff;
   margin-bottom: 0.5rem;
 }
 
 .category-body p {
   color: var(--fn-text-muted);
-  font-size: 0.92rem;
+  font-size: 0.94rem;
+  line-height: 1.5;
   margin-bottom: 1.2rem;
 }
 
@@ -342,7 +365,9 @@ body.fitnet-landing {
 .filter-btn.active {
   background: var(--fn-primary);
   border-color: var(--fn-primary);
-  color: #fff;
+  color: #100817;
+  font-weight: 700;
+  box-shadow: 0 3px 15px var(--fn-primary-glow);
 }
 
 /* ==========================================================================
@@ -362,12 +387,12 @@ body.fitnet-landing {
 
 .pricing-card:hover {
   transform: translateY(-8px);
-  border-color: rgba(255, 53, 0, 0.4);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+  border-color: var(--fn-primary);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
 }
 
 .pricing-card.featured {
-  background: linear-gradient(180deg, rgba(255, 53, 0, 0.08) 0%, var(--fn-card) 40%);
+  background: linear-gradient(180deg, rgba(182, 255, 0, 0.08) 0%, var(--fn-card) 45%);
   border: 2px solid var(--fn-primary);
   box-shadow: 0 10px 30px var(--fn-primary-glow);
 }
@@ -378,15 +403,15 @@ body.fitnet-landing {
   left: 50%;
   transform: translateX(-50%);
   background: var(--fn-primary);
-  color: #fff;
+  color: #100817;
   font-family: var(--fn-font-heading);
   text-transform: uppercase;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 1.5px;
   padding: 0.25rem 1.2rem;
   border-radius: 50px;
-  box-shadow: 0 3px 10px var(--fn-primary-glow);
+  box-shadow: 0 3px 12px var(--fn-primary-glow);
 }
 
 .pricing-card .plan-name {
@@ -394,12 +419,13 @@ body.fitnet-landing {
   font-size: 1.6rem;
   font-weight: 700;
   text-transform: uppercase;
+  color: #fff;
   margin-bottom: 0.5rem;
 }
 
 .pricing-card .plan-desc {
   color: var(--fn-text-muted);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   min-height: 42px;
   margin-bottom: 1.5rem;
 }
@@ -416,6 +442,7 @@ body.fitnet-landing {
   font-size: 1.5rem;
   vertical-align: super;
   margin-right: 2px;
+  color: var(--fn-primary);
 }
 
 .pricing-card .plan-price .period {
@@ -433,12 +460,16 @@ body.fitnet-landing {
 }
 
 .pricing-features li {
-  padding: 0.6rem 0;
-  font-size: 0.92rem;
+  padding: 0.65rem 0;
+  font-size: 0.93rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pricing-features li.included {
+  color: #FFFFFF;
 }
 
 .pricing-features li.included i {
@@ -446,11 +477,14 @@ body.fitnet-landing {
 }
 
 .pricing-features li.excluded {
-  color: #666;
+  color: var(--fn-text-subtle);
+  opacity: 0.6;
+  text-decoration: line-through;
 }
 
 .pricing-features li.excluded i {
-  color: #444;
+  color: var(--fn-border-light);
+  text-decoration: none;
 }
 
 /* ==========================================================================
@@ -476,23 +510,23 @@ body.fitnet-landing {
 }
 
 .calculator-input {
-  background: #1c1c1c;
-  border: 1px solid #333;
+  background: #150b1f;
+  border: 1px solid var(--fn-border-light);
   color: #fff;
   border-radius: 4px;
   padding: 0.75rem 1rem;
 }
 
 .calculator-input:focus {
-  background: #222;
+  background: #1c0e2a;
   border-color: var(--fn-primary);
   color: #fff;
-  box-shadow: 0 0 0 0.2rem rgba(255, 53, 0, 0.2);
+  box-shadow: 0 0 0 0.2rem rgba(182, 255, 0, 0.25);
 }
 
 .bmi-result-card {
-  background: #161616;
-  border: 1px solid #2b2b2b;
+  background: var(--fn-card);
+  border: 1px solid var(--fn-border);
   border-radius: 8px;
   padding: 2rem;
   text-align: center;
@@ -505,6 +539,7 @@ body.fitnet-landing {
   color: var(--fn-primary);
   line-height: 1;
   margin-bottom: 0.5rem;
+  text-shadow: 0 0 20px var(--fn-primary-glow);
 }
 
 .bmi-category {
@@ -529,6 +564,7 @@ body.fitnet-landing {
 .trainer-card:hover {
   transform: translateY(-6px);
   border-color: var(--fn-primary);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(182, 255, 0, 0.15);
 }
 
 .trainer-card img {
@@ -549,18 +585,26 @@ body.fitnet-landing {
 
 .trainer-info h4 {
   font-family: var(--fn-font-heading);
-  font-size: 1.3rem;
-  font-weight: 600;
+  font-size: 1.35rem;
+  font-weight: 700;
   text-transform: uppercase;
+  color: #ffffff;
   margin-bottom: 0.25rem;
 }
 
-.trainer-info p {
+.trainer-info .trainer-spec {
   color: var(--fn-primary);
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+
+.trainer-info .trainer-bio {
+  color: var(--fn-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
   margin-bottom: 1rem;
 }
 
@@ -568,8 +612,8 @@ body.fitnet-landing {
    Footer
    ========================================================================== */
 .fitnet-footer {
-  background: #060606;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0b0510;
+  border-top: 1px solid var(--fn-border);
   padding: 4rem 0 2rem 0;
   color: var(--fn-text-muted);
 }
@@ -609,8 +653,8 @@ body.fitnet-landing {
   justify-content: center;
   width: 38px;
   height: 38px;
-  background: #181818;
-  border: 1px solid #282828;
+  background: var(--fn-surface);
+  border: 1px solid var(--fn-border);
   color: #fff;
   border-radius: 50%;
   margin-right: 0.5rem;
@@ -620,5 +664,7 @@ body.fitnet-landing {
 .footer-social-links a:hover {
   background: var(--fn-primary);
   border-color: var(--fn-primary);
+  color: #100817;
   transform: translateY(-2px);
+  box-shadow: 0 0 12px var(--fn-primary-glow);
 }
