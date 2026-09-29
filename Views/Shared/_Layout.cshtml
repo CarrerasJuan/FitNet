@@ -77,27 +77,103 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <!-- Menú y Enlaces -->
+                <!-- Menú y Enlaces Dinámicos según Autenticación y Rol -->
                 <div class="collapse navbar-collapse" id="fitnetNavbarCollapse">
                     <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#inicio">Inicio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#disciplinas">Disciplinas</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#planes">Membresías</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#calculadora">Calculadora IMC</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#entrenadores">Entrenadores</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#faq">Preguntas</a>
-                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            @if (User.IsInRole("Admin") || User.IsInRole("Owner"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-white fw-bold" href="/Admin/Dashboard">
+                                        <i class="fa-solid fa-gauge-high me-1 text-primary-fn"></i> Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/Admin/Members">Socios</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/Admin/Trainers">Entrenadores</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/Admin/Exercises">
+                                        <i class="fa-solid fa-dumbbell me-1 text-primary-fn"></i> Ejercicios
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/Admin/WorkoutPlans">Rutinas</a>
+                                </li>
+                                @if (User.IsInRole("Owner"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-warning fw-semibold" href="/Admin/Metrics">
+                                            <i class="fa-solid fa-chart-pie me-1"></i> Métricas
+                                        </a>
+                                    </li>
+                                }
+                            }
+                            else if (User.IsInRole("Trainer"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/">Inicio</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white fw-bold" href="/Trainers/Members">
+                                        <i class="fa-solid fa-users me-1 text-primary-fn"></i> Mis Socios
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/WorkoutPlans">
+                                        <i class="fa-solid fa-clipboard-list me-1 text-primary-fn"></i> Rutinas
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/Exercises">Ejercicios</a>
+                                </li>
+                            }
+                            else
+                            {
+                                @* Menú para Socios (Member) *@
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/">Inicio</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white fw-bold" href="/Members/Workouts">
+                                        <i class="fa-solid fa-calendar-check me-1 text-primary-fn"></i> Mis Rutinas
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/Members/Progress">
+                                        <i class="fa-solid fa-chart-line me-1 text-primary-fn"></i> Mi Progreso
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/Exercises">Ejercicios</a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            @* Menú Comercial para Visitantes *@
+                            <li class="nav-item">
+                                <a class="nav-link" href="/#inicio">Inicio</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/#disciplinas">Disciplinas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/#planes">Membresías</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/#calculadora">Calculadora IMC</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/#entrenadores">Entrenadores</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/#faq">Preguntas</a>
+                            </li>
+                        }
                     </ul>
 
                     <!-- Accesos de Usuario / Sesión -->

@@ -1,0 +1,115 @@
+@model FitNet.ViewModels.Account.RegisterViewModel
+@{
+    ViewData["Title"] = "Crear Cuenta de Socio";
+}
+
+<div class="py-5" style="min-height: 90vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #231135 0%, #100817 75%);">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-9 col-sm-11">
+                <!-- Tarjeta Principal de Registro -->
+                <div class="p-4 p-md-5 rounded-3 border border-fn bg-card-fn shadow-lg">
+                    <!-- Cabecera -->
+                    <div class="text-center mb-4">
+                        <img src="~/img/logo/logo-Fitnet-sinfondo.webp" 
+                             alt="FitNet" 
+                             height="56" 
+                             class="mb-2"
+                             onerror="this.onerror=null; this.src='/img/logo/logo-Fitnet-sinfondo.png';" />
+                        <h2 class="font-heading fs-2 fw-bold text-white mb-1">REGISTRO DE SOCIO</h2>
+                        <p class="text-muted small">Tu cuenta se activará con una <strong>Prueba Gratuita de 24 horas</strong>.</p>
+                    </div>
+
+                    <!-- Banner de Beneficio del Trial -->
+                    <div class="p-3 mb-4 rounded border border-primary border-opacity-50 bg-surface-fn d-flex align-items-center gap-3">
+                        <i class="fa-solid fa-clock-rotate-left fa-2x text-primary-fn"></i>
+                        <div class="small">
+                            <span class="text-white fw-bold d-block">TRIAL DE 24 HORAS SIN COSTO</span>
+                            <span class="text-muted">Podrás navegar tu perfil y acceder a los ejercicios públicos sin ingresar datos de tarjeta.</span>
+                        </div>
+                    </div>
+
+                    <!-- Mensajes de Error Generales -->
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                    {
+                        <div class="alert alert-danger bg-danger bg-opacity-25 border-danger text-white py-2 small mb-3">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                            <span asp-validation-summary="ModelOnly"></span>
+                        </div>
+                    }
+
+                    <!-- Formulario de Registro -->
+                    <form asp-action="Register" asp-controller="Account" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="PlanInteres" />
+
+                        <!-- Fila 1: Nombre y Apellido -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label font-heading text-white small"></label>
+                                <input asp-for="FirstName" class="form-control calculator-input" placeholder="Tu nombre" />
+                                <span asp-validation-for="FirstName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label font-heading text-white small"></label>
+                                <input asp-for="LastName" class="form-control calculator-input" placeholder="Tu apellido" />
+                                <span asp-validation-for="LastName" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Fila 2: Correo Electrónico -->
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label font-heading text-white small"></label>
+                            <input asp-for="Email" class="form-control calculator-input" placeholder="nombre@ejemplo.com" autocomplete="email" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Fila 3: Contraseña y Confirmación -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Password" class="form-label font-heading text-white small"></label>
+                                <input asp-for="Password" type="password" class="form-control calculator-input" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ConfirmPassword" class="form-label font-heading text-white small"></label>
+                                <input asp-for="ConfirmPassword" type="password" class="form-control calculator-input" placeholder="Repetí tu contraseña" autocomplete="new-password" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Fila 4: Datos Físicos Opcionales -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="Height" class="form-label font-heading text-white small"></label>
+                                <input asp-for="Height" type="number" class="form-control calculator-input" placeholder="Ej: 175" min="100" max="250" />
+                                <span asp-validation-for="Height" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="BirthDate" class="form-label font-heading text-white small"></label>
+                                <input asp-for="BirthDate" type="date" class="form-control calculator-input" />
+                                <span asp-validation-for="BirthDate" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-fn-primary w-100 py-3 fs-6">
+                            <i class="fa-solid fa-user-plus"></i> CREAR MI CUENTA Y ACTIVAR TRIAL
+                        </button>
+                    </form>
+
+                    <!-- Enlace a Login -->
+                    <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+                        <span class="text-muted small">¿Ya tenés cuenta registrada?</span>
+                        <a href="/Account/Login" class="text-primary-fn fw-bold text-decoration-none small d-block mt-1 font-heading text-uppercase">
+                            Iniciar sesión con tu usuario <i class="fa-solid fa-arrow-right fa-xs"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
