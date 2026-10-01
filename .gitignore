@@ -68,8 +68,14 @@ NO_SUBIR/
 .copilot/
 .continue/
 .agents/
+.pi/
+.cursor/
+.windsurf/
+.gemini/
 agent*.md
 AGENTS.md
+*.prompt.md
+*.agent.md
 
 # =====================
 # OS

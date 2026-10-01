@@ -232,11 +232,22 @@
                         </ul>
 
                         <div class="mt-auto">
-                            <a :href="'/Account/Register?plan=' + p.id" 
-                               class="w-100" 
-                               :class="p.btnClase">
-                                {{ p.btnTexto }}
-                            </a>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <a :href="p.id === 'free' ? '/Members/Dashboard' : ('/Billing/Checkout?plan=' + p.id + '&periodo=' + periodo)" 
+                                   class="w-100" 
+                                   :class="p.btnClase">
+                                    {{ p.id === 'free' ? 'Ir a mi Dashboard' : ('Mejorar a ' + p.nombre) }}
+                                </a>
+                            }
+                            else
+                            {
+                                <a :href="'/Account/Register?plan=' + p.id" 
+                                   class="w-100" 
+                                   :class="p.btnClase">
+                                    {{ p.btnTexto }}
+                                </a>
+                            }
                         </div>
                     </div>
                 </div>

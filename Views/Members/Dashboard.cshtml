@@ -1,0 +1,385 @@
+@model FitNet.ViewModels.Members.MemberDashboardViewModel
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = "Mi Dashboard de Atleta";
+}
+
+<!-- Notificación si intentó entrar a una sección bloqueada -->
+@if (TempData["MensajeUpgrade"] != null)
+{
+    <div class="alert alert-warning bg-warning bg-opacity-25 border-warning text-white alert-dismissible fade show mb-3 py-2 px-3 small" role="alert">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-lock text-warning"></i>
+            <div>
+                <strong>Contenido Bloqueado:</strong> @TempData["MensajeUpgrade"]
+            </div>
+            <a href="/Billing/Checkout?plan=gold" class="btn btn-sm btn-fn-primary ms-auto me-3 py-1 px-3 font-heading" style="font-size: 0.75rem;">
+                Ver Planes de Upgrade
+            </a>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- Notificaciones Flash TempData (Pago exitoso, etc.) -->
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success bg-success bg-opacity-25 border-success text-white alert-dismissible fade show mb-3 py-2 px-3 small" role="alert">
+        <i class="fa-solid fa-circle-check me-2 text-primary-fn"></i>
+        @TempData["MensajeExito"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- ==========================================
+     HERO WELCOME BANNER (Con fondo de gym y neón FitNet)
+     ========================================== -->
+<div class="dashboard-hero-banner">
+    <div class="dashboard-hero-content">
+        <span class="hero-tag">Mi Dashboard</span>
+        <h1 class="hero-title">
+            ¡BIENVENIDO A <span class="text-primary-fn">FITNET, @(string.IsNullOrEmpty(Model.FirstName) ? "ATLETA" : Model.FirstName.ToUpper())!</span>
+        </h1>
+        <p class="hero-sub">
+            Gracias por elegir el gimnasio. Tu plan <strong>@Model.PlanName</strong> está activo y listo para entrenar.
+        </p>
+
+        <div class="d-flex flex-wrap gap-2">
+            @if (Model.PlanName != "Free")
+            {
+                <a asp-controller="Members" asp-action="Workouts" class="btn btn-fn-primary btn-sm px-3 py-2 font-heading text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">
+                    <i class="fa-solid fa-play me-1"></i> Ver Mis Ejercicios de Hoy
+                </a>
+                <a asp-controller="Members" asp-action="Progress" class="btn btn-outline-info text-white btn-sm px-3 py-2 font-heading text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">
+                    <i class="fa-solid fa-chart-line text-info me-1"></i> Ir a Mi Progreso
+                </a>
+            }
+            else
+            {
+                <a href="/Billing/Checkout?plan=gold" class="btn btn-fn-primary btn-sm px-3 py-2 font-heading text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">
+                    <i class="fa-solid fa-crown me-1"></i> Activar Plan Gold ($32.000)
+                </a>
+                <a asp-controller="Exercises" asp-action="Index" class="btn btn-outline-secondary text-white btn-sm px-3 py-2 font-heading text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">
+                    <i class="fa-solid fa-dumbbell me-1 text-primary-fn"></i> Explorar Catálogo Libre
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     FILA DE TARJETAS KPI (Compact Density Stats Cards)
+     ========================================== -->
+<div class="row g-2 g-lg-3 mb-3">
+    <!-- Card 1: Membresía Actual -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-lime">
+                <i class="fa-solid fa-id-badge"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Suscripción</div>
+                <div class="stats-value">@Model.PlanName.ToUpper()</div>
+                <div class="stats-sub">
+                    @if (Model.PlanName == "Free")
+                    {
+                        <span class="text-warning"><i class="fa-solid fa-clock me-1"></i>@(Model.IsTrialActive ? "Prueba Activa" : "Vencida")</span>
+                    }
+                    else
+                    {
+                        <span class="text-primary-fn"><i class="fa-solid fa-circle-check me-1"></i>Acceso Activo</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: Tiempo Restante -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon @(Model.PlanName == "Free" ? "stats-icon-orange" : "stats-icon-lime")">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Tiempo Restante</div>
+                <div class="stats-value">
+                    @if (Model.PlanName == "Free")
+                    {
+                        <span>@Model.TrialHoursRemaining HORAS</span>
+                    }
+                    else
+                    {
+                        <span>30 DÍAS</span>
+                    }
+                </div>
+                <div class="stats-sub">
+                    @if (Model.PlanName == "Free")
+                    {
+                        <span>Trial de 24 horas</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Renovación regular</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Rutina de Hoy -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-purple">
+                <i class="fa-solid fa-dumbbell"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Rutina de Hoy</div>
+                <div class="stats-value">
+                    @if (Model.PlanName == "Free")
+                    {
+                        <span class="text-muted" style="font-size: 1.15rem;"><i class="fa-solid fa-lock text-warning fa-xs me-1"></i>BLOQUEADA</span>
+                    }
+                    else
+                    {
+                        <span>@(Model.ActiveWorkoutExercisesCount > 0 ? $"{Model.ActiveWorkoutExercisesCount} EJERCICIOS >" : "5 EJERCICIOS >")</span>
+                    }
+                </div>
+                <div class="stats-sub text-truncate">
+                    @if (Model.PlanName == "Free")
+                    {
+                        <span>Requiere Plan Gold</span>
+                    }
+                    else
+                    {
+                        <span>Torso &bull; Fuerza</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 4: Coach Premium -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-blue">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Coach Premium</div>
+                <div class="stats-value">
+                    @if (Model.PlanName == "Premium")
+                    {
+                        <span>ASIGNADO ></span>
+                    }
+                    else
+                    {
+                        <span>OPCIONAL ></span>
+                    }
+                </div>
+                <div class="stats-sub">
+                    <span>Entrenamiento 1 a 1</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     GRILLA DE CONTENIDO MODULAR (Compact Layout)
+     ========================================== -->
+<div class="row g-3">
+    <!-- Columna Izquierda (~65% del ancho) -->
+    <div class="col-lg-8">
+        <!-- MÓDULO 1: MIS RUTINAS DEL GIMNASIO -->
+        <div class="fn-card routine-card-blended mb-3 @(Model.PlanName == "Free" ? "card-locked" : "")">
+            <!-- Capa difuminada de la mancuerna en el fondo izquierdo -->
+            <div class="routine-bg-fade"></div>
+
+            <div class="fn-card-header py-2 px-3 position-relative" style="z-index: 2;">
+                <div class="fn-card-title" style="font-size: 0.88rem;">
+                    <i class="fa-solid fa-clipboard-list text-primary-fn"></i>
+                    <span>Mis Rutinas del Gimnasio</span>
+                </div>
+                @if (Model.PlanName == "Free")
+                {
+                    <span class="locked-badge locked-badge-gold">
+                        <i class="fa-solid fa-lock"></i> Requiere Plan Gold
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-transparent text-primary-fn font-heading d-flex align-items-center gap-1" style="font-size: 0.72rem;">
+                        <span class="notification-dot position-static d-inline-block"></span> Plan de Entrenamiento Activo
+                    </span>
+                }
+            </div>
+            <div class="fn-card-body p-3 position-relative" style="z-index: 2;">
+                @if (Model.PlanName == "Free")
+                {
+                    <!-- Preview con Candado para Free Trial -->
+                    <div class="py-2 text-center text-sm-start ps-sm-4" style="max-width: 480px; margin-left: auto;">
+                        <span class="text-primary-fn font-heading small fw-bold text-uppercase d-block mb-1">
+                            <i class="fa-solid fa-lock text-warning me-1"></i> Contenido Exclusivo Gold &bull; Premium
+                        </span>
+                        <h5 class="font-heading text-white fw-bold mb-1" style="font-size: 1.15rem;">
+                            DESBLOQUEÁ TU PLAN DE ENTRENAMIENTO
+                        </h5>
+                        <p class="text-white text-opacity-75 small mb-3" style="font-size: 0.82rem; line-height: 1.35;">
+                            Rutinas estructuradas con series, repeticiones y descansos planificados por profesionales de la musculación.
+                        </p>
+                        <a href="/Billing/Checkout?plan=gold" class="btn btn-fn-primary btn-sm px-3 py-1 font-heading" style="font-size: 0.8rem;">
+                            <i class="fa-solid fa-crown me-1"></i> Desbloquear con Plan Gold ($32.000)
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <!-- Contenido Habilitado para Gold y Premium (Layout con Mancuerna Difuminada en Fondo) -->
+                    <div class="py-2 text-center" style="max-width: 460px; margin-left: auto; margin-right: 2rem;">
+                        <div class="text-primary-fn fs-2 mb-1">
+                            <i class="fa-solid fa-dumbbell"></i>
+                        </div>
+                        <h4 class="font-heading text-white fw-bold mb-1" style="font-size: 1.25rem;">
+                            ¡PLAN DE ENTRENAMIENTO HABILITADO!
+                        </h4>
+                        <p class="text-white text-opacity-75 small mb-3" style="font-size: 0.84rem;">
+                            Tenés acceso completo a las rutinas oficiales y personalizadas del gimnasio.
+                        </p>
+                        <a asp-controller="Members" asp-action="Workouts" class="btn btn-fn-primary btn-sm px-4 py-2 font-heading" style="font-size: 0.82rem;">
+                            <i class="fa-solid fa-play me-1"></i> VER MIS EJERCICIOS DE HOY
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- MÓDULO 2: SEGUIMIENTO DE PROGRESO & FOTOS -->
+        <div class="fn-card @(Model.PlanName == "Free" ? "card-locked" : "")">
+            <div class="fn-card-header py-2 px-3">
+                <div class="fn-card-title" style="font-size: 0.88rem;">
+                    <i class="fa-solid fa-chart-line text-primary-fn"></i>
+                    <span>Seguimiento de Progreso & Fotos</span>
+                </div>
+                @if (Model.PlanName == "Free")
+                {
+                    <span class="locked-badge locked-badge-gold">
+                        <i class="fa-solid fa-lock"></i> Requiere Plan Gold
+                    </span>
+                }
+            </div>
+            <div class="fn-card-body p-3">
+                @if (Model.PlanName == "Free")
+                {
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <h6 class="font-heading text-white fw-bold mb-1" style="font-size: 0.95rem;">REGISTRO CONTINUO DE TU EVOLUCIÓN</h6>
+                            <p class="text-white text-opacity-75 small mb-0" style="font-size: 0.8rem;">
+                                Guardá el historial de peso corporal, porcentaje de grasa estimado y comparativas fotográficas.
+                            </p>
+                        </div>
+                        <a href="/Billing/Checkout?plan=gold" class="btn btn-outline-warning text-white btn-sm font-heading py-1 px-3" style="font-size: 0.78rem;">
+                            <i class="fa-solid fa-unlock me-1"></i> Desbloquear con Gold
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <!-- Miniatura exacta de las dos fotos de espalda polaroid fanned out -->
+                            <img src="~/img/dashboard/progreso-backs.png" 
+                                 alt="Historial Físico" 
+                                 class="progress-polaroids-img" />
+
+                            <div>
+                                <h6 class="font-heading text-white fw-bold mb-1" style="font-size: 0.95rem;">HISTORIAL FÍSICO</h6>
+                                <p class="text-white text-opacity-75 small mb-0" style="font-size: 0.8rem;">Monitoreá tu evolución sesión a sesión.</p>
+                            </div>
+                        </div>
+
+                        <a asp-controller="Members" asp-action="Progress" class="btn btn-fn-primary btn-sm font-heading py-2 px-3" style="font-size: 0.82rem;">
+                            <i class="fa-solid fa-camera me-1"></i> CARGAR NUEVA MEDICIÓN
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna Derecha (~35% del ancho) -->
+    <div class="col-lg-4">
+        <!-- MÓDULO 3: COACH ASIGNADO -->
+        <div class="fn-card mb-3 @(Model.PlanName != "Premium" ? "card-locked" : "")">
+            <div class="fn-card-header py-2 px-3">
+                <div class="fn-card-title" style="font-size: 0.88rem;">
+                    <i class="fa-solid fa-user-tie text-primary-fn"></i>
+                    <span>Coach Asignado</span>
+                </div>
+                @if (Model.PlanName != "Premium")
+                {
+                    <span class="locked-badge locked-badge-premium">
+                        <i class="fa-solid fa-lock"></i> Exclusivo Premium
+                    </span>
+                }
+            </div>
+            <div class="fn-card-body p-3 text-center">
+                @if (Model.PlanName == "Premium" && !string.IsNullOrEmpty(Model.AssignedTrainerName))
+                {
+                    <div class="mb-2">
+                        @if (!string.IsNullOrEmpty(Model.AssignedTrainerAvatar))
+                        {
+                            <img src="@Model.AssignedTrainerAvatar" alt="Coach" class="rounded-circle border border-primary border-2" style="width: 56px; height: 56px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-dark border border-primary d-inline-flex align-items-center justify-content-center text-primary-fn" style="width: 56px; height: 56px; font-size: 1.5rem;">
+                                <i class="fa-solid fa-user-tie"></i>
+                            </div>
+                        }
+                    </div>
+                    <h6 class="font-heading text-white fw-bold mb-1" style="font-size: 0.95rem;">@Model.AssignedTrainerName</h6>
+                    <p class="text-muted small mb-2" style="font-size: 0.78rem;">Especialidad: @(Model.AssignedTrainerSpecialty ?? "Fuerza & Acondicionamiento")</p>
+                    <button type="button" class="btn btn-fn-primary btn-sm w-100 font-heading py-1" style="font-size: 0.78rem;">
+                        <i class="fa-solid fa-comments me-1"></i> Consultar a mi Entrenador
+                    </button>
+                }
+                else
+                {
+                    <div class="py-1">
+                        <div class="rounded-circle bg-dark bg-opacity-50 border border-secondary border-opacity-50 d-inline-flex align-items-center justify-content-center text-muted mb-2" style="width: 50px; height: 50px; font-size: 1.3rem;">
+                            <i class="fa-solid fa-user-lock text-warning"></i>
+                        </div>
+                        <h6 class="font-heading text-white fw-bold mb-1" style="font-size: 0.95rem;">ENTRENADOR PERSONAL 1 A 1</h6>
+                        <p class="text-white text-opacity-75 small mb-3" style="font-size: 0.78rem; line-height: 1.35;">
+                            Un profesor certificado del staff adapta tus rutinas a tus metas y hace corrección técnica individualizada.
+                        </p>
+                        <a href="/Billing/Checkout?plan=premium" class="btn btn-sm btn-outline-info text-white font-heading w-100 py-2" style="font-size: 0.78rem; letter-spacing: 0.5px;">
+                            <i class="fa-solid fa-gem me-1 text-info"></i> CONTRATAR PLAN PREMIUM ($65.000)
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- MÓDULO 4: CATÁLOGO BIOMECÁNICO (HABILITADO) -->
+        <div class="fn-card">
+            <div class="fn-card-header py-2 px-3">
+                <div class="fn-card-title" style="font-size: 0.88rem;">
+                    <i class="fa-solid fa-cube text-primary-fn"></i>
+                    <span>Catálogo Biomecánico</span>
+                </div>
+                <span class="badge bg-success bg-opacity-25 text-success border border-success font-heading" style="font-size: 0.68rem;">
+                    <i class="fa-solid fa-check"></i> Habilitado
+                </span>
+            </div>
+            <div class="fn-card-body p-3">
+                <p class="text-white text-opacity-75 small mb-3" style="font-size: 0.8rem; line-height: 1.35;">
+                    Explorá la biblioteca de ejercicios públicos con su ejecución anatómica, músculos involucrados y nivel de dificultad.
+                </p>
+                <a asp-controller="Exercises" asp-action="Index" class="btn btn-fn-outline btn-sm w-100 font-heading py-2" style="font-size: 0.78rem; letter-spacing: 0.5px;">
+                    <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> EXPLORAR EJERCICIOS
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

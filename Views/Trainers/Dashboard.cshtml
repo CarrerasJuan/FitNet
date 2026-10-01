@@ -1,0 +1,111 @@
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = "Panel del Entrenador";
+    var assignments = ViewBag.Assignments as List<FitNet.Models.WorkoutAssignment> ?? new List<FitNet.Models.WorkoutAssignment>();
+}
+
+<!-- Encabezado de Página -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-1">PANEL DEL ENTRENADOR</h1>
+        <p class="text-muted small mb-0">Coach: <strong class="text-white">@ViewBag.TrainerName</strong> &bull; Especialidad: <span class="text-primary-fn">@ViewBag.Specialty</span></p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="WorkoutPlans" asp-action="Create" class="btn btn-fn-primary font-heading px-3 py-2">
+            <i class="fa-solid fa-plus me-1"></i> Nueva Rutina
+        </a>
+    </div>
+</div>
+
+<!-- ==========================================
+     FILA DE TARJETAS KPI (Metis Stats Cards)
+     ========================================== -->
+<div class="row g-3 g-lg-4 mb-4">
+    <div class="col-sm-6 col-xl-4">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-lime">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Alumnos a Cargo</div>
+                <div class="stats-value">@ViewBag.AssignedCount</div>
+                <div class="stats-sub text-primary-fn"><i class="fa-solid fa-check me-1"></i>Socios Premium asignados</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-4">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-purple">
+                <i class="fa-solid fa-clipboard-list"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Rutinas Activas</div>
+                <div class="stats-value">@assignments.Count</div>
+                <div class="stats-sub text-muted">Planificaciones en curso</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-4">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-blue">
+                <i class="fa-solid fa-dumbbell"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Biblioteca</div>
+                <div class="stats-value">EJERCICIOS</div>
+                <div class="stats-sub text-info">Catálogo biomecánico</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Alumnos Asignados -->
+<div class="fn-card">
+    <div class="fn-card-header">
+        <div class="fn-card-title">
+            <i class="fa-solid fa-user-check text-primary-fn"></i>
+            <span>Mis Socios Premium Asignados</span>
+        </div>
+    </div>
+    <div class="fn-card-body p-0">
+        @if (assignments.Count == 0)
+        {
+            <div class="text-center py-5">
+                <i class="fa-solid fa-user-clock fa-3x text-muted mb-3"></i>
+                <h5 class="font-heading text-white">NO TENÉS ALUMNOS ASIGNADOS AÚN</h5>
+                <p class="text-muted small">Cuando la administración te asigne socios Premium, aparecerán aquí para el seguimiento de sus rutinas.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0" style="background: transparent;">
+                    <thead>
+                        <tr class="border-bottom border-secondary border-opacity-25 text-muted small font-heading">
+                            <th class="ps-4">Alumno</th>
+                            <th>Email</th>
+                            <th>Rutina Asignada</th>
+                            <th>Fecha de Inicio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in assignments)
+                        {
+                            <tr>
+                                <td class="ps-4 text-white fw-bold">
+                                    <i class="fa-solid fa-circle-user text-primary-fn me-2"></i>
+                                    @a.Member.User.FirstName @a.Member.User.LastName
+                                </td>
+                                <td class="text-muted small">@a.Member.User.Email</td>
+                                <td class="text-white">@a.WorkoutPlan.Name</td>
+                                <td class="text-muted small">@a.StartDate.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

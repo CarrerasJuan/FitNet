@@ -1,0 +1,239 @@
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = "Simulador de Checkout";
+    var plan = ViewBag.TargetPlan as FitNet.Models.Membership;
+    var user = ViewBag.User as FitNet.Models.ApplicationUser;
+    var periodo = ViewBag.Periodo as string ?? "mensual";
+    var isSemestral = periodo == "semestral";
+
+    var precioMensual = plan?.MonthlyPrice ?? 0;
+    var cuotaMensual = isSemestral ? (plan?.SemiannualPrice ?? 0) : precioMensual;
+    var totalCobro = isSemestral ? cuotaMensual * 6 : precioMensual;
+    var ahorroTotal = isSemestral ? (precioMensual - cuotaMensual) * 6 : 0;
+
+    var alreadySamePlan = ViewBag.AlreadySamePlan as bool? ?? false;
+    var currentPlanName = ViewBag.CurrentPlanName as string ?? "Free";
+    var daysRemaining = ViewBag.DaysRemaining as int? ?? 0;
+    var expirationDate = ViewBag.ExpirationDate as string ?? "";
+    var isUpgradeFromGold = currentPlanName == "Gold" && plan?.Name == "Premium";
+}
+
+<!-- Encabezado de Página -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-1">CONFIRMAR SUSCRIPCIÓN</h1>
+        <p class="text-white text-opacity-75 small mb-0">Simulador de pago seguro &bull; Actualización en tiempo real de tu cuenta</p>
+    </div>
+    <a asp-controller="Members" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading">
+        <i class="fa-solid fa-arrow-left me-1"></i> Volver a mi Dashboard
+    </a>
+</div>
+
+<!-- Selector de Período en Checkout (Mensual vs Semestral -20%) -->
+<div class="d-flex justify-content-center mb-4">
+    <div class="d-inline-flex align-items-center bg-card-fn p-1 rounded-pill border border-fn shadow">
+        <a href="/Billing/Checkout?plan=@(plan?.Name?.ToLower() ?? "gold")&periodo=mensual" 
+           class="btn btn-sm rounded-pill font-heading px-4 py-2 text-decoration-none @(!isSemestral ? "btn-fn-primary" : "text-white border-0 bg-transparent")">
+            Facturación Mensual
+        </a>
+        <a href="/Billing/Checkout?plan=@(plan?.Name?.ToLower() ?? "gold")&periodo=semestral" 
+           class="btn btn-sm rounded-pill font-heading px-4 py-2 text-decoration-none @(isSemestral ? "btn-fn-primary" : "text-white border-0 bg-transparent")">
+            Plan Semestral <span class="badge bg-dark text-warning ms-1">-20% OFF</span>
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 justify-content-center">
+    <!-- Columna Izquierda: Resumen del Plan Seleccionado -->
+    <div class="col-lg-5 col-xl-4">
+        <div class="fn-card p-4 h-100 border border-primary border-opacity-50">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="badge bg-primary-fn text-dark font-heading text-uppercase px-3 py-1">
+                    <i class="fa-solid fa-crown me-1"></i> Plan Seleccionado
+                </span>
+                @if (isSemestral)
+                {
+                    <span class="badge bg-warning text-dark font-heading text-uppercase px-2 py-1">
+                        6 Meses Bonificados
+                    </span>
+                }
+            </div>
+
+            <h2 class="font-heading text-white fw-bold mb-2">PLAN @(plan?.Name?.ToUpper() ?? "GOLD")</h2>
+            <p class="text-white text-opacity-75 small mb-4">@(plan?.Description ?? "Acceso a la plataforma deportiva FitNet.")</p>
+
+            <!-- Cuadro de Precios y Desglose Semestral -->
+            <div class="p-3 bg-dark bg-opacity-75 rounded border border-secondary border-opacity-50 mb-4">
+                <div class="text-primary-fn small font-heading text-uppercase fw-bold">
+                    <i class="fa-solid fa-receipt me-1"></i> @(isSemestral ? "Abono Semestral (6 Meses)" : "Abono Mensual")
+                </div>
+
+                <div class="d-flex align-items-baseline gap-1 mt-1">
+                    <span class="font-heading fs-1 fw-bold text-white">$@totalCobro.ToString("N0")</span>
+                    <span class="text-white text-opacity-75 small">/ @(isSemestral ? "total por 6 meses" : "mes")</span>
+                </div>
+
+                @if (isSemestral)
+                {
+                    <div class="mt-2 pt-2 border-top border-secondary border-opacity-25 small text-white">
+                        <div class="d-flex justify-content-between text-muted">
+                            <span>Cuota equivalente:</span>
+                            <strong class="text-white">$@cuotaMensual.ToString("N0") / mes</strong>
+                        </div>
+                        <div class="d-flex justify-content-between text-success mt-1">
+                            <span>Ahorro del 20%:</span>
+                            <strong>-$@ahorroTotal.ToString("N0")</strong>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <h6 class="font-heading text-primary-fn fw-bold small text-uppercase mb-3">Beneficios Incluidos:</h6>
+            <ul class="list-unstyled mb-4">
+                <li class="d-flex align-items-center gap-2 mb-2 text-white small">
+                    <i class="fa-solid fa-circle-check text-primary-fn"></i>
+                    <span>Acceso continuo por @(isSemestral ? "6 meses" : "30 días")</span>
+                </li>
+                <li class="d-flex align-items-center gap-2 mb-2 text-white small">
+                    <i class="fa-solid fa-circle-check text-primary-fn"></i>
+                    <span>Biblioteca completa de ejercicios y técnica</span>
+                </li>
+                <li class="d-flex align-items-center gap-2 mb-2 text-white small">
+                    <i class="fa-solid fa-circle-check text-primary-fn"></i>
+                    <span>Rutinas oficiales del gimnasio (series y pausas)</span>
+                </li>
+                <li class="d-flex align-items-center gap-2 mb-2 text-white small">
+                    <i class="fa-solid fa-circle-check text-primary-fn"></i>
+                    <span>Registro continuo de peso corporal y evolución</span>
+                </li>
+                @if (plan?.Name == "Premium")
+                {
+                    <li class="d-flex align-items-center gap-2 mb-2 text-white small">
+                        <i class="fa-solid fa-circle-check text-primary-fn"></i>
+                        <span>Entrenador personal 1 a 1 asignado</span>
+                    </li>
+                }
+            </ul>
+
+            <div class="mt-auto pt-3 border-top border-secondary border-opacity-25 text-center">
+                <small class="text-white text-opacity-75" style="font-size: 0.8rem;">
+                    <i class="fa-solid fa-shield-halved me-1 text-primary-fn"></i> Transacción protegida por arquitectura RBAC FitNet.
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna Derecha: Formulario de Pago Simulado -->
+    <div class="col-lg-7 col-xl-6">
+        <div class="fn-card p-4 p-md-5">
+            <!-- Aviso si el usuario YA tiene el plan activo -->
+            @if (alreadySamePlan)
+            {
+                <div class="p-3 mb-4 rounded border border-info bg-info bg-opacity-10 text-white">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="fa-solid fa-circle-info text-info fa-lg"></i>
+                        <h6 class="font-heading text-info fw-bold mb-0 text-uppercase">Suscripción Activa Detectada</h6>
+                    </div>
+                    <p class="small text-white text-opacity-85 mb-0">
+                        Ya contás con el <strong>Plan @plan?.Name</strong> activo hasta el <strong>@expirationDate</strong> (@daysRemaining días restantes). 
+                        Al abonar, tu vencimiento se <strong>extenderá por @(isSemestral ? "6 meses" : "1 mes") adicionales</strong> sin perder tus días actuales.
+                    </p>
+                </div>
+            }
+            else if (isUpgradeFromGold)
+            {
+                <div class="p-3 mb-4 rounded border border-warning bg-warning bg-opacity-10 text-white">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="fa-solid fa-arrow-up-right-dots text-warning fa-lg"></i>
+                        <h6 class="font-heading text-warning fw-bold mb-0 text-uppercase">Mejora de Plan (Upgrade)</h6>
+                    </div>
+                    <p class="small text-white text-opacity-85 mb-0">
+                        Actualmente tenés Plan Gold. Al confirmar pasarás a <strong>Plan Premium</strong> con entrenador personal asignado de inmediato.
+                    </p>
+                </div>
+            }
+
+            <h4 class="font-heading text-white fw-bold mb-1">MÉTODO DE PAGO (SIMULADOR)</h4>
+            <p class="text-white text-opacity-75 small mb-4">Elegí tu medio de pago para simular la confirmación de la orden.</p>
+
+            <!-- Selector de Medio de Pago -->
+            <div class="row g-2 mb-4">
+                <div class="col-sm-6">
+                    <div class="p-3 rounded border border-primary bg-dark d-flex align-items-center gap-2" style="cursor: pointer;">
+                        <input type="radio" name="paymentMethod" id="payCard" class="form-check-input" checked />
+                        <label for="payCard" class="form-check-label text-white small font-heading fw-bold" style="cursor: pointer;">
+                            <i class="fa-solid fa-credit-card text-primary-fn me-1"></i> Tarjeta Débito / Crédito
+                        </label>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 rounded border border-secondary border-opacity-50 bg-surface-fn d-flex align-items-center gap-2" style="cursor: pointer;">
+                        <input type="radio" name="paymentMethod" id="payMp" class="form-check-input" />
+                        <label for="payMp" class="form-check-label text-white small font-heading fw-bold" style="cursor: pointer;">
+                            <i class="fa-solid fa-wallet text-info me-1"></i> Mercado Pago Demo
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos del Titular -->
+            <div class="mb-3">
+                <label class="form-label font-heading text-white small">Titular de la Cuenta</label>
+                <input type="text" class="form-control calculator-input" value="@(user != null ? $"{user.FirstName} {user.LastName}" : "Socio FitNet")" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label font-heading text-white small">Correo Electrónico de Facturación</label>
+                <input type="email" class="form-control calculator-input" value="@(user?.Email ?? "")" readonly />
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-8">
+                    <label class="form-label font-heading text-white small">Número de Tarjeta (Simulado)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary border-opacity-50 text-primary-fn">
+                            <i class="fa-brands fa-cc-visa"></i>
+                        </span>
+                        <input type="text" class="form-control calculator-input" value="•••• •••• •••• 4242" readonly />
+                    </div>
+                </div>
+                <div class="col-4">
+                    <label class="form-label font-heading text-white small">Vencimiento</label>
+                    <input type="text" class="form-control calculator-input" value="12/28" readonly />
+                </div>
+            </div>
+
+            <!-- Formulario de Confirmación Real (Server-Side) -->
+            <form asp-action="ProcessUpgrade" asp-controller="Billing" method="post">
+                @Html.AntiForgeryToken()
+                <!-- Parámetros enviados de forma segura: el backend calcula el precio en BD -->
+                <input type="hidden" name="planCode" value="@(plan?.Name?.ToLower() ?? "gold")" />
+                <input type="hidden" name="periodo" value="@periodo" />
+
+                <button type="submit" class="btn btn-fn-primary w-100 py-3 font-heading fs-5">
+                    @if (alreadySamePlan)
+                    {
+                        <i class="fa-solid fa-calendar-plus me-2"></i>
+                        <span>EXTENDER @(plan?.Name?.ToUpper()) POR @(isSemestral ? "6 MESES" : "1 MES") ($@totalCobro.ToString("N0"))</span>
+                    }
+                    else if (isUpgradeFromGold)
+                    {
+                        <i class="fa-solid fa-gem me-2"></i>
+                        <span>MEJORAR A PLAN PREMIUM ($@totalCobro.ToString("N0"))</span>
+                    }
+                    else
+                    {
+                        <i class="fa-solid fa-circle-check me-2"></i>
+                        <span>CONFIRMAR Y ACTIVAR @(plan?.Name?.ToUpper()) ($@totalCobro.ToString("N0"))</span>
+                    }
+                </button>
+            </form>
+
+            <div class="text-center mt-3">
+                <small class="text-white text-opacity-75" style="font-size: 0.78rem;">
+                    * Al confirmar, el servidor asignará tu membresía por @(isSemestral ? "6 meses" : "1 mes") y actualizará tu temporizador en el panel superior.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>

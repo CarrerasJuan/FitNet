@@ -1,0 +1,652 @@
+/* ==========================================================================
+   FitNet - Dashboard Stylesheet (Compact Density UI - Desktop Optimized)
+   Paleta: Charcoal Violet #3C1A47 & Cyberlime #B6FF00
+   Adaptado con Bootstrap 5 y Font Awesome 6 (100% Offline)
+   ========================================================================== */
+
+:root {
+  --header-height: 56px;
+  --sidebar-width: 224px;
+  
+  /* Colores Corporativos FitNet */
+  --fn-bg: #0d0714;
+  --fn-surface: #140b1e;
+  --fn-card: #1c102b;
+  --fn-card-hover: #26163a;
+  --fn-border: #35173f;
+  --fn-border-light: #522462;
+  --fn-border-subtle: rgba(255, 255, 255, 0.07);
+  
+  --fn-primary: #B6FF00;
+  --fn-primary-hover: #9fe200;
+  --fn-primary-glow: rgba(182, 255, 0, 0.25);
+  
+  --fn-text: #FFFFFF;
+  --fn-text-muted: #DCD6E2;
+  --fn-text-subtle: #AFA4B8;
+  
+  --fn-font-heading: 'Oswald', sans-serif;
+  --fn-font-body: 'Roboto', sans-serif;
+}
+
+/* ==========================================================================
+   Contraste de Textos de Alto Rendimiento (Cero gris apagado ilegible)
+   ========================================================================== */
+.dashboard-body .text-muted,
+.dashboard-app .text-muted,
+.dashboard-sidebar .text-muted,
+.dashboard-main .text-muted,
+.fn-card .text-muted,
+.stats-card .text-muted {
+  color: var(--fn-text-muted) !important;
+}
+
+.dashboard-body .text-secondary,
+.dashboard-app .text-secondary {
+  color: var(--fn-text-subtle) !important;
+}
+
+/* ==========================================================================
+   Contenedor Principal de la Aplicación (Compact Density)
+   ========================================================================== */
+body.dashboard-body {
+  background-color: var(--fn-bg);
+  color: var(--fn-text);
+  font-family: var(--fn-font-body);
+  font-size: 13.5px;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+.dashboard-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ==========================================================================
+   Topbar Superior (Admin Header - Compact)
+   ========================================================================== */
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  height: var(--header-height);
+  background: rgba(20, 11, 30, 0.97);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--fn-border);
+  z-index: 1030;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Barra de Búsqueda Compacta (Metis Style) */
+.dashboard-search-container {
+  position: relative;
+  width: 320px;
+}
+
+.dashboard-search-container i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--fn-text-subtle);
+  font-size: 0.8rem;
+}
+
+.dashboard-search-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--fn-border);
+  color: #FFFFFF;
+  border-radius: 20px;
+  padding: 0.35rem 1rem 0.35rem 2.2rem;
+  font-size: 0.82rem;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.dashboard-search-input:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--fn-primary);
+  outline: none;
+  box-shadow: 0 0 10px var(--fn-primary-glow);
+}
+
+.dashboard-search-input::placeholder {
+  color: #8c7e9c;
+}
+
+/* Botón Icono Topbar (Campana de Notificaciones) */
+.dashboard-icon-btn {
+  background: transparent;
+  border: 1px solid var(--fn-border);
+  color: var(--fn-text-muted);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.dashboard-icon-btn:hover {
+  border-color: var(--fn-primary);
+  color: var(--fn-primary);
+}
+
+.notification-dot {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  background-color: var(--fn-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--fn-primary);
+}
+
+/* Dropdown Usuario Compacto */
+.user-dropdown-btn {
+  background: transparent;
+  border: 1px solid var(--fn-border);
+  padding: 0.25rem 0.75rem 0.25rem 0.35rem;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #FFFFFF;
+  transition: all 0.2s ease;
+}
+
+.user-dropdown-btn:hover {
+  border-color: var(--fn-primary);
+  background: rgba(182, 255, 0, 0.05);
+}
+
+.user-initials-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3C1A47 0%, #1e0d29 100%);
+  border: 1.5px solid var(--fn-primary);
+  color: var(--fn-primary);
+  font-family: var(--fn-font-heading);
+  font-weight: 700;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--fn-primary);
+}
+
+/* ==========================================================================
+   Sidebar Lateral (Compact Density - Metis Pattern)
+   ========================================================================== */
+.dashboard-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--fn-surface);
+  border-right: 1px solid var(--fn-border);
+  z-index: 1035;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.dashboard-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dashboard-sidebar::-webkit-scrollbar-thumb {
+  background: var(--fn-border);
+  border-radius: 4px;
+}
+
+/* Logo Circular en Cabecera del Sidebar */
+.sidebar-brand-emblem {
+  padding: 1rem 0.5rem 0.75rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-logo-img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(182, 255, 0, 0.2));
+  transition: transform 0.2s ease;
+}
+
+.sidebar-logo-img:hover {
+  transform: scale(1.05);
+}
+
+.sidebar-nav-list {
+  list-style: none;
+  padding: 0 0.5rem;
+  margin: 0;
+}
+
+.sidebar-nav-item {
+  margin-bottom: 2px;
+}
+
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  color: #C8BED2;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.sidebar-nav-link i {
+  font-size: 0.95rem;
+  width: 18px;
+  text-align: center;
+  color: #9c8dae;
+  transition: color 0.2s ease;
+}
+
+.sidebar-nav-link:hover {
+  background-color: rgba(182, 255, 0, 0.08);
+  color: #FFFFFF;
+}
+
+.sidebar-nav-link:hover i {
+  color: var(--fn-primary);
+}
+
+.sidebar-nav-link.active {
+  background: linear-gradient(90deg, rgba(182, 255, 0, 0.16) 0%, rgba(182, 255, 0, 0.03) 100%);
+  color: #FFFFFF;
+  font-weight: 600;
+  border-left: 3px solid var(--fn-primary);
+}
+
+.sidebar-nav-link.active i {
+  color: var(--fn-primary);
+  text-shadow: 0 0 8px var(--fn-primary-glow);
+}
+
+/* Tarjeta de Plan al Pie del Sidebar */
+.sidebar-plan-card {
+  margin: auto 0.6rem 0.5rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(28, 16, 43, 0.9);
+  border: 1px solid rgba(182, 255, 0, 0.3);
+  border-radius: 8px;
+  text-decoration: none;
+  display: block;
+  transition: all 0.2s ease;
+}
+
+.sidebar-plan-card:hover {
+  border-color: var(--fn-primary);
+  background: rgba(38, 22, 58, 0.95);
+}
+
+.sidebar-plan-title {
+  font-family: var(--fn-font-heading);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-plan-exp {
+  font-size: 0.7rem;
+  color: #a594b8;
+  margin-top: 2px;
+}
+
+/* Tagline de la Marca al Pie del Sidebar */
+.sidebar-footer-brand {
+  padding: 0.5rem 0.75rem 0.85rem;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.sidebar-footer-title {
+  font-family: 'SpeedBeast', var(--fn-font-heading);
+  font-size: 1.15rem;
+  color: #FFFFFF;
+  margin-bottom: 2px;
+  letter-spacing: 1px;
+}
+
+.sidebar-footer-tagline {
+  font-family: var(--fn-font-heading);
+  font-size: 0.62rem;
+  color: #7b6d8d;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+/* ==========================================
+   Espacio Principal de Trabajo (Compact Density)
+   ========================================== */
+.dashboard-main {
+  margin-top: var(--header-height);
+  margin-left: var(--sidebar-width);
+  min-height: calc(100vh - var(--header-height));
+  padding: 1.1rem 1.4rem 2.5rem;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-x: clip;
+}
+
+/* ==========================================================================
+   Hero Welcome Banner (Banner con fondo de gym y neón FitNet)
+   ========================================================================== */
+.dashboard-hero-banner {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--fn-border);
+  background-image: url('/img/dashboard/hero_gym_neon_clean.webp');
+  background-size: cover;
+  background-position: center right;
+  background-repeat: no-repeat;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.dashboard-hero-overlay {
+  display: none;
+}
+
+.dashboard-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 620px;
+}
+
+.hero-tag {
+  font-family: var(--fn-font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #B8ADC4;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+.hero-title {
+  font-family: var(--fn-font-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  line-height: 1.1;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.hero-sub {
+  font-size: 0.88rem;
+  color: #DCD6E2;
+  line-height: 1.4;
+  margin-bottom: 1.15rem;
+}
+
+/* ==========================================================================
+   Tarjetas de Estadísticas KPI (Compact Density Metis Cards)
+   ========================================================================== */
+.stats-card {
+  background-color: var(--fn-card);
+  border: 1px solid var(--fn-border);
+  border-radius: 10px;
+  padding: 0.85rem 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--fn-border-light);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.stats-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.stats-icon-lime {
+  background: rgba(182, 255, 0, 0.12);
+  color: var(--fn-primary);
+  border: 1px solid rgba(182, 255, 0, 0.25);
+}
+
+.stats-icon-purple {
+  background: rgba(139, 92, 246, 0.12);
+  color: #c084fc;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+.stats-icon-orange {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.stats-icon-blue {
+  background: rgba(14, 165, 233, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.25);
+}
+
+.stats-content {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.stats-label {
+  font-family: var(--fn-font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #B8ADC4 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 0.15rem;
+}
+
+.stats-value {
+  font-family: var(--fn-font-heading);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.1;
+  letter-spacing: 0.5px;
+}
+
+.stats-sub {
+  font-size: 0.75rem;
+  color: var(--fn-text-muted);
+  margin-top: 0.15rem;
+}
+
+/* ==========================================================================
+   Tarjetas Modulares (Content Cards - Compact)
+   ========================================================================== */
+.fn-card {
+  background-color: var(--fn-card);
+  border: 1px solid var(--fn-border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.fn-card-header {
+  padding: 0.75rem 1.1rem;
+  border-bottom: 1px solid var(--fn-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(20, 11, 30, 0.4);
+}
+
+.fn-card-title {
+  font-family: var(--fn-font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fn-card-body {
+  padding: 1.1rem;
+}
+
+/* Card de Rutina con Mancuerna Difuminada en Fondo Izquierdo */
+.routine-card-blended {
+  position: relative;
+  overflow: hidden;
+}
+
+.routine-bg-fade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 52%;
+  background-image: url('/img/dashboard/img-mancuerna.webp');
+  background-size: cover;
+  background-position: left center;
+  background-repeat: no-repeat;
+  mask-image: linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 40%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 40%, rgba(0,0,0,0) 100%);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.95;
+}
+
+/* Imagen de Polaroids de Progreso Físico */
+.progress-polaroids-img {
+  height: 64px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+  flex-shrink: 0;
+}
+
+/* Módulos Bloqueados */
+.card-locked {
+  position: relative;
+  background: linear-gradient(180deg, var(--fn-card) 0%, rgba(18, 9, 26, 0.95) 100%);
+  border: 1px dashed rgba(245, 158, 11, 0.4);
+}
+
+.locked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 5px;
+  font-family: var(--fn-font-heading);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.locked-badge-gold {
+  background: rgba(182, 255, 0, 0.12);
+  color: var(--fn-primary);
+  border: 1px solid rgba(182, 255, 0, 0.3);
+}
+
+.locked-badge-premium {
+  background: rgba(14, 165, 233, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+/* ==========================================================================
+   Responsive & Mobile
+   ========================================================================== */
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 1020;
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  .dashboard-header {
+    left: 0;
+    padding: 0 1rem;
+  }
+
+  .dashboard-sidebar {
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+
+  .dashboard-sidebar.show {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.6);
+  }
+
+  .sidebar-backdrop.show {
+    display: block;
+  }
+
+  .dashboard-main {
+    margin-left: 0;
+    padding: 1rem 0.85rem 2.5rem;
+  }
+
+  .dashboard-search-container {
+    display: none;
+  }
+}

@@ -1,0 +1,372 @@
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var userName = User.Identity?.Name ?? "Usuario";
+    var isOwner = User.IsInRole("Owner");
+    var isAdmin = User.IsInRole("Admin") || isOwner;
+    var isTrainer = User.IsInRole("Trainer");
+    var isMember = !isAdmin && !isTrainer;
+
+    var primaryRole = isOwner ? "Owner" : isAdmin ? "Admin" : isTrainer ? "Trainer" : "Member";
+
+    var pName = ViewData["PlanName"] as string ?? (isMember ? "Free" : "Staff");
+    var isTrial = ViewData["IsTrialActive"] as bool? ?? true;
+    var hoursRem = ViewData["TrialHoursRemaining"] as int? ?? 0;
+    var daysRem = ViewData["DaysRemaining"] as int? ?? 0;
+    var expDate = ViewData["ExpirationDate"] as string ?? "";
+
+    // Obtener iniciales o nombre corto
+    var initials = "FN";
+    if (!string.IsNullOrEmpty(userName))
+    {
+        var parts = userName.Split(new[] { ' ', '.', '@' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+            initials = $"{parts[0][0]}{parts[1][0]}".ToUpper();
+        else if (parts.Length == 1 && parts[0].Length >= 2)
+            initials = parts[0].Substring(0, 2).ToUpper();
+    }
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - FitNet Platform</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/webp" href="~/img/logo/logo-Fitnet-sinfondo.webp" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- CSS Locales (100% Offline) -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/fontawesome/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-app">
+        <!-- ==========================================
+             1. TOPBAR SUPERIOR (Admin Header - Compact Density)
+             ========================================== -->
+        <header class="dashboard-header">
+            <!-- Botón Hamburguesa Móvil (Visible únicamente en celulares/tablets) -->
+            <button class="sidebar-toggle-btn d-lg-none me-2" id="sidebarToggle" type="button" aria-label="Toggle Navigation">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <!-- Zona Derecha: Notificaciones + User Dropdown -->
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <!-- Campana de Notificaciones con Punto Neón -->
+                <button class="dashboard-icon-btn" type="button" title="Notificaciones del Sistema">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="notification-dot"></span>
+                </button>
+
+                <!-- Dropdown de Usuario Compacto -->
+                <div class="dropdown">
+                    <button class="user-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="user-initials-avatar">
+                            @initials
+                        </div>
+                        <div class="text-start d-none d-sm-block me-1">
+                            <span class="d-block font-heading text-white fw-bold" style="font-size: 0.78rem; line-height: 1.1;">
+                                @userName
+                            </span>
+                            <span class="d-block font-heading text-primary-fn" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                                @if (isMember)
+                                {
+                                    <span><i class="fa-solid fa-crown me-1 text-warning"></i>Plan @pName</span>
+                                }
+                                else
+                                {
+                                    <span><i class="fa-solid fa-shield me-1"></i>@primaryRole</span>
+                                }
+                            </span>
+                        </div>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow border border-secondary border-opacity-50">
+                        <li class="px-3 py-2 border-bottom border-secondary border-opacity-25">
+                            <div class="text-white small fw-bold">@userName</div>
+                            <span class="badge bg-secondary text-uppercase font-heading" style="font-size: 0.65rem;">@primaryRole</span>
+                        </li>
+                        <li>
+                            <!-- Requerimiento explícito: cuando seleccionas Mi Perfil en el combobox, primeramente va a Mi Dashboard -->
+                            <a class="dropdown-item py-2" asp-controller="@(isMember ? "Members" : isTrainer ? "Trainers" : "Admin")" asp-action="Dashboard">
+                                <i class="fa-solid fa-gauge-high me-2 text-primary-fn"></i> Mi Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2" asp-controller="Account" asp-action="Profile">
+                                <i class="fa-solid fa-user-pen me-2 text-primary-fn"></i> Ajustes de Perfil
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2" asp-controller="Home" asp-action="Index">
+                                <i class="fa-solid fa-arrow-up-right-from-square me-2 text-primary-fn"></i> Ver Portal Web
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider border-secondary border-opacity-25"></li>
+                        <li>
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item text-danger py-2">
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar Sesión
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <!-- ==========================================
+             2. SIDEBAR LATERAL (Compact Density - Metis Pattern)
+             ========================================== -->
+        <aside class="dashboard-sidebar" id="dashboardSidebar">
+            <!-- Emblema Circular Oficial FitNet -->
+            <div class="sidebar-brand-emblem">
+                <a asp-controller="Home" asp-action="Index">
+                    <img src="~/img/logo/logo-Fitnet-sinfondo.webp" 
+                         alt="FitNet Mascot" 
+                         class="sidebar-logo-img"
+                         onerror="this.onerror=null; this.src='/img/logo/logo-Fitnet-sinfondo.png';" />
+                </a>
+            </div>
+
+            <!-- NAVEGACIÓN PARA SOCIOS (ROL MEMBER) -->
+            @if (isMember)
+            {
+                <ul class="sidebar-nav-list flex-grow-1">
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Members" && ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")" 
+                           asp-controller="Members" asp-action="Dashboard">
+                            <i class="fa-solid fa-house"></i>
+                            <span>Mi Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Workouts" ? "active" : "")" 
+                           asp-controller="Members" asp-action="Workouts">
+                            <i class="fa-solid fa-dumbbell"></i>
+                            <span>Mis Rutinas</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Exercises" ? "active" : "")" 
+                           asp-controller="Exercises" asp-action="Index">
+                            <i class="fa-solid fa-person-running"></i>
+                            <span>Ejercicios</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Progress" ? "active" : "")" 
+                           asp-controller="Members" asp-action="Progress">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <span>Mi Progreso</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link text-muted opacity-75" href="#!">
+                            <i class="fa-solid fa-utensils"></i>
+                            <span>Plan Alimenticio</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link text-muted opacity-75" href="#!">
+                            <i class="fa-solid fa-users"></i>
+                            <span>Comunidad</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item mt-2">
+                        <a class="sidebar-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Account" && ViewContext.RouteData.Values["action"]?.ToString() == "Profile" ? "active" : "")" 
+                           asp-controller="Account" asp-action="Profile">
+                            <i class="fa-solid fa-user"></i>
+                            <span>Mi Perfil</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Tarjeta de Estado de Plan al Pie del Sidebar -->
+                @if (pName == "Gold")
+                {
+                    <a href="/Billing/Checkout?plan=gold" class="sidebar-plan-card">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="sidebar-plan-title text-white">
+                                <i class="fa-solid fa-crown text-warning me-1"></i> PLAN GOLD
+                            </span>
+                            <i class="fa-solid fa-chevron-right fa-xs text-muted"></i>
+                        </div>
+                        <div class="sidebar-plan-exp">Activo hasta @(!string.IsNullOrEmpty(expDate) ? expDate : "30 días")</div>
+                    </a>
+                }
+                else if (pName == "Premium")
+                {
+                    <a href="/Billing/Checkout?plan=premium" class="sidebar-plan-card" style="border-color: rgba(14, 165, 233, 0.4);">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="sidebar-plan-title text-white">
+                                <i class="fa-solid fa-gem text-info me-1"></i> PLAN PREMIUM
+                            </span>
+                            <i class="fa-solid fa-chevron-right fa-xs text-muted"></i>
+                        </div>
+                        <div class="sidebar-plan-exp">Activo hasta @(!string.IsNullOrEmpty(expDate) ? expDate : "6 meses")</div>
+                    </a>
+                }
+                else
+                {
+                    <a href="/Billing/Checkout?plan=gold" class="sidebar-plan-card" style="border-color: rgba(245, 158, 11, 0.4);">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="sidebar-plan-title text-warning">
+                                <i class="fa-solid fa-clock me-1"></i> TRIAL 24H
+                            </span>
+                            <span class="badge bg-primary-fn text-dark font-heading" style="font-size: 0.65rem;">UPGRADE</span>
+                        </div>
+                        <div class="sidebar-plan-exp">@(hoursRem > 0 ? $"{hoursRem}h restantes" : "Expirado")</div>
+                    </a>
+                }
+
+                <!-- Brand Tagline al Pie del Sidebar -->
+                <div class="sidebar-footer-brand">
+                    <div class="sidebar-footer-title">Fit<span class="text-primary-fn">Net</span></div>
+                    <div class="sidebar-footer-tagline">DISCIPLINA &bull; PROGRESO &bull; RESULTADOS</div>
+                </div>
+            }
+            else if (isTrainer)
+            {
+                <!-- NAVEGACIÓN PARA ENTRENADORES (ROL TRAINER) -->
+                <ul class="sidebar-nav-list flex-grow-1">
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link active" asp-controller="Trainers" asp-action="Dashboard">
+                            <i class="fa-solid fa-chalkboard-user"></i>
+                            <span>Panel Coach</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" asp-controller="Trainers" asp-action="Members">
+                            <i class="fa-solid fa-users"></i>
+                            <span>Mis Alumnos</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" asp-controller="WorkoutPlans" asp-action="Index">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                            <span>Diseñar Rutinas</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" asp-controller="Exercises" asp-action="Index">
+                            <i class="fa-solid fa-dumbbell"></i>
+                            <span>Ejercicios</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item mt-2">
+                        <a class="sidebar-nav-link" asp-controller="Account" asp-action="Profile">
+                            <i class="fa-solid fa-user"></i>
+                            <span>Mi Perfil</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="sidebar-footer-brand">
+                    <div class="sidebar-footer-title">Fit<span class="text-primary-fn">Net</span></div>
+                    <div class="sidebar-footer-tagline">STAFF TÉCNICO &bull; COACH</div>
+                </div>
+            }
+            else
+            {
+                <!-- NAVEGACIÓN PARA ADMINISTRADORES Y DUEÑOS (ADMIN / OWNER) -->
+                <ul class="sidebar-nav-list flex-grow-1">
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link active" asp-controller="Admin" asp-action="Dashboard">
+                            <i class="fa-solid fa-gauge-high"></i>
+                            <span>Dashboard General</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" asp-controller="Admin" asp-action="Members">
+                            <i class="fa-solid fa-users"></i>
+                            <span>Socios del Gym</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" asp-controller="Admin" asp-action="Trainers">
+                            <i class="fa-solid fa-user-tie"></i>
+                            <span>Entrenadores</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" asp-controller="Admin" asp-action="Exercises">
+                            <i class="fa-solid fa-dumbbell"></i>
+                            <span>ABM Ejercicios</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link" asp-controller="Admin" asp-action="WorkoutPlans">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                            <span>Rutinas Oficiales</span>
+                        </a>
+                    </li>
+                    @if (isOwner)
+                    {
+                        <li class="sidebar-nav-item">
+                            <a class="sidebar-nav-link text-warning" asp-controller="Admin" asp-action="Metrics">
+                                <i class="fa-solid fa-chart-pie text-warning"></i>
+                                <span>Métricas de Negocio</span>
+                            </a>
+                        </li>
+                    }
+                    <li class="sidebar-nav-item mt-2">
+                        <a class="sidebar-nav-link" asp-controller="Account" asp-action="Profile">
+                            <i class="fa-solid fa-user"></i>
+                            <span>Mi Perfil</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="sidebar-footer-brand">
+                    <div class="sidebar-footer-title">Fit<span class="text-primary-fn">Net</span></div>
+                    <div class="sidebar-footer-tagline">ADMINISTRACIÓN &bull; GESTIÓN</div>
+                </div>
+            }
+        </aside>
+
+        <!-- Overlay Backdrop para móviles -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <!-- ==========================================
+             3. ESPACIO PRINCIPAL (Admin Main)
+             ========================================== -->
+        <main class="dashboard-main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Scripts Locales -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle del Sidebar en móviles (Metis Pattern)
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleBtn = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('dashboardSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+
+            if (toggleBtn && sidebar && backdrop) {
+                toggleBtn.addEventListener('click', function () {
+                    sidebar.classList.toggle('show');
+                    backdrop.classList.toggle('show');
+                });
+
+                backdrop.addEventListener('click', function () {
+                    sidebar.classList.remove('show');
+                    backdrop.classList.remove('show');
+                });
+            }
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -32,11 +32,15 @@ public class AccountController : Controller
     // 1. INICIO DE SESIÓN (LOGIN)
     // ==========================================
     [HttpGet]
-    public IActionResult Login(string? returnUrl = null)
+    public async Task<IActionResult> Login(string? returnUrl = null)
     {
         if (User.Identity?.IsAuthenticated == true)
         {
-            return RedirectToLocal(returnUrl);
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser != null)
+            {
+                return await RedirectAfterLoginAsync(currentUser, returnUrl);
+            }
         }
 
         var model = new LoginViewModel { ReturnUrl = returnUrl };
@@ -72,7 +76,7 @@ public class AccountController : Controller
         if (result.Succeeded)
         {
             _logger.LogInformation("Usuario {Email} inició sesión con éxito.", model.Email);
-            return RedirectToLocal(returnUrl);
+            return await RedirectAfterLoginAsync(user, returnUrl);
         }
 
         ModelState.AddModelError(string.Empty, "Correo o contraseña incorrectos.");
@@ -165,7 +169,7 @@ public class AccountController : Controller
         await _signInManager.SignInAsync(user, isPersistent: false);
 
         TempData["MensajeExito"] = "¡Bienvenido a FitNet! Tu prueba gratuita de 24 horas está activa.";
-        return RedirectToAction("Profile");
+        return RedirectToAction("Dashboard", "Members");
     }
 
     // ==========================================
@@ -202,6 +206,17 @@ public class AccountController : Controller
 
         var trainerProfile = await _context.TrainerProfiles
             .FirstOrDefaultAsync(t => t.UserId == user.Id);
+
+        var pName = memberProfile?.Membership?.Name ?? "Free";
+        var isTrActive = memberProfile != null && memberProfile.TrialEndsAt > DateTime.UtcNow;
+        var trHours = isTrActive && memberProfile != null ? Math.Max(0, (int)Math.Ceiling((memberProfile.TrialEndsAt - DateTime.UtcNow).TotalHours)) : 0;
+        var dRemaining = isTrActive && pName != "Free" && memberProfile != null ? Math.Max(1, (int)Math.Ceiling((memberProfile.TrialEndsAt - DateTime.UtcNow).TotalDays)) : 0;
+
+        ViewData["PlanName"] = pName;
+        ViewData["IsTrialActive"] = isTrActive;
+        ViewData["TrialHoursRemaining"] = trHours;
+        ViewData["DaysRemaining"] = dRemaining;
+        ViewData["ExpirationDate"] = memberProfile?.TrialEndsAt.ToString("dd/MM/yyyy") ?? "";
 
         var model = new ProfileViewModel
         {
@@ -305,13 +320,23 @@ public class AccountController : Controller
     // ==========================================
     // HELPERS
     // ==========================================
-    private IActionResult RedirectToLocal(string? returnUrl)
+    private async Task<IActionResult> RedirectAfterLoginAsync(ApplicationUser user, string? returnUrl)
     {
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
         {
             return Redirect(returnUrl);
         }
 
-        return RedirectToAction("Profile", "Account");
+        if (await _userManager.IsInRoleAsync(user, "Admin") || await _userManager.IsInRoleAsync(user, "Owner"))
+        {
+            return RedirectToAction("Dashboard", "Admin");
+        }
+
+        if (await _userManager.IsInRoleAsync(user, "Trainer"))
+        {
+            return RedirectToAction("Dashboard", "Trainers");
+        }
+
+        return RedirectToAction("Dashboard", "Members");
     }
 }
