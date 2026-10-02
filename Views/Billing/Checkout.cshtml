@@ -115,10 +115,36 @@
                 }
             </ul>
 
-            <div class="mt-auto pt-3 border-top border-secondary border-opacity-25 text-center">
-                <small class="text-white text-opacity-75" style="font-size: 0.8rem;">
-                    <i class="fa-solid fa-shield-halved me-1 text-primary-fn"></i> Transacción protegida por arquitectura RBAC FitNet.
-                </small>
+            <div class="mt-auto pt-4 border-top border-secondary border-opacity-25">
+                <!-- Selector Switch de Plan (Gold vs Premium) -->
+                <div class="p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-white text-opacity-75 small font-heading text-uppercase">
+                            <i class="fa-solid fa-arrows-rotate me-1 text-primary-fn"></i> Cambiar Plan:
+                        </span>
+                        <span class="badge @(plan?.Name == "Premium" ? "bg-info text-dark" : "bg-warning text-dark") font-heading text-uppercase">
+                            @(plan?.Name ?? "Gold")
+                        </span>
+                    </div>
+                    <div class="d-flex p-1 bg-surface-fn rounded-pill border border-secondary border-opacity-50">
+                        <a href="/Billing/Checkout?plan=gold&periodo=@periodo"
+                           class="btn btn-sm rounded-pill font-heading flex-fill text-decoration-none py-1 @(plan?.Name == "Gold" ? "btn-fn-primary" : "text-white border-0 bg-transparent")"
+                           style="font-size: 0.8rem;">
+                            <i class="fa-solid fa-medal me-1"></i> Gold
+                        </a>
+                        <a href="/Billing/Checkout?plan=premium&periodo=@periodo"
+                           class="btn btn-sm rounded-pill font-heading flex-fill text-decoration-none py-1 @(plan?.Name == "Premium" ? "btn-fn-primary" : "text-white border-0 bg-transparent")"
+                           style="font-size: 0.8rem;">
+                            <i class="fa-solid fa-crown me-1"></i> Premium
+                        </a>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <small class="text-white text-opacity-75" style="font-size: 0.8rem;">
+                        <i class="fa-solid fa-shield-halved me-1 text-primary-fn"></i> Transacción protegida por arquitectura RBAC FitNet.
+                    </small>
+                </div>
             </div>
         </div>
     </div>
