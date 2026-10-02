@@ -36,7 +36,6 @@ msbuild.wrn
 project.lock.json
 project.fragment.lock.json
 artifacts/
-**/Properties/launchSettings.json
 
 # =====================
 # Secretos / config local (NUNCA subir)
