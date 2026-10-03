@@ -95,12 +95,23 @@
                         {
                             <tr>
                                 <td class="ps-4 text-white fw-bold">
-                                    <i class="fa-solid fa-circle-user text-primary-fn me-2"></i>
-                                    @a.Member.User.FirstName @a.Member.User.LastName
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if (!string.IsNullOrEmpty(a.Member?.User?.AvatarPath))
+                                        {
+                                            <img src="@a.Member.User.AvatarPath" alt="@a.Member.User.FirstName" class="rounded-circle border border-primary" style="width: 32px; height: 32px; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="rounded-circle bg-surface-fn border border-fn d-inline-flex align-items-center justify-content-center text-primary-fn" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                                <i class="fa-solid fa-user"></i>
+                                            </div>
+                                        }
+                                        <span>@a.Member?.User?.FirstName @a.Member?.User?.LastName</span>
+                                    </div>
                                 </td>
-                                <td class="text-muted small">@a.Member.User.Email</td>
-                                <td class="text-white">@a.WorkoutPlan.Name</td>
-                                <td class="text-muted small">@a.StartDate.ToString("dd/MM/yyyy")</td>
+                                <td class="text-muted small align-middle">@a.Member?.User?.Email</td>
+                                <td class="text-white align-middle">@a.WorkoutPlan?.Name</td>
+                                <td class="text-muted small align-middle">@a.StartDate.ToString("dd/MM/yyyy")</td>
                             </tr>
                         }
                     </tbody>

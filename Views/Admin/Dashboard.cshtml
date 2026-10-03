@@ -103,16 +103,27 @@
                             {
                                 <tr>
                                     <td class="ps-4 text-white fw-bold">
-                                        <i class="fa-solid fa-circle-user text-primary-fn me-2"></i>
-                                        @m.User.FirstName @m.User.LastName
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if (!string.IsNullOrEmpty(m.User?.AvatarPath))
+                                            {
+                                                <img src="@m.User.AvatarPath" alt="@m.User.FirstName" class="rounded-circle border border-primary" style="width: 32px; height: 32px; object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded-circle bg-surface-fn border border-fn d-inline-flex align-items-center justify-content-center text-primary-fn" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                                    <i class="fa-solid fa-user"></i>
+                                                </div>
+                                            }
+                                            <span>@m.User?.FirstName @m.User?.LastName</span>
+                                        </div>
                                     </td>
-                                    <td class="text-muted small">@m.User.Email</td>
-                                    <td>
-                                        <span class="badge @(m.Membership.Name == "Gold" ? "bg-warning text-dark" : m.Membership.Name == "Premium" ? "bg-info text-dark" : "bg-secondary") font-heading text-uppercase">
-                                            @m.Membership.Name
+                                    <td class="text-muted small align-middle">@m.User?.Email</td>
+                                    <td class="align-middle">
+                                        <span class="badge @(m.Membership?.Name == "Gold" ? "bg-warning text-dark" : m.Membership?.Name == "Premium" ? "bg-info text-dark" : "bg-secondary") font-heading text-uppercase">
+                                            @(m.Membership?.Name ?? "Free")
                                         </span>
                                     </td>
-                                    <td class="text-muted small">@m.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="text-muted small align-middle">@m.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
                                 </tr>
                             }
                         </tbody>

@@ -33,6 +33,9 @@ public class ProfileViewModel
 
     public string? AvatarPath { get; set; }
 
+    [Display(Name = "Subir o Cambiar Foto de Perfil")]
+    public IFormFile? AvatarFile { get; set; }
+
     // Información de Roles y Membresía
     public string Role { get; set; } = "Member";
     public string PlanName { get; set; } = "Free";

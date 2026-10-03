@@ -1,6 +1,9 @@
+@inject Microsoft.AspNetCore.Identity.UserManager<FitNet.Models.ApplicationUser> UserManager
 @{
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
     var userName = User.Identity?.Name ?? "Usuario";
+    var currentUser = isAuthenticated ? await UserManager.GetUserAsync(User) : null;
+    var avatarPath = currentUser?.AvatarPath;
     var isOwner = User.IsInRole("Owner");
     var isAdmin = User.IsInRole("Admin") || isOwner;
     var isTrainer = User.IsInRole("Trainer");
@@ -70,9 +73,16 @@
                 <!-- Dropdown de Usuario Compacto -->
                 <div class="dropdown">
                     <button class="user-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="user-initials-avatar">
-                            @initials
-                        </div>
+                        @if (!string.IsNullOrEmpty(avatarPath))
+                        {
+                            <img src="@avatarPath" alt="@userName" class="user-avatar-sm" />
+                        }
+                        else
+                        {
+                            <div class="user-initials-avatar">
+                                @initials
+                            </div>
+                        }
                         <div class="text-start d-none d-sm-block me-1">
                             <span class="d-block font-heading text-white fw-bold" style="font-size: 0.78rem; line-height: 1.1;">
                                 @userName

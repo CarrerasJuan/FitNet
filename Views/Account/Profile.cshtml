@@ -41,17 +41,18 @@
             <!-- Columna Izquierda: Tarjeta Resumen de Usuario -->
             <div class="col-lg-4">
                 <div class="p-4 rounded-3 border border-fn bg-card-fn text-center mb-4">
-                    <!-- Avatar Circular -->
+                    <!-- Avatar Circular con Previsualización -->
                     <div class="position-relative d-inline-block mb-3">
                         @if (!string.IsNullOrEmpty(Model.AvatarPath))
                         {
-                            <img src="@Model.AvatarPath" alt="Avatar" class="rounded-circle border border-primary border-3" style="width: 110px; height: 110px; object-fit: cover;" />
+                            <img id="avatarPreview" src="@Model.AvatarPath" alt="Avatar" class="rounded-circle border border-primary border-3" style="width: 110px; height: 110px; object-fit: cover;" />
                         }
                         else
                         {
-                            <div class="rounded-circle bg-surface-fn border border-fn d-flex align-items-center justify-content-center text-primary-fn" style="width: 110px; height: 110px; font-size: 3rem;">
+                            <div id="avatarPlaceholder" class="rounded-circle bg-surface-fn border border-fn d-flex align-items-center justify-content-center text-primary-fn" style="width: 110px; height: 110px; font-size: 3rem;">
                                 <i class="fa-solid fa-user"></i>
                             </div>
+                            <img id="avatarPreview" src="#" alt="Nuevo Avatar" class="rounded-circle border border-primary border-3 d-none" style="width: 110px; height: 110px; object-fit: cover;" />
                         }
                     </div>
 
@@ -130,10 +131,23 @@
                         <h4 class="font-heading fs-4 fw-bold text-white mb-0">DATOS PERSONALES</h4>
                     </div>
 
-                    <form asp-action="Profile" asp-controller="Account" method="post">
+                    <form asp-action="Profile" asp-controller="Account" method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="Id" />
                         <input type="hidden" asp-for="Email" />
+                        <input type="hidden" asp-for="AvatarPath" />
+
+                        <!-- Subida de Avatar -->
+                        <div class="p-3 mb-4 rounded border border-secondary border-opacity-50 bg-surface-fn">
+                            <label asp-for="AvatarFile" class="form-label font-heading text-white small fw-bold mb-1">
+                                <i class="fa-solid fa-camera me-1 text-primary-fn"></i> Foto de Perfil / Avatar
+                            </label>
+                            <input asp-for="AvatarFile" id="avatarFileInput" type="file" class="form-control calculator-input" accept=".jpg,.jpeg,.png,.webp" />
+                            <span asp-validation-for="AvatarFile" class="text-danger small d-block mt-1"></span>
+                            <small class="text-white text-opacity-50 d-block mt-1" style="font-size: 0.78rem;">
+                                Formatos admitidos: JPG, PNG, WEBP. Tamaño máximo: 2 MB. El archivo anterior se reemplaza automáticamente.
+                            </small>
+                        </div>
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
@@ -219,4 +233,29 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const fileInput = document.getElementById('avatarFileInput');
+            const previewImg = document.getElementById('avatarPreview');
+            const placeholder = document.getElementById('avatarPlaceholder');
+
+            if (fileInput && previewImg) {
+                fileInput.addEventListener('change', function (e) {
+                    const file = e.target.files && e.target.files[0];
+                    if (file) {
+                        // Previsualizar la imagen seleccionada de forma instantánea
+                        const reader = new FileReader();
+                        reader.onload = function (evt) {
+                            previewImg.src = evt.target.result;
+                            previewImg.classList.remove('d-none');
+                            if (placeholder) {
+                                placeholder.classList.add('d-none');
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+    </script>
 }

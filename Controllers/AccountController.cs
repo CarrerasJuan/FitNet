@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FitNet.Data;
 using FitNet.Models;
+using FitNet.Services;
 using FitNet.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,17 +15,20 @@ public class AccountController : Controller
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ApplicationDbContext _context;
+    private readonly IFileStorageService _fileStorageService;
     private readonly ILogger<AccountController> _logger;
 
     public AccountController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         ApplicationDbContext context,
+        IFileStorageService fileStorageService,
         ILogger<AccountController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _context = context;
+        _fileStorageService = fileStorageService;
         _logger = logger;
     }
 
@@ -249,9 +253,54 @@ public class AccountController : Controller
             return RedirectToAction("Login");
         }
 
+        // Si se envió un archivo de avatar, validarlo con FileStorageService
+        if (model.AvatarFile != null)
+        {
+            if (!_fileStorageService.ValidateImage(model.AvatarFile, out var avatarError))
+            {
+                ModelState.AddModelError("AvatarFile", avatarError ?? "Archivo de imagen no válido.");
+            }
+        }
+
         if (!ModelState.IsValid)
         {
+            // Restaurar datos de solo lectura para la vista
+            var roles = await _userManager.GetRolesAsync(user);
+            model.Role = roles.FirstOrDefault() ?? "Member";
+            model.Email = user.Email ?? string.Empty;
+            model.AvatarPath = user.AvatarPath;
+
+            var memberProf = await _context.MemberProfiles
+                .Include(m => m.Membership)
+                .FirstOrDefaultAsync(m => m.UserId == user.Id);
+            model.PlanName = memberProf?.Membership?.Name ?? "No aplica";
+            model.TrialEndsAt = memberProf?.TrialEndsAt;
+
             return View(model);
+        }
+
+        // Procesar subida de nuevo Avatar si se adjuntó
+        if (model.AvatarFile != null)
+        {
+            try
+            {
+                // 1. Guardar nuevo avatar con nombre GUID seguro
+                var newAvatarPath = await _fileStorageService.SaveFileAsync(model.AvatarFile, "avatars");
+
+                // 2. Si tenía un avatar previo, eliminarlo del disco para evitar basura
+                if (!string.IsNullOrEmpty(user.AvatarPath))
+                {
+                    await _fileStorageService.DeleteFileAsync(user.AvatarPath);
+                }
+
+                user.AvatarPath = newAvatarPath;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al procesar la subida del avatar para el usuario {UserId}", user.Id);
+                ModelState.AddModelError("AvatarFile", "Ocurrió un error al guardar la imagen de perfil.");
+                return View(model);
+            }
         }
 
         user.FirstName = model.FirstName.Trim();
