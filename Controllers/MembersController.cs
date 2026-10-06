@@ -113,6 +113,10 @@ public class MembersController : Controller
             return RedirectToAction("Dashboard");
         }
 
+        var planName = memberProfile?.Membership?.Name ?? "Gold";
+        ViewData["PlanName"] = planName;
+        ViewData["IsTrialActive"] = memberProfile != null && memberProfile.TrialEndsAt > DateTime.UtcNow;
+
         return View();
     }
 
@@ -134,6 +138,10 @@ public class MembersController : Controller
             TempData["MensajeUpgrade"] = "El registro continuo de peso y fotos de progreso requiere Plan Gold.";
             return RedirectToAction("Dashboard");
         }
+
+        var planName = memberProfile?.Membership?.Name ?? "Gold";
+        ViewData["PlanName"] = planName;
+        ViewData["IsTrialActive"] = memberProfile != null && memberProfile.TrialEndsAt > DateTime.UtcNow;
 
         return View();
     }

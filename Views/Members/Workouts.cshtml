@@ -1,0 +1,388 @@
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = "Mis Rutinas de Entrenamiento";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/members.css" asp-append-version="true" />
+}
+
+<!-- ==========================================
+     CABECERA / HERO BANNER DE MIS RUTINAS
+     ========================================== -->
+<div class="workout-hero-banner mb-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary-fn font-heading text-dark px-2 py-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                    <i class="fa-solid fa-crown me-1"></i> PLAN GOLD & PREMIUM
+                </span>
+                <span class="badge bg-dark border border-secondary text-white font-heading" style="font-size: 0.7rem;">
+                    VIGENTE · MES EN CURSO
+                </span>
+            </div>
+            <h1 class="hero-title mb-1" style="font-size: 1.85rem;">
+                MIS RUTINAS DE <span class="text-primary-fn">ENTRENAMIENTO</span>
+            </h1>
+            <p class="hero-sub mb-0 text-muted" style="max-width: 650px;">
+                Programa integral diseñado por el cuerpo técnico de FitNet. Ejecuta tus series, controla los descansos y maximiza tu rendimiento físico.
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-fn-primary btn-sm px-3 py-2 font-heading" title="Iniciar Modo Entrenamiento">
+                <i class="fa-solid fa-play me-1"></i> INICIAR SESIÓN DE HOY
+            </button>
+            <button type="button" class="btn btn-outline-secondary text-white btn-sm px-3 py-2 font-heading" title="Descargar Ficha en PDF">
+                <i class="fa-solid fa-file-pdf text-danger me-1"></i> DESCARGAR RUTINA
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     SELECTOR DE SESIONES / DÍAS (PILLS INTERACTIVAS)
+     ========================================== -->
+<div class="session-nav-pills">
+    <div class="session-pill active">
+        <i class="fa-solid fa-fire text-primary-fn"></i>
+        <span>DÍA 1: TORSO - EMPUJE (PUSH)</span>
+        <span class="badge bg-primary-fn text-dark px-2 py-0 ms-1" style="font-size: 0.65rem;">HOY</span>
+    </div>
+    <div class="session-pill">
+        <i class="fa-solid fa-dumbbell"></i>
+        <span>DÍA 2: ESPALDA & BÍCEPS (PULL)</span>
+    </div>
+    <div class="session-pill">
+        <i class="fa-solid fa-person-running"></i>
+        <span>DÍA 3: PIERNAS & CORE (LEGS)</span>
+    </div>
+    <div class="session-pill">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>DÍA 4: HOMBROS & BRAZOS</span>
+    </div>
+</div>
+
+<!-- ==========================================
+     CUERPO PRINCIPAL: LISTADO DE EJERCICIOS + PANEL LATERAL
+     ========================================== -->
+<div class="row g-3">
+    <!-- COLUMNA IZQUIERDA: LISTA DETALLADA DE EJERCICIOS (8 COLS) -->
+    <div class="col-lg-8">
+        <!-- Tarjeta de Identificación de Sesión -->
+        <div class="fn-card mb-3">
+            <div class="fn-card-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-clipboard-list text-primary-fn"></i>
+                    <span class="fn-card-title">SESIÓN TORSO A — HIPERTROFIA Y EMPUJE</span>
+                </div>
+                <span class="badge bg-secondary bg-opacity-25 text-white font-heading" style="font-size: 0.7rem;">
+                    5 EJERCICIOS · 18 SERIES TOTALES
+                </span>
+            </div>
+            <div class="fn-card-body p-3">
+                <div class="d-flex flex-wrap gap-2 text-muted small">
+                    <div><i class="fa-solid fa-clock text-primary-fn me-1"></i> Duración estimada: <strong>60 - 70 min</strong></div>
+                    <div class="ms-md-3"><i class="fa-solid fa-heart-pulse text-danger me-1"></i> Intensidad: <strong>RPE 8 - 9</strong></div>
+                    <div class="ms-md-3"><i class="fa-solid fa-bullseye text-info me-1"></i> Foco: <strong>Pectoral, Deltoides Anterior y Tríceps</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ejercicio 1 -->
+        <div class="exercise-item-card">
+            <div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="exercise-order-badge">01</div>
+                    <div>
+                        <h4 class="font-heading text-white mb-0" style="font-size: 1.15rem; letter-spacing: 0.5px;">
+                            PRESS DE BANCA PLANO CON BARRA
+                        </h4>
+                        <span class="text-primary-fn small font-heading">
+                            <i class="fa-solid fa-tag me-1"></i> Pectoral Mayor · Barra Olímpica
+                        </span>
+                    </div>
+                </div>
+                <button type="button" class="routine-check-btn" title="Marcar como completado">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+
+            <!-- Chips de Cargas y Repeticiones -->
+            <div class="d-flex flex-wrap gap-2 my-2">
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-layer-group"></i> <strong>4</strong> Series
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-repeat"></i> <strong>8 - 10</strong> Repeticiones
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-stopwatch"></i> <strong>90s</strong> Descanso
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-gauge-high"></i> Carga: <strong>RPE 8.5 (Pesado)</strong>
+                </div>
+            </div>
+
+            <div class="bg-surface-fn border border-secondary border-opacity-25 rounded p-2 mt-2 small text-muted">
+                <strong class="text-white"><i class="fa-solid fa-circle-info text-primary-fn me-1"></i> Indicación Técnica:</strong>
+                Retracción escapular firme antes de descolgar la barra. Descender al esternón con control en 2 segundos y empuje explosivo sin despegar glúteos del banco.
+            </div>
+        </div>
+
+        <!-- Ejercicio 2 -->
+        <div class="exercise-item-card">
+            <div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="exercise-order-badge">02</div>
+                    <div>
+                        <h4 class="font-heading text-white mb-0" style="font-size: 1.15rem; letter-spacing: 0.5px;">
+                            PRESS MILITAR CON MANCUERNAS SENTADO
+                        </h4>
+                        <span class="text-primary-fn small font-heading">
+                            <i class="fa-solid fa-tag me-1"></i> Deltoides Anterior y Medio · Mancuernas
+                        </span>
+                    </div>
+                </div>
+                <button type="button" class="routine-check-btn" title="Marcar como completado">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 my-2">
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-layer-group"></i> <strong>4</strong> Series
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-repeat"></i> <strong>10 - 12</strong> Repeticiones
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-stopwatch"></i> <strong>75s</strong> Descanso
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-gauge-high"></i> Carga: <strong>RPE 8</strong>
+                </div>
+            </div>
+
+            <div class="bg-surface-fn border border-secondary border-opacity-25 rounded p-2 mt-2 small text-muted">
+                <strong class="text-white"><i class="fa-solid fa-circle-info text-primary-fn me-1"></i> Indicación Técnica:</strong>
+                Banco inclinado a 75-80 grados para proteger la zona lumbar. No bloquear completamente los codos en la fase superior para mantener tensión mecánica constante.
+            </div>
+        </div>
+
+        <!-- Ejercicio 3 -->
+        <div class="exercise-item-card">
+            <div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="exercise-order-badge">03</div>
+                    <div>
+                        <h4 class="font-heading text-white mb-0" style="font-size: 1.15rem; letter-spacing: 0.5px;">
+                            FONDOS EN BARRAS PARALELAS (DIPS)
+                        </h4>
+                        <span class="text-primary-fn small font-heading">
+                            <i class="fa-solid fa-tag me-1"></i> Pectoral Inferior y Tríceps · Peso Corporal
+                        </span>
+                    </div>
+                </div>
+                <button type="button" class="routine-check-btn" title="Marcar como completado">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 my-2">
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-layer-group"></i> <strong>3</strong> Series
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-repeat"></i> <strong>12</strong> Repeticiones
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-stopwatch"></i> <strong>60s</strong> Descanso
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-gauge-high"></i> Carga: <strong>Peso Corporal (+5kg opcional)</strong>
+                </div>
+            </div>
+
+            <div class="bg-surface-fn border border-secondary border-opacity-25 rounded p-2 mt-2 small text-muted">
+                <strong class="text-white"><i class="fa-solid fa-circle-info text-primary-fn me-1"></i> Indicación Técnica:</strong>
+                Inclinar el torso 20 grados hacia adelante para enfatizar el reclutamiento del pectoral. Bajar hasta que los codos formen un ángulo de 90 grados.
+            </div>
+        </div>
+
+        <!-- Ejercicio 4 -->
+        <div class="exercise-item-card">
+            <div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="exercise-order-badge">04</div>
+                    <div>
+                        <h4 class="font-heading text-white mb-0" style="font-size: 1.15rem; letter-spacing: 0.5px;">
+                            APERTURAS EN POLEA MEDIA (CABLE FLYES)
+                        </h4>
+                        <span class="text-primary-fn small font-heading">
+                            <i class="fa-solid fa-tag me-1"></i> Pectoral Mayor · Poleas Cruzadas
+                        </span>
+                    </div>
+                </div>
+                <button type="button" class="routine-check-btn" title="Marcar como completado">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 my-2">
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-layer-group"></i> <strong>3</strong> Series
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-repeat"></i> <strong>15</strong> Repeticiones
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-stopwatch"></i> <strong>45s</strong> Descanso
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-gauge-high"></i> Carga: <strong>RPE 9 (Fallo Técnico)</strong>
+                </div>
+            </div>
+
+            <div class="bg-surface-fn border border-secondary border-opacity-25 rounded p-2 mt-2 small text-muted">
+                <strong class="text-white"><i class="fa-solid fa-circle-info text-primary-fn me-1"></i> Indicación Técnica:</strong>
+                Aguantar 1 segundo la contracción máxima en el centro. Movimiento en arco amplio con codos semiflexionados.
+            </div>
+        </div>
+
+        <!-- Ejercicio 5 -->
+        <div class="exercise-item-card">
+            <div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="exercise-order-badge">05</div>
+                    <div>
+                        <h4 class="font-heading text-white mb-0" style="font-size: 1.15rem; letter-spacing: 0.5px;">
+                            EXTENSIONES DE TRÍCEPS EN POLEA ALTA CON CUERDA
+                        </h4>
+                        <span class="text-primary-fn small font-heading">
+                            <i class="fa-solid fa-tag me-1"></i> Tríceps Braquial · Polea Alta
+                        </span>
+                    </div>
+                </div>
+                <button type="button" class="routine-check-btn" title="Marcar como completado">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 my-2">
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-layer-group"></i> <strong>4</strong> Series
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-repeat"></i> <strong>12 - 15</strong> Repeticiones
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-stopwatch"></i> <strong>45s</strong> Descanso
+                </div>
+                <div class="exercise-meta-chip">
+                    <i class="fa-solid fa-gauge-high"></i> Carga: <strong>RPE 8.5</strong>
+                </div>
+            </div>
+
+            <div class="bg-surface-fn border border-secondary border-opacity-25 rounded p-2 mt-2 small text-muted">
+                <strong class="text-white"><i class="fa-solid fa-circle-info text-primary-fn me-1"></i> Indicación Técnica:</strong>
+                Fijar los codos a los costados del cuerpo. Abrir la cuerda hacia los lados al final de la extensión para aislar la cabeza lateral del tríceps.
+            </div>
+        </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: ASISTENCIA Y PANEL LATERAL DEL ENTRENADOR (4 COLS) -->
+    <div class="col-lg-4">
+        <!-- Tarjeta del Entrenador Asignado -->
+        <div class="fn-card mb-3">
+            <div class="fn-card-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-user-tie text-primary-fn"></i>
+                    <span class="fn-card-title">ENTRENADOR RESPONSABLE</span>
+                </div>
+            </div>
+            <div class="fn-card-body p-3">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <img src="/img/trainers/trainer-1.jpg" alt="Profesor Asignado" class="trainer-mini-avatar" 
+                         onerror="this.onerror=null; this.src='/img/logo/logo-Fitnet-sinfondo.webp';" />
+                    <div>
+                        <h5 class="font-heading text-white mb-0" style="font-size: 1rem;">
+                            PROF. LUCAS GIMÉNEZ
+                        </h5>
+                        <div class="text-primary-fn small font-heading">
+                            Especialista en Biomecánica & Fuerza
+                        </div>
+                        <span class="badge bg-success bg-opacity-25 text-primary-fn mt-1" style="font-size: 0.65rem;">
+                            <i class="fa-solid fa-circle me-1" style="font-size: 0.45rem;"></i> En Sala Activo
+                        </span>
+                    </div>
+                </div>
+                <p class="text-muted small mb-3">
+                    Rutina asignada para las próximas 4 semanas. Cualquier duda sobre la técnica o necesidad de sustitución de ejercicio, puedes consultarme en el gimnasio.
+                </p>
+                <button type="button" class="btn btn-outline-light btn-sm w-100 font-heading" title="Enviar Consulta">
+                    <i class="fa-solid fa-comment-dots text-primary-fn me-1"></i> CONSULTAR AL ENTRENADOR
+                </button>
+            </div>
+        </div>
+
+        <!-- Tarjeta de Consejos y Recuperación -->
+        <div class="fn-card mb-3">
+            <div class="fn-card-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-heart-pulse text-danger"></i>
+                    <span class="fn-card-title">PAUTAS DE RECUPERACIÓN</span>
+                </div>
+            </div>
+            <div class="fn-card-body p-3">
+                <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small">
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="fa-solid fa-bottle-water text-primary-fn mt-1"></i>
+                        <div><strong class="text-white">Hidratación:</strong> Beber al menos 600 ml de agua durante la sesión y 2.5L diarios.</div>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="fa-solid fa-bed text-info mt-1"></i>
+                        <div><strong class="text-white">Descanso:</strong> 48 horas mínimas de recuperación antes de volver a estimular empuje.</div>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="fa-solid fa-apple-whole text-warning mt-1"></i>
+                        <div><strong class="text-white">Nutrición:</strong> Ingesta proteica de 20-30g dentro de las 2 horas posteriores al entrenamiento.</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tarjeta de Resumen Semanal -->
+        <div class="fn-card">
+            <div class="fn-card-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-chart-simple text-warning"></i>
+                    <span class="fn-card-title">CUMPLIMIENTO SEMANAL</span>
+                </div>
+            </div>
+            <div class="fn-card-body p-3">
+                <div class="d-flex justify-content-between align-items-center mb-1 small">
+                    <span class="text-muted">Progreso de la semana</span>
+                    <strong class="text-primary-fn font-heading">3 DE 4 SESIONES (75%)</strong>
+                </div>
+                <div class="progress bg-dark border border-secondary border-opacity-25" style="height: 8px;">
+                    <div class="progress-bar bg-primary-fn" role="progressbar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-3 text-center">
+                    <div class="px-2">
+                        <div class="font-heading text-white fw-bold">18</div>
+                        <div class="text-muted" style="font-size: 0.68rem;">SERIES HOY</div>
+                    </div>
+                    <div class="px-2 border-start border-end border-secondary border-opacity-25">
+                        <div class="font-heading text-primary-fn fw-bold">65 min</div>
+                        <div class="text-muted" style="font-size: 0.68rem;">TIEMPO EST.</div>
+                    </div>
+                    <div class="px-2">
+                        <div class="font-heading text-white fw-bold">380 kcal</div>
+                        <div class="text-muted" style="font-size: 0.68rem;">GASTO APROX.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
