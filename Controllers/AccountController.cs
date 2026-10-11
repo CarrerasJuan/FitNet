@@ -264,18 +264,7 @@ public class AccountController : Controller
 
         if (!ModelState.IsValid)
         {
-            // Restaurar datos de solo lectura para la vista
-            var roles = await _userManager.GetRolesAsync(user);
-            model.Role = roles.FirstOrDefault() ?? "Member";
-            model.Email = user.Email ?? string.Empty;
-            model.AvatarPath = user.AvatarPath;
-
-            var memberProf = await _context.MemberProfiles
-                .Include(m => m.Membership)
-                .FirstOrDefaultAsync(m => m.UserId == user.Id);
-            model.PlanName = memberProf?.Membership?.Name ?? "No aplica";
-            model.TrialEndsAt = memberProf?.TrialEndsAt;
-
+            await PopulateReadOnlyProfileDataAsync(model, user);
             return View(model);
         }
 
@@ -299,6 +288,7 @@ public class AccountController : Controller
             {
                 _logger.LogError(ex, "Error al procesar la subida del avatar para el usuario {UserId}", user.Id);
                 ModelState.AddModelError("AvatarFile", "Ocurrió un error al guardar la imagen de perfil.");
+                await PopulateReadOnlyProfileDataAsync(model, user);
                 return View(model);
             }
         }
@@ -320,6 +310,47 @@ public class AccountController : Controller
 
         TempData["MensajeExito"] = "Perfil actualizado correctamente.";
         return RedirectToAction("Profile");
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveAvatar()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return RedirectToAction("Login");
+        }
+
+        if (!string.IsNullOrEmpty(user.AvatarPath))
+        {
+            await _fileStorageService.DeleteFileAsync(user.AvatarPath);
+            user.AvatarPath = null;
+            await _userManager.UpdateAsync(user);
+            TempData["MensajeExito"] = "Foto de perfil eliminada correctamente.";
+        }
+
+        return RedirectToAction("Profile");
+    }
+
+    private async Task PopulateReadOnlyProfileDataAsync(ProfileViewModel model, ApplicationUser user)
+    {
+        var roles = await _userManager.GetRolesAsync(user);
+        model.Role = roles.FirstOrDefault() ?? "Member";
+        model.Email = user.Email ?? string.Empty;
+        model.AvatarPath = user.AvatarPath;
+
+        var memberProf = await _context.MemberProfiles
+            .Include(m => m.Membership)
+            .FirstOrDefaultAsync(m => m.UserId == user.Id);
+        model.PlanName = memberProf?.Membership?.Name ?? "No aplica";
+        model.TrialEndsAt = memberProf?.TrialEndsAt;
+
+        var trainerProf = await _context.TrainerProfiles
+            .FirstOrDefaultAsync(t => t.UserId == user.Id);
+        model.Specialty = trainerProf?.Specialty;
+        model.Biography = trainerProf?.Biography;
     }
 
     // ==========================================

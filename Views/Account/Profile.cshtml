@@ -42,7 +42,7 @@
             <div class="col-lg-4">
                 <div class="p-4 rounded-3 border border-fn bg-card-fn text-center mb-4">
                     <!-- Avatar Circular con Previsualización -->
-                    <div class="position-relative d-inline-block mb-3">
+                    <div class="position-relative d-inline-block mb-2">
                         @if (!string.IsNullOrEmpty(Model.AvatarPath))
                         {
                             <img id="avatarPreview" src="@Model.AvatarPath" alt="Avatar" class="rounded-circle border border-primary border-3" style="width: 110px; height: 110px; object-fit: cover;" />
@@ -55,6 +55,18 @@
                             <img id="avatarPreview" src="#" alt="Nuevo Avatar" class="rounded-circle border border-primary border-3 d-none" style="width: 110px; height: 110px; object-fit: cover;" />
                         }
                     </div>
+
+                    @if (!string.IsNullOrEmpty(Model.AvatarPath))
+                    {
+                        <div class="mb-3">
+                            <form asp-action="RemoveAvatar" asp-controller="Account" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseás eliminar tu foto de perfil?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2 font-heading" style="font-size: 0.75rem;">
+                                    <i class="fa-solid fa-trash-can me-1"></i> Eliminar foto
+                                </button>
+                            </form>
+                        </div>
+                    }
 
                     <h3 class="font-heading fs-4 fw-bold text-white mb-1">@Model.FirstName @Model.LastName</h3>
                     <p class="text-muted small mb-2">@Model.Email</p>
