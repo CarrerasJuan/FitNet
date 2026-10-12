@@ -7,13 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Conexión a Base de Datos MySQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Server=localhost;Port=3306;Database=FitNetDb;User=root;Password=;";
+    ?? "Server=localhost;Port=3306;Database=FitNetDb;User=root;Password=;CharSet=utf8mb4;";
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySQL(connectionString));
 
 // Inyección de Dependencias de Servicios de FitNet
 builder.Services.AddScoped<FitNet.Services.IFileStorageService, FitNet.Services.FileStorageService>();
+builder.Services.AddScoped<FitNet.Services.IMembershipService, FitNet.Services.MembershipService>();
 
 // Configuración de ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>

@@ -1,0 +1,279 @@
+@model FitNet.ViewModels.Members.MemberWorkoutsViewModel
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = "Mis Rutinas de Entrenamiento";
+}
+
+<!-- Page Header (Metis UI) -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge @(Model.IsPremium ? "bg-info text-dark" : "bg-warning text-dark") text-uppercase font-heading">
+                <i class="fa-solid fa-crown me-1"></i> Plan @Model.PlanName Activo
+            </span>
+            <span class="badge bg-secondary font-heading text-uppercase">
+                <i class="fa-solid fa-calendar-day me-1"></i> @Model.RemainingDays días restantes
+            </span>
+        </div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-1">MIS RUTINAS DE ENTRENAMIENTO</h1>
+        <p class="text-muted small mb-0">Planes estructurados, series, repeticiones y recomendaciones de descanso.</p>
+    </div>
+
+    <a asp-controller="Members" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading btn-sm">
+        <i class="fa-solid fa-arrow-left me-1"></i> Volver a mi Dashboard
+    </a>
+</div>
+
+<!-- ==========================================
+     SECCIÓN 1: RUTINA PERSONALIZADA ASIGNADA (COACH)
+     ========================================== -->
+@if (Model.ActiveAssignments.Any())
+{
+    @foreach (var assignment in Model.ActiveAssignments)
+    {
+        <div class="p-4 p-md-5 rounded-3 border border-fn bg-card-fn mb-5 position-relative">
+            <!-- Badge de Rutina Activa -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge bg-primary-fn text-uppercase font-heading">Rutina Activa Personalizada</span>
+                        <span class="text-muted small">Asignada el @assignment.AssignedAt.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <h2 class="font-heading fs-3 fw-bold text-white mb-0">@assignment.WorkoutPlan.Name.ToUpper()</h2>
+                </div>
+
+                @if (assignment.AssignedByTrainer != null)
+                {
+                    <div class="d-flex align-items-center gap-2 p-2 rounded bg-surface-fn border border-fn">
+                        @if (!string.IsNullOrEmpty(assignment.AssignedByTrainer.AvatarPath))
+                        {
+                            <img src="@assignment.AssignedByTrainer.AvatarPath" alt="Coach" class="rounded-circle border border-primary" style="width: 36px; height: 36px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-surface-fn border border-fn d-flex align-items-center justify-content-center text-primary-fn" style="width: 36px; height: 36px;">
+                                <i class="fa-solid fa-user-ninja"></i>
+                            </div>
+                        }
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.72rem;">COACH ASIGNADO</span>
+                            <span class="text-white font-heading fw-bold" style="font-size: 0.85rem;">
+                                @assignment.AssignedByTrainer.FirstName @assignment.AssignedByTrainer.LastName
+                            </span>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (!string.IsNullOrEmpty(assignment.WorkoutPlan.Description))
+            {
+                <p class="text-muted small mb-4" style="line-height: 1.6;">
+                    <i class="fa-solid fa-quote-left text-primary-fn me-1"></i> @assignment.WorkoutPlan.Description
+                </p>
+            }
+
+            <!-- Tabla de Ejercicios del Plan -->
+            <div class="table-responsive">
+                <table class="table table-dark table-hover border border-secondary border-opacity-25 rounded overflow-hidden align-middle mb-0">
+                    <thead class="bg-surface-fn font-heading text-primary-fn small text-uppercase">
+                        <tr>
+                            <th class="ps-3" style="width: 60px;">#</th>
+                            <th>Ejercicio</th>
+                            <th>Grupo</th>
+                            <th class="text-center" style="width: 110px;">Series</th>
+                            <th class="text-center" style="width: 120px;">Reps</th>
+                            <th class="text-center" style="width: 120px;">Descanso</th>
+                            <th>Notas del Coach</th>
+                            <th class="text-end pe-3" style="width: 100px;">Guía</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (assignment.WorkoutPlan.WorkoutExercises.Any())
+                        {
+                            @foreach (var we in assignment.WorkoutPlan.WorkoutExercises)
+                            {
+                                <tr>
+                                    <td class="ps-3 font-heading text-primary-fn fw-bold">@we.Order</td>
+                                    <td>
+                                        <span class="text-white fw-bold d-block">@we.Exercise.Name</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-surface-fn border border-fn text-white-50 font-heading">
+                                            @we.Exercise.MuscleGroup
+                                        </span>
+                                    </td>
+                                    <td class="text-center font-heading">
+                                        <span class="text-white fw-bold fs-6">@we.Sets</span>
+                                        <small class="text-white-50 d-block" style="font-size: 0.68rem;">SERIES</small>
+                                    </td>
+                                    <td class="text-center font-heading">
+                                        <span class="text-primary-fn fw-bold fs-6">@we.Repetitions</span>
+                                        <small class="text-white-50 d-block" style="font-size: 0.68rem;">REPS</small>
+                                    </td>
+                                    <td class="text-center font-heading">
+                                        <span class="text-warning small"><i class="fa-solid fa-stopwatch me-1"></i>@we.RestSeconds seg</span>
+                                        <small class="text-white-50 d-block" style="font-size: 0.68rem;">DESCANSO</small>
+                                    </td>
+                                    <td class="text-muted small">
+                                        @(string.IsNullOrEmpty(we.Notes) ? "—" : we.Notes)
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <a asp-controller="Exercises" asp-action="Details" asp-route-id="@we.ExerciseId" class="btn btn-outline-light btn-sm py-1 px-2 font-heading" title="Ver técnica">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted small">
+                                    Esta rutina aún no tiene ejercicios asignados por el entrenador.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <!-- Si no tiene asignación activa de coach -->
+    <div class="p-4 rounded-3 border border-fn bg-card-fn mb-5 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle bg-surface-fn border border-fn p-3 text-primary-fn">
+                <i class="fa-solid fa-dumbbell fa-xl"></i>
+            </div>
+            <div>
+                <h5 class="font-heading text-white fw-bold mb-1">RUTINAS GENERALES DEL GIMNASIO</h5>
+                <p class="text-muted small mb-0">
+                    Tu suscripción activa te permite entrenar con todas las rutinas oficiales de FitNet a continuación.
+                    @if (!Model.IsPremium)
+                    {
+                        <span>¿Querés un plan personalizado con entrenador personal? <a href="/Billing/Checkout?plan=premium" class="text-primary-fn fw-bold">Mejorar a Plan Premium</a>.</span>
+                    }
+                </p>
+            </div>
+        </div>
+        @if (!Model.IsPremium)
+        {
+            <a href="/Billing/Checkout?plan=premium" class="btn btn-fn-primary btn-sm font-heading text-nowrap">
+                <i class="fa-solid fa-crown me-1"></i> Pedir Entrenador Personal
+            </a>
+        }
+    </div>
+}
+
+<!-- ==========================================
+     SECCIÓN 2: BIBLIOTECA DE RUTINAS GENERALES
+     ========================================== -->
+<div class="mb-3">
+    <div class="d-flex align-items-center gap-2 mb-1">
+        <i class="fa-solid fa-layer-group text-primary-fn"></i>
+        <h3 class="font-heading fs-4 fw-bold text-white mb-0">PLANES GENERALES DEL CLUB</h3>
+    </div>
+    <p class="text-muted small mb-4">Estructurados por los entrenadores de FitNet para cada objetivo físico.</p>
+</div>
+
+@if (Model.GeneralPlans.Any())
+{
+    <div class="row g-4">
+        @foreach (var plan in Model.GeneralPlans)
+        {
+            <div class="col-lg-6">
+                <div class="p-4 rounded-3 border border-fn bg-card-fn h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <!-- Badges -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-primary-fn text-uppercase font-heading">
+                                Rutina General FitNet
+                            </span>
+                            <span class="text-muted small font-heading">
+                                <i class="fa-solid fa-list-check me-1"></i> @plan.WorkoutExercises.Count Ejercicios
+                            </span>
+                        </div>
+
+                        <!-- Título y Descripción -->
+                        <h4 class="font-heading fs-5 fw-bold text-white mb-2">@plan.Name</h4>
+                        <p class="text-muted small mb-3" style="line-height: 1.5;">
+                            @(string.IsNullOrEmpty(plan.Description) ? "Plan estándar de acondicionamiento físico." : plan.Description)
+                        </p>
+
+                        <!-- Lista de ejercicios de la rutina -->
+                        <div class="mb-3">
+                            <span class="text-primary-fn font-heading small fw-bold text-uppercase d-block mb-2">
+                                <i class="fa-solid fa-list-check me-1"></i> Secuencia del Entrenamiento:
+                            </span>
+                            <div class="d-flex flex-column gap-2">
+                                @foreach (var we in plan.WorkoutExercises)
+                                {
+                                    <div class="workout-exercise-row d-flex justify-content-between align-items-center py-2 px-3 rounded-2 bg-surface-fn border border-secondary border-opacity-25">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge bg-card-fn border border-fn text-primary-fn font-heading" style="width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">
+                                                @we.Order
+                                            </span>
+                                            <div>
+                                                <a asp-controller="Exercises" asp-action="Details" asp-route-id="@we.ExerciseId" class="text-white fw-bold text-decoration-none hover-primary small d-block">
+                                                    @we.Exercise.Name
+                                                </a>
+                                                <span class="text-muted" style="font-size: 0.72rem;">
+                                                    <i class="fa-solid fa-bullseye text-primary-fn me-1"></i>@we.Exercise.MuscleGroup · @we.Exercise.Difficulty
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-end font-heading">
+                                            <div class="text-white fs-6 fw-bold">
+                                                @we.Sets series <span class="text-primary-fn">×</span> @we.Repetitions reps
+                                            </div>
+                                            @if (we.RestSeconds > 0)
+                                            {
+                                                <small class="text-warning d-block" style="font-size: 0.72rem;">
+                                                    <i class="fa-solid fa-stopwatch me-1"></i>@we.RestSeconds seg descanso
+                                                </small>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer con coach que la diseñó -->
+                    <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                        <span class="text-muted small">
+                            <i class="fa-solid fa-user-tie me-1 text-primary-fn"></i>
+                            @(plan.Trainer != null ? $"{plan.Trainer.FirstName} {plan.Trainer.LastName}" : "Equipo FitNet")
+                        </span>
+
+                        <a asp-controller="Exercises" asp-action="Index" class="btn btn-outline-light btn-sm font-heading">
+                            Ver Ejercicios <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="p-4 rounded-3 border border-fn bg-card-fn text-center text-muted small">
+        No hay rutinas generales cargadas en el sistema actualmente.
+    </div>
+}
+
+<style>
+    .workout-exercise-row {
+        transition: border-color 0.2s ease, transform 0.15s ease;
+    }
+    .workout-exercise-row:hover {
+        border-color: var(--fn-primary, #00f2fe) !important;
+        transform: translateX(2px);
+    }
+    .hover-primary:hover {
+        color: var(--fn-primary, #00f2fe) !important;
+    }
+</style>

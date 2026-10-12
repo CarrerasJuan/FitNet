@@ -1,0 +1,181 @@
+@model List<FitNet.Models.MemberProfile>
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = "Directorio de Socios";
+    var availablePlans = ViewBag.AvailablePlans as List<FitNet.Models.Membership> ?? new List<FitNet.Models.Membership>();
+}
+
+<!-- Page Header (Metis UI) -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-primary-fn text-uppercase font-heading">
+                <i class="fa-solid fa-users-gear me-1"></i> Administración
+            </span>
+            <span class="badge bg-secondary font-heading text-uppercase">@Model.Count Socios Registrados</span>
+        </div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-1">DIRECTORIO Y GESTIÓN DE SOCIOS</h1>
+        <p class="text-muted small mb-0">Control de membresías, estado de trial y activación comercial sin pasarela de pago.</p>
+    </div>
+
+    <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading btn-sm">
+        <i class="fa-solid fa-arrow-left me-1"></i> Volver al Panel Admin
+    </a>
+</div>
+
+<!-- Flash Notifications TempData -->
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success bg-success bg-opacity-25 border-success text-white alert-dismissible fade show mb-4 small" role="alert">
+        <i class="fa-solid fa-circle-check me-2 text-primary-fn"></i>
+        @TempData["MensajeExito"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger bg-danger bg-opacity-25 border-danger text-white alert-dismissible fade show mb-4 small" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        @TempData["MensajeError"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="fn-card">
+    <div class="fn-card-header d-flex justify-content-between align-items-center">
+        <div class="fn-card-title">
+            <i class="fa-solid fa-address-book text-primary-fn"></i>
+            <span>Listado de Atletas y Socios del Club</span>
+        </div>
+    </div>
+
+    <div class="fn-card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+                <thead class="bg-surface-fn font-heading text-primary-fn small text-uppercase">
+                    <tr class="border-bottom border-secondary border-opacity-25">
+                        <th class="ps-4">Socio</th>
+                        <th>Contacto</th>
+                        <th>Plan Actual</th>
+                        <th>Vencimiento / Trial</th>
+                        <th>Fecha de Alta</th>
+                        <th class="text-end pe-4" style="min-width: 250px;">Modificar Membresía</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model)
+                    {
+                        var isTrial = m.Membership?.Name == "Free";
+                        var isActive = m.TrialEndsAt > DateTime.UtcNow;
+                        var remainingHours = isActive ? Math.Max(0, (int)Math.Ceiling((m.TrialEndsAt - DateTime.UtcNow).TotalHours)) : 0;
+                        var remainingDays = isActive ? Math.Max(1, (int)Math.Ceiling((m.TrialEndsAt - DateTime.UtcNow).TotalDays)) : 0;
+
+                        <tr>
+                            <!-- Nombre y Avatar -->
+                            <td class="ps-4 text-white fw-bold">
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (!string.IsNullOrEmpty(m.User?.AvatarPath))
+                                    {
+                                        <img src="@m.User.AvatarPath" alt="@m.User.FirstName" class="rounded-circle border border-primary" style="width: 36px; height: 36px; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle bg-surface-fn border border-fn d-inline-flex align-items-center justify-content-center text-primary-fn" style="width: 36px; height: 36px; font-size: 0.9rem;">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                    }
+                                    <div>
+                                        <span class="d-block text-white">@m.User?.FirstName @m.User?.LastName</span>
+                                        <span class="text-muted" style="font-size: 0.75rem;">ID: @m.UserId.Substring(0, Math.Min(8, m.UserId.Length))</span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Contacto -->
+                            <td>
+                                <span class="d-block text-muted small">@m.User?.Email</span>
+                                <small class="text-white-50" style="font-size: 0.75rem;">
+                                    @(string.IsNullOrEmpty(m.User?.PhoneNumber) ? "Sin teléfono" : m.User.PhoneNumber)
+                                </small>
+                            </td>
+
+                            <!-- Plan Actual -->
+                            <td>
+                                <span class="badge @(m.Membership?.Name == "Gold" ? "bg-warning text-dark" : m.Membership?.Name == "Premium" ? "bg-info text-dark" : "bg-secondary") font-heading text-uppercase">
+                                    @(m.Membership?.Name ?? "Free")
+                                </span>
+                            </td>
+
+                            <!-- Vencimiento / Trial -->
+                            <td>
+                                @if (isTrial)
+                                {
+                                    if (isActive)
+                                    {
+                                        <span class="badge bg-warning bg-opacity-25 text-warning font-heading">
+                                            <i class="fa-solid fa-stopwatch me-1"></i> Trial activo (@remainingHours h)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger bg-opacity-25 text-danger font-heading">
+                                            <i class="fa-solid fa-circle-xmark me-1"></i> Trial expirado
+                                        </span>
+                                    }
+                                }
+                                else
+                                {
+                                    if (isActive)
+                                    {
+                                        <span class="text-success small font-heading fw-bold d-block">
+                                            <i class="fa-solid fa-circle-check me-1"></i> Activo (@remainingDays días)
+                                        </span>
+                                        <small class="text-muted" style="font-size: 0.75rem;">Vence: @m.TrialEndsAt.ToString("dd/MM/yyyy")</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger bg-opacity-25 text-danger font-heading">
+                                            Suscripción vencida
+                                        </span>
+                                    }
+                                }
+                            </td>
+
+                            <!-- Alta -->
+                            <td class="text-muted small">
+                                @m.CreatedAt.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <!-- Formulario de Cambio de Membresía -->
+                            <td class="text-end pe-4">
+                                <form asp-action="UpdateMemberPlan" asp-controller="Admin" method="post" class="d-inline-flex align-items-center gap-1 justify-content-end">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="userId" value="@m.UserId" />
+                                    <input type="hidden" name="returnUrl" value="/Admin/Members" />
+
+                                    <select name="planName" class="form-select form-select-sm calculator-input py-1 px-2" style="width: 110px; font-size: 0.78rem;">
+                                        @foreach (var p in availablePlans)
+                                        {
+                                            <option value="@p.Name" selected="@(m.Membership?.Name == p.Name)">@p.Name</option>
+                                        }
+                                    </select>
+
+                                    <select name="durationMonths" class="form-select form-select-sm calculator-input py-1 px-2" style="width: 90px; font-size: 0.78rem;">
+                                        <option value="1">1 mes</option>
+                                        <option value="6">6 meses</option>
+                                        <option value="12">1 año</option>
+                                    </select>
+
+                                    <button type="submit" class="btn btn-fn-primary btn-sm py-1 px-2 font-heading" style="font-size: 0.78rem;" title="Aplicar cambio de plan">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

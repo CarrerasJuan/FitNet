@@ -1,0 +1,111 @@
+@model FitNet.Models.Exercise
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    Layout = isAuthenticated ? "_LayoutDashboard" : "_Layout";
+    ViewData["Title"] = Model.Name + " - Detalle Técnico";
+}
+
+<div class="@(isAuthenticated ? "" : "container py-5")">
+    <!-- Navegación y Encabezado -->
+    <div class="mb-4">
+        <a asp-action="Index" class="btn btn-outline-secondary text-white btn-sm font-heading mb-3">
+            <i class="fa-solid fa-arrow-left me-1"></i> Volver a la Biblioteca
+        </a>
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+            <span class="badge bg-primary-fn text-uppercase font-heading">@Model.MuscleGroup</span>
+            <span class="badge @(Model.Difficulty == "Principiante" ? "bg-success bg-opacity-75" : Model.Difficulty == "Intermedio" ? "bg-warning text-dark" : "bg-danger") font-heading text-uppercase">
+                Dificultad: @Model.Difficulty
+            </span>
+            @if (Model.IsPublic)
+            {
+                <span class="badge bg-secondary font-heading">
+                    <i class="fa-solid fa-earth-americas me-1"></i> Ejercicio Público (Trial)
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-warning text-dark font-heading">
+                    <i class="fa-solid fa-crown me-1"></i> Exclusivo Gold / Premium
+                </span>
+            }
+        </div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-1">@Model.Name.ToUpper()</h1>
+        <p class="text-muted small mb-0">Ficha técnica oficial de ejecución y biomecánica FitNet</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Columna Izquierda: Información Principal y Guía -->
+        <div class="col-lg-8">
+            <!-- Tarjeta de Instrucción Técnica -->
+            <div class="p-4 p-md-5 rounded-3 border border-fn bg-card-fn mb-4">
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                    <i class="fa-solid fa-book-open text-primary-fn fa-lg"></i>
+                    <h4 class="font-heading fs-4 fw-bold text-white mb-0">DESCRIPCIÓN Y EJECUCIÓN</h4>
+                </div>
+
+                <p class="text-white text-opacity-75 mb-4" style="font-size: 1.05rem; line-height: 1.7;">
+                    @(string.IsNullOrEmpty(Model.Description) ? "Este ejercicio no posee notas biomecánicas adicionales registradas." : Model.Description)
+                </p>
+
+                <!-- Consejos de Seguridad Biomecánica -->
+                <div class="p-3 rounded bg-surface-fn border border-fn">
+                    <h6 class="font-heading text-primary-fn fw-bold mb-2">
+                        <i class="fa-solid fa-shield-halved me-1"></i> RECOMENDACIONES DE SEGURIDAD
+                    </h6>
+                    <ul class="text-muted small mb-0 ps-3" style="line-height: 1.6;">
+                        <li>Priorizá el rango completo de movimiento y el control de la fase excéntrica por sobre la carga.</li>
+                        <li>Mantené la respiración diafragmática y la presión intraabdominal (Valsalva) en repeticiones pesadas.</li>
+                        <li>Si sentís dolor articular en lugar de fatiga muscular, detené la serie y revisá la técnica.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Tarjeta Resumen y Atributos -->
+        <div class="col-lg-4">
+            <div class="p-4 rounded-3 border border-fn bg-card-fn mb-4">
+                <h5 class="font-heading text-white fw-bold mb-3 border-bottom border-secondary border-opacity-25 pb-2">
+                    DATOS DEL MOVIMIENTO
+                </h5>
+
+                <div class="d-flex flex-column gap-3">
+                    <div>
+                        <span class="text-muted small d-block mb-1">Grupo Muscular Principal</span>
+                        <div class="text-white font-heading fs-6 fw-bold">
+                            <i class="fa-solid fa-bullseye text-primary-fn me-1"></i> @Model.MuscleGroup
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="text-muted small d-block mb-1">Nivel Requerido</span>
+                        <div class="text-white font-heading fs-6 fw-bold">
+                            <i class="fa-solid fa-gauge text-primary-fn me-1"></i> @Model.Difficulty
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="text-muted small d-block mb-1">Disponibilidad en Plataforma</span>
+                        <div class="text-white font-heading fs-6 fw-bold">
+                            @if (Model.IsPublic)
+                            {
+                                <span class="text-success"><i class="fa-solid fa-check-circle me-1"></i> Acceso Libre & Trial</span>
+                            }
+                            else
+                            {
+                                <span class="text-warning"><i class="fa-solid fa-lock me-1"></i> Exclusivo Gold / Premium</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-secondary border-opacity-25 my-4" />
+
+                <div class="d-grid gap-2">
+                    <a asp-action="Index" class="btn btn-outline-light btn-sm font-heading py-2">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i> Explorar Más Ejercicios
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
