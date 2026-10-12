@@ -1,3 +1,4 @@
+@inject Microsoft.AspNetCore.Identity.UserManager<FitNet.Models.ApplicationUser> UserManager
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -181,9 +182,18 @@
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Member";
+                            var currentUser = await UserManager.GetUserAsync(User);
+                            var avatarPath = currentUser?.AvatarPath;
                             <div class="dropdown">
                                 <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa-solid fa-circle-user fa-lg text-primary-fn"></i>
+                                    @if (!string.IsNullOrEmpty(avatarPath))
+                                    {
+                                        <img src="@avatarPath" alt="@User.Identity.Name" class="rounded-circle border border-primary" style="width: 24px; height: 24px; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <i class="fa-solid fa-circle-user fa-lg text-primary-fn"></i>
+                                    }
                                     <span>@User.Identity.Name</span>
                                     <span class="badge bg-primary-fn text-uppercase">@userRole</span>
                                 </button>

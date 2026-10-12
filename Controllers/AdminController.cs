@@ -1,5 +1,6 @@
 using FitNet.Data;
 using FitNet.Models;
+using FitNet.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,15 +13,18 @@ public class AdminController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IMembershipService _membershipService;
     private readonly ILogger<AdminController> _logger;
 
     public AdminController(
         ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
+        IMembershipService membershipService,
         ILogger<AdminController> logger)
     {
         _context = context;
         _userManager = userManager;
+        _membershipService = membershipService;
         _logger = logger;
     }
 
@@ -73,7 +77,36 @@ public class AdminController : Controller
             .OrderByDescending(m => m.CreatedAt)
             .ToListAsync();
 
+        ViewBag.AvailablePlans = await _context.Memberships.Where(m => m.IsActive).ToListAsync();
         return View(members);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateMemberPlan(string userId, string planName, int durationMonths = 1, string? returnUrl = null)
+    {
+        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(planName))
+        {
+            TempData["MensajeError"] = "Parámetros de socio o plan no válidos.";
+            return RedirectToAction("Members");
+        }
+
+        var success = await _membershipService.ChangeMembershipAsync(userId, planName, durationMonths);
+        if (success)
+        {
+            TempData["MensajeExito"] = $"Membresía del socio actualizada a '{planName}' con éxito ({durationMonths} mes/es).";
+        }
+        else
+        {
+            TempData["MensajeError"] = "No se pudo actualizar la membresía del socio.";
+        }
+
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
+
+        return RedirectToAction("Members");
     }
 
     [HttpGet]

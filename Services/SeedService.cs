@@ -180,5 +180,205 @@ public static class SeedService
                 await context.SaveChangesAsync();
             }
         }
+
+        // 4. Asegurar Catálogo Inicial de Ejercicios
+        if (!await context.Exercises.AnyAsync())
+        {
+            context.Exercises.AddRange(
+                // Ejercicios Públicos (Visibles en Trial Free y Planes Superiores)
+                new Exercise
+                {
+                    Name = "Sentadilla con Peso Corporal",
+                    Description = "Ejercicio básico de tren inferior enfocado en cuádriceps, glúteos y core. Mantener la espalda recta y romper el paralelo.",
+                    MuscleGroup = "Piernas",
+                    Difficulty = "Principiante",
+                    IsPublic = true,
+                    IsActive = true
+                },
+                new Exercise
+                {
+                    Name = "Flexiones de Brazos (Push Ups)",
+                    Description = "Trabajo de empuje horizontal para pectoral mayor, tríceps y deltoides anterior con el propio peso.",
+                    MuscleGroup = "Pecho",
+                    Difficulty = "Principiante",
+                    IsPublic = true,
+                    IsActive = true
+                },
+                new Exercise
+                {
+                    Name = "Plancha Abdominal Isométrica",
+                    Description = "Fortalecimiento del transverso abdominal, core y estabilidad de columna lumbopélvica.",
+                    MuscleGroup = "Core",
+                    Difficulty = "Principiante",
+                    IsPublic = true,
+                    IsActive = true
+                },
+                new Exercise
+                {
+                    Name = "Estocadas / Zancadas Dinámicas",
+                    Description = "Ejercicio unilateral de piernas para equilibrio, estabilidad de rodilla, glúteos e isquiotibiales.",
+                    MuscleGroup = "Piernas",
+                    Difficulty = "Intermedio",
+                    IsPublic = true,
+                    IsActive = true
+                },
+                new Exercise
+                {
+                    Name = "Fondos de Tríceps en Banco",
+                    Description = "Extensión de codo para desarrollo de tríceps utilizando elevación de apoyo.",
+                    MuscleGroup = "Brazos",
+                    Difficulty = "Principiante",
+                    IsPublic = true,
+                    IsActive = true
+                },
+                // Ejercicios Exclusivos (Biblioteca Completa — Solo Gold y Premium)
+                new Exercise
+                {
+                    Name = "Press de Banca Plano con Barra",
+                    Description = "Ejercicio compuesto de fuerza máxima y sobrecarga progresiva para desarrollo del pectoral.",
+                    MuscleGroup = "Pecho",
+                    Difficulty = "Intermedio",
+                    IsPublic = false,
+                    IsActive = true
+                },
+                new Exercise
+                {
+                    Name = "Peso Muerto Rumano con Barra",
+                    Description = "Bisagra de cadera fundamental para cadena posterior: isquiosurales, glúteos y erectores espinales.",
+                    MuscleGroup = "Piernas",
+                    Difficulty = "Avanzado",
+                    IsPublic = false,
+                    IsActive = true
+                },
+                new Exercise
+                {
+                    Name = "Dominadas Pronas Estrictas",
+                    Description = "Tracción vertical fundamental para amplitud de dorsal ancho, redondos y bíceps braquial.",
+                    MuscleGroup = "Espalda",
+                    Difficulty = "Avanzado",
+                    IsPublic = false,
+                    IsActive = true
+                },
+                new Exercise
+                {
+                    Name = "Press Militar con Mancuernas",
+                    Description = "Empuje vertical para desarrollo de deltoides medio y anterior con estabilización escapular.",
+                    MuscleGroup = "Hombros",
+                    Difficulty = "Intermedio",
+                    IsPublic = false,
+                    IsActive = true
+                },
+                new Exercise
+                {
+                    Name = "Remo con Barra T",
+                    Description = "Tracción horizontal pesada para densidad de espalda media, romboides y trapecios.",
+                    MuscleGroup = "Espalda",
+                    Difficulty = "Intermedio",
+                    IsPublic = false,
+                    IsActive = true
+                },
+                new Exercise
+                {
+                    Name = "Sentadilla Búlgara con Mancuernas",
+                    Description = "Ejercicio hipertrófico unilateral de alta intensidad para cuádriceps y glúteo mayor.",
+                    MuscleGroup = "Piernas",
+                    Difficulty = "Avanzado",
+                    IsPublic = false,
+                    IsActive = true
+                }
+            );
+            await context.SaveChangesAsync();
+        }
+
+        // 5. Asegurar Rutinas y Asignaciones Iniciales
+        if (!await context.WorkoutPlans.AnyAsync())
+        {
+            var trainer = await userManager.FindByEmailAsync("trainer@fitnet.com");
+            var sentadilla = await context.Exercises.FirstAsync(e => e.Name.Contains("Sentadilla con"));
+            var pressBanca = await context.Exercises.FirstAsync(e => e.Name.Contains("Press de Banca"));
+            var dominadas = await context.Exercises.FirstAsync(e => e.Name.Contains("Dominadas"));
+            var plancha = await context.Exercises.FirstAsync(e => e.Name.Contains("Plancha"));
+            var pesoMuerto = await context.Exercises.FirstAsync(e => e.Name.Contains("Peso Muerto"));
+            var pressMilitar = await context.Exercises.FirstAsync(e => e.Name.Contains("Press Militar"));
+
+            // 5.1. Rutina General (Gold / Premium)
+            var generalPlan = new WorkoutPlan
+            {
+                Name = "Rutina General Full Body (Hipertrofia & Base)",
+                Description = "Estructura global de cuerpo completo para fuerza básica y estímulo muscular uniforme en 3 días semanales.",
+                IsGeneral = true,
+                TrainerId = trainer?.Id,
+                WorkoutExercises = new List<WorkoutExercise>
+                {
+                    new() { Exercise = sentadilla, Order = 1, Sets = 4, Repetitions = 10, RestSeconds = 90, Notes = "Bajar controlado y mantener pecho erguido." },
+                    new() { Exercise = pressBanca, Order = 2, Sets = 4, Repetitions = 8, RestSeconds = 90, Notes = "Retracción escapular firme durante todo el recorrido." },
+                    new() { Exercise = dominadas, Order = 3, Sets = 3, Repetitions = 8, RestSeconds = 75, Notes = "Rango completo de recorrido hasta pasar la barbilla." },
+                    new() { Exercise = plancha, Order = 4, Sets = 3, Repetitions = 45, RestSeconds = 60, Notes = "45 segundos por serie con glúteos y abdomen apretados." }
+                }
+            };
+
+            // 5.2. Rutina Personalizada (Premium) asignada a member@fitnet.com
+            var personalizedPlan = new WorkoutPlan
+            {
+                Name = "Plan de Acondicionamiento de Atleta - Fase 1",
+                Description = "Plan de fuerza enfocado en sobrecarga progresiva y cadena posterior diseñado por Coach Lucas.",
+                IsGeneral = false,
+                TrainerId = trainer?.Id,
+                WorkoutExercises = new List<WorkoutExercise>
+                {
+                    new() { Exercise = pesoMuerto, Order = 1, Sets = 4, Repetitions = 6, RestSeconds = 120, Notes = "Bisagra de cadera estricta. Cero flexión de columna." },
+                    new() { Exercise = pressMilitar, Order = 2, Sets = 4, Repetitions = 8, RestSeconds = 90, Notes = "Bloqueo firme arriba sin hiperextender lumbares." },
+                    new() { Exercise = dominadas, Order = 3, Sets = 4, Repetitions = 6, RestSeconds = 90, Notes = "Con pausa isométrica de 1 segundo arriba." }
+                }
+            };
+
+            context.WorkoutPlans.AddRange(generalPlan, personalizedPlan);
+            await context.SaveChangesAsync();
+
+            // 5.3. Asignación activa al socio de prueba (member@fitnet.com)
+            var memberUser = await userManager.FindByEmailAsync("member@fitnet.com");
+            if (memberUser != null)
+            {
+                var memberProfile = await context.MemberProfiles.FirstOrDefaultAsync(m => m.UserId == memberUser.Id);
+                if (memberProfile != null)
+                {
+                    context.WorkoutAssignments.Add(new WorkoutAssignment
+                    {
+                        MemberId = memberProfile.Id,
+                        WorkoutPlanId = personalizedPlan.Id,
+                        AssignedByTrainerId = trainer?.Id,
+                        StartDate = DateTime.UtcNow.Date,
+                        IsActive = true
+                    });
+                    await context.SaveChangesAsync();
+
+                    // 5.4. Registros de progreso iniciales para member@fitnet.com
+                    if (!await context.ProgressRecords.AnyAsync())
+                    {
+                        context.ProgressRecords.AddRange(
+                            new ProgressRecord
+                            {
+                                MemberId = memberProfile.Id,
+                                Date = DateTime.UtcNow.Date.AddDays(-14),
+                                Weight = 78.5m,
+                                BodyFat = 16.0m,
+                                Notes = "Inicio de ciclo de fuerza con Coach Lucas. Adaptación positiva en sentadillas.",
+                                CreatedAt = DateTime.UtcNow.AddDays(-14)
+                            },
+                            new ProgressRecord
+                            {
+                                MemberId = memberProfile.Id,
+                                Date = DateTime.UtcNow.Date.AddDays(-2),
+                                Weight = 77.2m,
+                                BodyFat = 15.3m,
+                                Notes = "Control quincenal. Descenso de 1.3 kg de grasa y mejoras en dominadas estrictas.",
+                                CreatedAt = DateTime.UtcNow.AddDays(-2)
+                            }
+                        );
+                        await context.SaveChangesAsync();
+                    }
+                }
+            }
+        }
     }
 }

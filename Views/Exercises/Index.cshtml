@@ -1,0 +1,229 @@
+@model FitNet.ViewModels.Exercises.ExerciseCatalogViewModel
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    Layout = isAuthenticated ? "_LayoutDashboard" : "_Layout";
+    ViewData["Title"] = "Biblioteca de Ejercicios";
+}
+
+<div class="@(isAuthenticated ? "" : "container py-5")">
+    <!-- Header de la sección (Metis Design) -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary-fn text-uppercase font-heading">Base de Datos Fitness</span>
+                @if (Model.CanAccessFullLibrary)
+                {
+                    <span class="badge bg-warning text-dark text-uppercase font-heading">
+                        <i class="fa-solid fa-crown me-1"></i> Biblioteca Completa Desbloqueada
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary text-uppercase font-heading">
+                        <i class="fa-solid fa-lock-open me-1"></i> Modo Previsualización Pública
+                    </span>
+                }
+            </div>
+            <h1 class="font-heading display-6 fw-bold text-white mb-1">BIBLIOTECA DE EJERCICIOS</h1>
+            <p class="text-muted small mb-0">
+                Guía técnica de movimientos, biomecánica y ejecución para tus entrenamientos.
+            </p>
+        </div>
+
+        @if (isAuthenticated && Model.PlanName == "Member")
+        {
+            <a asp-controller="Members" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading btn-sm">
+                <i class="fa-solid fa-arrow-left me-1"></i> Volver a mi Dashboard
+            </a>
+        }
+    </div>
+
+    <!-- Notificaciones TempData -->
+    @if (TempData["MensajeUpgrade"] != null)
+    {
+        <div class="alert alert-warning bg-warning bg-opacity-25 border-warning text-white alert-dismissible fade show mb-4 small" role="alert">
+            <i class="fa-solid fa-crown me-2 text-warning"></i>
+            @TempData["MensajeUpgrade"]
+            <a href="/Billing/Checkout?plan=gold" class="alert-link text-warning ms-2 fw-bold text-decoration-underline">Mejorar a Plan Gold</a>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Banner informativo de Trial (Si aplica) -->
+    @if (Model.IsTrialActive)
+    {
+        <div class="p-3 mb-4 rounded-3 border border-warning border-opacity-50 bg-surface-fn d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-warning bg-opacity-25 p-3 text-warning">
+                    <i class="fa-solid fa-stopwatch fa-lg"></i>
+                </div>
+                <div>
+                    <h6 class="font-heading text-white fw-bold mb-1">MODO TRIAL DE 24 HORAS ACTIVO</h6>
+                    <p class="text-muted small mb-0">
+                        Te quedan <strong class="text-white">@Model.TrialHoursRemaining horas</strong> de prueba. Tenés acceso a <strong class="text-white">@Model.PublicExercisesCount ejercicios públicos</strong>. Para desbloquear el catálogo completo de @Model.TotalExercisesCount ejercicios y rutinas guiadas, suscribite a Gold.
+                    </p>
+                </div>
+            </div>
+            <a href="/Billing/Checkout?plan=gold" class="btn btn-fn-primary btn-sm font-heading text-nowrap">
+                <i class="fa-solid fa-bolt me-1"></i> Desbloquear Todo
+            </a>
+        </div>
+    }
+
+    <!-- Filtros de Búsqueda -->
+    <div class="p-4 rounded-3 border border-fn bg-card-fn mb-4">
+        <form method="get" asp-action="Index" class="row g-3 align-items-end">
+            <!-- Búsqueda por texto -->
+            <div class="col-md-5">
+                <label for="search" class="form-label font-heading text-white small fw-bold mb-1">
+                    <i class="fa-solid fa-magnifying-glass text-primary-fn me-1"></i> Buscar Ejercicio
+                </label>
+                <input type="text" name="search" id="search" value="@Model.SearchQuery" class="form-control calculator-input" placeholder="Ej: Sentadilla, Press, Dominadas..." />
+            </div>
+
+            <!-- Grupo Muscular -->
+            <div class="col-md-3">
+                <label for="muscleGroup" class="form-label font-heading text-white small fw-bold mb-1">
+                    <i class="fa-solid fa-dumbbell text-primary-fn me-1"></i> Grupo Muscular
+                </label>
+                <select name="muscleGroup" id="muscleGroup" class="form-select calculator-input">
+                    <option value="">Todos los grupos</option>
+                    @foreach (var group in FitNet.ViewModels.Exercises.ExerciseCatalogViewModel.MuscleGroups)
+                    {
+                        <option value="@group" selected="@(Model.SelectedMuscleGroup == group)">@group</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Dificultad -->
+            <div class="col-md-2">
+                <label for="difficulty" class="form-label font-heading text-white small fw-bold mb-1">
+                    <i class="fa-solid fa-signal text-primary-fn me-1"></i> Dificultad
+                </label>
+                <select name="difficulty" id="difficulty" class="form-select calculator-input">
+                    <option value="">Todas</option>
+                    @foreach (var diff in FitNet.ViewModels.Exercises.ExerciseCatalogViewModel.Difficulties)
+                    {
+                        <option value="@diff" selected="@(Model.SelectedDifficulty == diff)">@diff</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Botones -->
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-fn-primary w-100 py-2">
+                    <i class="fa-solid fa-filter me-1"></i> Filtrar
+                </button>
+                @if (!string.IsNullOrEmpty(Model.SearchQuery) || !string.IsNullOrEmpty(Model.SelectedMuscleGroup) || !string.IsNullOrEmpty(Model.SelectedDifficulty))
+                {
+                    <a asp-action="Index" class="btn btn-outline-secondary py-2" title="Limpiar filtros">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+
+    <!-- Conteo de Resultados -->
+    <div class="d-flex justify-content-between align-items-center mb-3 text-muted small">
+        <span>Mostrando <strong class="text-white">@Model.Exercises.Count</strong> ejercicios disponibles para tu plan</span>
+        @if (!Model.CanAccessFullLibrary)
+        {
+            <span class="text-warning">
+                <i class="fa-solid fa-lock me-1"></i> @Model.ExclusiveExercisesCount ejercicios exclusivos ocultos
+            </span>
+        }
+    </div>
+
+    <!-- Grilla de Tarjetas de Ejercicios -->
+    @if (Model.Exercises.Any())
+    {
+        <div class="row g-4">
+            @foreach (var item in Model.Exercises)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="p-4 rounded-3 border border-fn bg-card-fn h-100 d-flex flex-column justify-content-between position-relative hover-border-primary transition-all">
+                        <div>
+                            <!-- Badges superiores -->
+                            <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                                <span class="badge bg-surface-fn border border-fn text-primary-fn font-heading text-uppercase px-2 py-1">
+                                    <i class="fa-solid fa-tag me-1"></i> @item.MuscleGroup
+                                </span>
+                                
+                                <div class="d-flex gap-1">
+                                    <span class="badge @(item.Difficulty == "Principiante" ? "bg-success bg-opacity-75" : item.Difficulty == "Intermedio" ? "bg-warning text-dark" : "bg-danger") font-heading text-uppercase px-2 py-1">
+                                        @item.Difficulty
+                                    </span>
+
+                                    @if (item.IsPublic)
+                                    {
+                                        <span class="badge bg-secondary font-heading px-2 py-1" title="Disponible en prueba de 24h">
+                                            Trial
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark font-heading px-2 py-1" title="Exclusivo Gold/Premium">
+                                            <i class="fa-solid fa-crown"></i>
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Título -->
+                            <h4 class="font-heading fs-5 fw-bold text-white mb-2">@item.Name</h4>
+
+                            <!-- Descripción -->
+                            <p class="text-muted small mb-3 text-truncate-3" style="line-height: 1.5; min-height: 3.5rem;">
+                                @(string.IsNullOrEmpty(item.Description) ? "Sin descripción técnica registrada." : item.Description)
+                            </p>
+                        </div>
+
+                        <!-- Footer de la tarjeta con acción -->
+                        <div class="pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                            <span class="text-white-50 small">
+                                <i class="fa-solid fa-layer-group me-1 text-primary-fn"></i> Fitness DB
+                            </span>
+
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-light btn-sm font-heading">
+                                Ver Detalle <i class="fa-solid fa-chevron-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="p-5 rounded-3 border border-fn bg-card-fn text-center">
+            <div class="rounded-circle bg-surface-fn border border-fn d-inline-flex align-items-center justify-content-center text-muted mb-3" style="width: 70px; height: 70px; font-size: 2rem;">
+                <i class="fa-solid fa-dumbbell"></i>
+            </div>
+            <h4 class="font-heading text-white fw-bold mb-2">NO SE ENCONTRARON EJERCICIOS</h4>
+            <p class="text-muted small mb-3">
+                No hay ejercicios que coincidan con los criterios de búsqueda o filtros seleccionados.
+            </p>
+            <a asp-action="Index" class="btn btn-outline-secondary text-white btn-sm font-heading">
+                <i class="fa-solid fa-rotate-left me-1"></i> Restablecer Filtros
+            </a>
+        </div>
+    }
+</div>
+
+<style>
+    .hover-border-primary:hover {
+        border-color: var(--fn-primary, #00f2fe) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .text-truncate-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .transition-all {
+        transition: all 0.2s ease-in-out;
+    }
+</style>

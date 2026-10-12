@@ -1,387 +1,319 @@
+@model FitNet.ViewModels.Members.MemberProgressViewModel
 @{
     Layout = "_LayoutDashboard";
     ViewData["Title"] = "Mi Progreso y Evolución Física";
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/members.css" asp-append-version="true" />
+<!-- Page Header (Metis UI) -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-primary-fn text-uppercase font-heading">
+                <i class="fa-solid fa-chart-line me-1"></i> Biometría & Antropometría
+            </span>
+            <span class="badge bg-secondary font-heading text-uppercase">Plan @Model.PlanName</span>
+        </div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-1">MI PROGRESO Y EVOLUCIÓN FÍSICA</h1>
+        <p class="text-muted small mb-0">Registrá tus pesajes periódicos, porcentaje de grasa y fotos de transformación.</p>
+    </div>
+
+    <a asp-controller="Members" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading btn-sm">
+        <i class="fa-solid fa-arrow-left me-1"></i> Volver a mi Dashboard
+    </a>
+</div>
+
+<!-- Flash Notifications TempData -->
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success bg-success bg-opacity-25 border-success text-white alert-dismissible fade show mb-4 small" role="alert">
+        <i class="fa-solid fa-circle-check me-2 text-primary-fn"></i>
+        @TempData["MensajeExito"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger bg-danger bg-opacity-25 border-danger text-white alert-dismissible fade show mb-4 small" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        @TempData["MensajeError"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
 
 <!-- ==========================================
-     CABECERA / HERO BANNER DE MI PROGRESO
-     ========================================== -->
-<div class="progress-hero-banner mb-3">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-50 font-heading px-2 py-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">
-                    <i class="fa-solid fa-chart-line me-1"></i> EVOLUCIÓN CORPORAL & BIOMETRÍA
-                </span>
-                <span class="badge bg-dark border border-secondary text-white font-heading" style="font-size: 0.7rem;">
-                    SEGUIMIENTO ACTIVO
-                </span>
-            </div>
-            <h1 class="hero-title mb-1" style="font-size: 1.85rem;">
-                MI PROGRESO Y <span class="text-primary-fn">EVOLUCIÓN FÍSICA</span>
-            </h1>
-            <p class="hero-sub mb-0 text-muted" style="max-width: 650px;">
-                Registra tu peso corporal, porcentaje graso y fotografías de estado físico. Los datos se sincronizan con tu ficha para análisis de tu entrenador personal.
-            </p>
-        </div>
-
-        <div class="d-flex flex-wrap gap-2">
-            <a href="#formRegistro" class="btn btn-fn-primary btn-sm px-3 py-2 font-heading" title="Registrar Medición">
-                <i class="fa-solid fa-plus me-1"></i> NUEVA MEDICIÓN
-            </a>
-            <button type="button" class="btn btn-outline-secondary text-white btn-sm px-3 py-2 font-heading" title="Exportar Historial">
-                <i class="fa-solid fa-file-arrow-down text-info me-1"></i> EXPORTAR HISTORIAL
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- ==========================================
-     FILA DE TARJETAS KPI (Métricas Biométricas)
-     ========================================== -->
-<div class="row g-2 g-lg-3 mb-3">
-    <!-- Card 1: Peso Actual -->
-    <div class="col-sm-6 col-xl-3">
-        <div class="stats-card">
-            <div class="stats-icon stats-icon-lime">
-                <i class="fa-solid fa-weight-scale"></i>
-            </div>
-            <div class="stats-content">
-                <div class="stats-label">Peso Corporal Actual</div>
-                <div class="stats-value">74.5 <span style="font-size: 0.85rem; font-weight: 500;">KG</span></div>
-                <div class="stats-sub text-primary-fn">
-                    <i class="fa-solid fa-arrow-trend-down me-1"></i> -2.3 kg en los últimos 30 días
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Card 2: Porcentaje Graso -->
-    <div class="col-sm-6 col-xl-3">
-        <div class="stats-card">
-            <div class="stats-icon stats-icon-purple">
-                <i class="fa-solid fa-percent"></i>
-            </div>
-            <div class="stats-content">
-                <div class="stats-label">% Grasa Estimado</div>
-                <div class="stats-value">14.8 <span style="font-size: 0.85rem; font-weight: 500;">%</span></div>
-                <div class="stats-sub text-white">
-                    <i class="fa-solid fa-circle-check text-primary-fn me-1"></i> Reducción de -1.5% grasa
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Card 3: Masa Muscular Estimada -->
-    <div class="col-sm-6 col-xl-3">
-        <div class="stats-card">
-            <div class="stats-icon stats-icon-blue">
-                <i class="fa-solid fa-dumbbell"></i>
-            </div>
-            <div class="stats-content">
-                <div class="stats-label">Masa Magra Estimada</div>
-                <div class="stats-value">63.4 <span style="font-size: 0.85rem; font-weight: 500;">KG</span></div>
-                <div class="stats-sub text-info">
-                    <i class="fa-solid fa-arrow-trend-up me-1"></i> +0.8 kg ganancia muscular
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Card 4: Frecuencia de Medición -->
-    <div class="col-sm-6 col-xl-3">
-        <div class="stats-card">
-            <div class="stats-icon stats-icon-orange">
-                <i class="fa-solid fa-calendar-check"></i>
-            </div>
-            <div class="stats-content">
-                <div class="stats-label">Total Mediciones</div>
-                <div class="stats-value">14 <span style="font-size: 0.85rem; font-weight: 500;">FICHAS</span></div>
-                <div class="stats-sub text-muted">
-                    <i class="fa-solid fa-clock me-1 text-warning"></i> Última hace 2 días (04/10)
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ==========================================
-     SECCIÓN 2: FORMULARIO DE CARGA + GRÁFICO DE TENDENCIA
+     MÉTRICAS RESUMEN (KPI CARDS)
      ========================================== -->
 <div class="row g-3 mb-4">
-    <!-- COLUMNA IZQUIERDA: FORMULARIO VISUAL DE NUEVA MEDICIÓN (7 COLS) -->
-    <div class="col-lg-7" id="formRegistro">
-        <div class="fn-card h-100">
-            <div class="fn-card-header">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-primary-fn"></i>
-                    <span class="fn-card-title">REGISTRAR NUEVA MEDICIÓN BIOMÉTRICA</span>
-                </div>
-                <span class="badge bg-primary-fn text-dark font-heading" style="font-size: 0.65rem;">
-                    NUEVO REGISTRO
+    <!-- Card 1: Último Peso -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="p-3 rounded-3 border border-fn bg-card-fn h-100">
+            <span class="text-muted small font-heading text-uppercase d-block mb-1">Último Peso Registrado</span>
+            <div class="d-flex align-items-baseline gap-2">
+                <span class="font-heading fs-3 fw-bold text-white">
+                    @(Model.LatestWeight.HasValue ? $"{Model.LatestWeight.Value:F1} kg" : "—")
                 </span>
             </div>
-            <div class="fn-card-body p-3">
-                <form action="#!" method="post" enctype="multipart/form-data">
-                    <div class="row g-3 mb-3">
-                        <!-- Fecha -->
-                        <div class="col-md-4">
-                            <label class="form-label font-heading text-white small mb-1">
-                                <i class="fa-solid fa-calendar-day text-primary-fn me-1"></i> FECHA
-                            </label>
-                            <input type="date" class="form-control bg-surface-fn border-fn text-white py-2" value="2026-10-06" />
-                        </div>
-
-                        <!-- Peso -->
-                        <div class="col-md-4">
-                            <label class="form-label font-heading text-white small mb-1">
-                                <i class="fa-solid fa-weight-scale text-primary-fn me-1"></i> PESO (KG) *
-                            </label>
-                            <input type="number" step="0.1" class="form-control bg-surface-fn border-fn text-white py-2" placeholder="Ej. 74.5" value="74.5" />
-                        </div>
-
-                        <!-- Grasa Corporal -->
-                        <div class="col-md-4">
-                            <label class="form-label font-heading text-white small mb-1">
-                                <i class="fa-solid fa-percent text-primary-fn me-1"></i> % GRASA (OPCIONAL)
-                            </label>
-                            <input type="number" step="0.1" class="form-control bg-surface-fn border-fn text-white py-2" placeholder="Ej. 14.8" value="14.8" />
-                        </div>
-                    </div>
-
-                    <!-- Notas y Sensaciones -->
-                    <div class="mb-3">
-                        <label class="form-label font-heading text-white small mb-1">
-                            <i class="fa-solid fa-comment-dots text-primary-fn me-1"></i> OBSERVACIONES / SENSACIONES DE ENTRENAMIENTO
-                        </label>
-                        <textarea class="form-control bg-surface-fn border-fn text-white small" rows="2" 
-                                  placeholder="Describe cómo te has sentido en fuerza, energía, recuperación y adherencia nutricional..."></textarea>
-                    </div>
-
-                    <!-- Subida de Fotografía de Progreso Físico (Requerimiento Universitario) -->
-                    <div class="mb-3">
-                        <label class="form-label font-heading text-white small mb-1 d-flex justify-content-between">
-                            <span><i class="fa-solid fa-camera text-primary-fn me-1"></i> FOTOGRAFÍA DE EVOLUCIÓN FÍSICA</span>
-                            <span class="text-muted" style="font-size: 0.7rem;">MÁX 2 MB · JPG, PNG, WEBP</span>
-                        </label>
-                        
-                        <div class="upload-dropzone">
-                            <div class="upload-dropzone-icon">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                            </div>
-                            <h6 class="font-heading text-white mb-1" style="font-size: 0.9rem;">
-                                HAZ CLIC PARA SELECCIONAR O ARRASTRA TU FOTO AQUÍ
-                            </h6>
-                            <p class="text-muted small mb-2">
-                                Se guardará de forma segura en <code class="text-primary-fn">/uploads/progress/</code> con nombre criptográfico.
-                            </p>
-                            <input type="file" class="d-none" id="progressPhotoInput" accept="image/png, image/jpeg, image/webp" />
-                            <button type="button" class="btn btn-sm btn-outline-secondary text-white font-heading px-3" 
-                                    onclick="document.getElementById('progressPhotoInput').click();">
-                                <i class="fa-solid fa-folder-open me-1"></i> ELEGIR ARCHIVO
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Botón de Guardado -->
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-outline-secondary text-white btn-sm font-heading px-3">
-                            CANCELAR
-                        </button>
-                        <button type="button" class="btn btn-fn-primary btn-sm font-heading px-4">
-                            <i class="fa-solid fa-floppy-disk me-1"></i> GUARDAR MEDICIÓN
-                        </button>
-                    </div>
-                </form>
-            </div>
+            <small class="text-white-50" style="font-size: 0.75rem;">
+                <i class="fa-solid fa-weight-scale text-primary-fn me-1"></i> En báscula
+            </small>
         </div>
     </div>
 
-    <!-- COLUMNA DERECHA: GRÁFICO DE TENDENCIA Y OBJETIVO (5 COLS) -->
-    <div class="col-lg-5">
-        <!-- Tarjeta de Gráfico / Histograma de Evolución -->
-        <div class="fn-card mb-3">
-            <div class="fn-card-header">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-chart-column text-primary-fn"></i>
-                    <span class="fn-card-title">TENDENCIA DE PESO (ÚLTIMOS MESES)</span>
-                </div>
-                <span class="badge bg-secondary bg-opacity-25 text-white font-heading" style="font-size: 0.65rem;">
-                    KG EVOLUCIÓN
+    <!-- Card 2: Variación de Peso -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="p-3 rounded-3 border border-fn bg-card-fn h-100">
+            <span class="text-muted small font-heading text-uppercase d-block mb-1">Variación Acumulada</span>
+            <div class="d-flex align-items-baseline gap-2">
+                @if (Model.WeightDifference.HasValue)
+                {
+                    var isDiffNeg = Model.WeightDifference.Value < 0;
+                    <span class="font-heading fs-3 fw-bold @(isDiffNeg ? "text-success" : "text-info")">
+                        @(Model.WeightDifference.Value > 0 ? "+" : "")@Model.WeightDifference.Value.ToString("F1") kg
+                    </span>
+                }
+                else
+                {
+                    <span class="font-heading fs-3 fw-bold text-white">—</span>
+                }
+            </div>
+            <small class="text-white-50" style="font-size: 0.75rem;">
+                <i class="fa-solid fa-arrow-trend-up text-primary-fn me-1"></i> Respecto al inicio
+            </small>
+        </div>
+    </div>
+
+    <!-- Card 3: Grasa Corporal -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="p-3 rounded-3 border border-fn bg-card-fn h-100">
+            <span class="text-muted small font-heading text-uppercase d-block mb-1">Grasa Corporal Actual</span>
+            <div class="d-flex align-items-baseline gap-2">
+                <span class="font-heading fs-3 fw-bold text-white">
+                    @(Model.LatestBodyFat.HasValue ? $"{Model.LatestBodyFat.Value:F1} %" : "—")
                 </span>
             </div>
-            <div class="fn-card-body p-3">
-                <div class="chart-bar-container">
-                    <!-- Mayo -->
-                    <div class="chart-bar-col">
-                        <span class="chart-bar-val">78.2</span>
-                        <div class="chart-bar" style="height: 100%;"></div>
-                        <span class="chart-bar-label">MAY</span>
-                    </div>
-                    <!-- Junio -->
-                    <div class="chart-bar-col">
-                        <span class="chart-bar-val">77.0</span>
-                        <div class="chart-bar" style="height: 88%;"></div>
-                        <span class="chart-bar-label">JUN</span>
-                    </div>
-                    <!-- Julio -->
-                    <div class="chart-bar-col">
-                        <span class="chart-bar-val">76.1</span>
-                        <div class="chart-bar" style="height: 78%;"></div>
-                        <span class="chart-bar-label">JUL</span>
-                    </div>
-                    <!-- Agosto -->
-                    <div class="chart-bar-col">
-                        <span class="chart-bar-val">75.4</span>
-                        <div class="chart-bar" style="height: 71%;"></div>
-                        <span class="chart-bar-label">AGO</span>
-                    </div>
-                    <!-- Septiembre -->
-                    <div class="chart-bar-col">
-                        <span class="chart-bar-val">74.8</span>
-                        <div class="chart-bar" style="height: 64%;"></div>
-                        <span class="chart-bar-label">SEP</span>
-                    </div>
-                    <!-- Octubre (Actual) -->
-                    <div class="chart-bar-col">
-                        <span class="chart-bar-val text-primary-fn fw-bold">74.5</span>
-                        <div class="chart-bar current" style="height: 60%;"></div>
-                        <span class="chart-bar-label text-primary-fn fw-bold">OCT</span>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center mt-3 small">
-                    <span class="text-muted">Pérdida acumulada:</span>
-                    <strong class="text-primary-fn font-heading">-3.7 KG TOTALES (META DEFINICIÓN)</strong>
-                </div>
-            </div>
+            <small class="text-white-50" style="font-size: 0.75rem;">
+                <i class="fa-solid fa-percent text-primary-fn me-1"></i> Composición física
+            </small>
         </div>
+    </div>
 
-        <!-- Tarjeta de Objetivo Biométrico -->
-        <div class="fn-card">
-            <div class="fn-card-header">
+    <!-- Card 4: Total de Chequeos -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="p-3 rounded-3 border border-fn bg-card-fn h-100">
+            <span class="text-muted small font-heading text-uppercase d-block mb-1">Chequeos Realizados</span>
+            <div class="d-flex align-items-baseline gap-2">
+                <span class="font-heading fs-3 fw-bold text-white">@Model.TotalCheckins</span>
+            </div>
+            <small class="text-white-50" style="font-size: 0.75rem;">
+                <i class="fa-solid fa-clipboard-check text-primary-fn me-1"></i> Registros en historial
+            </small>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <!-- Columna Izquierda: Formulario de Nuevo Registro -->
+    <div class="col-lg-5">
+        <div class="p-4 rounded-3 border border-fn bg-card-fn h-100">
+            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                <i class="fa-solid fa-plus-circle text-primary-fn fa-lg"></i>
+                <h4 class="font-heading fs-5 fw-bold text-white mb-0">NUEVO CHEQUEO CORPORAL</h4>
+            </div>
+
+            <form asp-action="AddProgress" asp-controller="Members" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                <!-- Fecha -->
+                <div class="mb-3">
+                    <label asp-for="Date" class="form-label font-heading text-white small fw-bold mb-1"></label>
+                    <input asp-for="Date" type="date" class="form-control calculator-input" />
+                    <span asp-validation-for="Date" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <!-- Peso (kg) -->
+                    <div class="col-6">
+                        <label asp-for="Weight" class="form-label font-heading text-white small fw-bold mb-1"></label>
+                        <input asp-for="Weight" type="number" step="0.1" class="form-control calculator-input" placeholder="Ej: 78.5" />
+                        <span asp-validation-for="Weight" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Grasa (%) -->
+                    <div class="col-6">
+                        <label asp-for="BodyFat" class="form-label font-heading text-white small fw-bold mb-1"></label>
+                        <input asp-for="BodyFat" type="number" step="0.1" class="form-control calculator-input" placeholder="Ej: 15.2" />
+                        <span asp-validation-for="BodyFat" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Foto de Progreso con Previsualización -->
+                <div class="p-3 mb-3 rounded border border-secondary border-opacity-50 bg-surface-fn">
+                    <label asp-for="ProgressPhoto" class="form-label font-heading text-white small fw-bold mb-1">
+                        <i class="fa-solid fa-camera text-primary-fn me-1"></i> Foto de Evolución Corporal
+                    </label>
+                    <input asp-for="ProgressPhoto" id="photoInput" type="file" class="form-control calculator-input" accept=".jpg,.jpeg,.png,.webp" />
+                    <span asp-validation-for="ProgressPhoto" class="text-danger small d-block mt-1"></span>
+                    <small class="text-white-50 d-block mt-1" style="font-size: 0.75rem;">
+                        Formatos permitidos: JPG, PNG, WEBP (máx. 2MB).
+                    </small>
+
+                    <div id="photoPreviewContainer" class="mt-2 d-none text-center">
+                        <img id="photoPreview" src="#" alt="Previsualización" class="rounded border border-primary" style="max-height: 120px; object-fit: cover;" />
+                    </div>
+                </div>
+
+                <!-- Notas -->
+                <div class="mb-4">
+                    <label asp-for="Notes" class="form-label font-heading text-white small fw-bold mb-1"></label>
+                    <textarea asp-for="Notes" class="form-control calculator-input" rows="3" placeholder="Ej: Buena congestión, energía alta en sentadillas, dieta cumplida al 100%..."></textarea>
+                    <span asp-validation-for="Notes" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-fn-primary w-100 py-2">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Guardar Chequeo
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Columna Derecha: Historial Cronológico de Registros -->
+    <div class="col-lg-7">
+        <div class="p-4 rounded-3 border border-fn bg-card-fn h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
                 <div class="d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-bullseye text-warning"></i>
-                    <span class="fn-card-title">OBJETIVO DEL PLAN: DEFINICIÓN LIMPIA</span>
+                    <i class="fa-solid fa-clock-rotate-left text-primary-fn fa-lg"></i>
+                    <h4 class="font-heading fs-5 fw-bold text-white mb-0">HISTORIAL DE PESAJES</h4>
                 </div>
+                <span class="text-muted small">@Model.Records.Count registros</span>
             </div>
-            <div class="fn-card-body p-3">
-                <div class="d-flex justify-content-between align-items-center mb-1 small">
-                    <span class="text-muted">Progreso hacia la meta (72.0 kg)</span>
-                    <strong class="text-primary-fn font-heading">68% LOGRADO</strong>
+
+            @if (Model.Records.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover border border-secondary border-opacity-25 rounded overflow-hidden align-middle mb-0">
+                        <thead class="bg-surface-fn font-heading text-primary-fn small text-uppercase">
+                            <tr>
+                                <th class="ps-3">Fecha</th>
+                                <th class="text-center">Peso</th>
+                                <th class="text-center">Grasa</th>
+                                <th>Notas</th>
+                                <th class="text-center" style="width: 70px;">Foto</th>
+                                <th class="text-end pe-3" style="width: 60px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in Model.Records)
+                            {
+                                <tr>
+                                    <td class="ps-3 text-white fw-bold small">
+                                        @r.Date.ToString("dd/MM/yyyy")
+                                    </td>
+                                    <td class="text-center font-heading fs-6 text-white">
+                                        @(r.Weight.HasValue ? $"{r.Weight.Value:F1} kg" : "—")
+                                    </td>
+                                    <td class="text-center text-muted small">
+                                        @(r.BodyFat.HasValue ? $"{r.BodyFat.Value:F1}%" : "—")
+                                    </td>
+                                    <td class="text-muted small" style="max-width: 180px;">
+                                        <span class="d-inline-block text-truncate w-100">
+                                            @(string.IsNullOrEmpty(r.Notes) ? "—" : r.Notes)
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrEmpty(r.ImagePath))
+                                        {
+                                            <a href="@r.ImagePath" target="_blank" title="Ver foto en tamaño completo">
+                                                <img src="@r.ImagePath" alt="Foto" class="rounded border border-primary" style="width: 32px; height: 32px; object-fit: cover;" />
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <form asp-action="DeleteProgress" asp-controller="Members" asp-route-id="@r.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este registro de progreso?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-danger btn-sm p-1" title="Eliminar registro">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
-                <div class="progress bg-dark border border-secondary border-opacity-25" style="height: 8px;">
-                    <div class="progress-bar bg-primary-fn" role="progressbar" style="width: 68%;" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"></div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted small">
+                    <i class="fa-solid fa-scale-balanced fa-2x mb-2 d-block text-muted"></i>
+                    Aún no registraste pesajes. Utilizá el formulario de la izquierda para registrar tu primer chequeo corporal.
                 </div>
-                <div class="d-flex justify-content-between mt-3 text-center">
-                    <div>
-                        <div class="font-heading text-white fw-bold">78.2 kg</div>
-                        <div class="text-muted" style="font-size: 0.68rem;">PESO INICIAL</div>
-                    </div>
-                    <div class="border-start border-end border-secondary border-opacity-25 px-3">
-                        <div class="font-heading text-primary-fn fw-bold">74.5 kg</div>
-                        <div class="text-muted" style="font-size: 0.68rem;">ACTUAL</div>
-                    </div>
-                    <div>
-                        <div class="font-heading text-warning fw-bold">72.0 kg</div>
-                        <div class="text-muted" style="font-size: 0.68rem;">META FINAL</div>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </div>
 
 <!-- ==========================================
-     SECCIÓN 3: GALERÍA DE EVOLUCIÓN HISTÓRICA CON FOTOS
+     SECCIÓN 3: GALERÍA DE TRANSFORMACIÓN FÍSICA
      ========================================== -->
-<div class="fn-card">
-    <div class="fn-card-header">
-        <div class="d-flex align-items-center gap-2">
+@if (Model.Records.Any(r => !string.IsNullOrEmpty(r.ImagePath)))
+{
+    <div class="mb-4">
+        <div class="d-flex align-items-center gap-2 mb-1">
             <i class="fa-solid fa-images text-primary-fn"></i>
-            <span class="fn-card-title">GALERÍA DE EVOLUCIÓN HISTÓRICA (FOTOGRAFÍAS & MEDICIONES)</span>
+            <h3 class="font-heading fs-4 fw-bold text-white mb-0">GALERÍA DE EVOLUCIÓN FÍSICA</h3>
         </div>
-        <span class="badge bg-secondary bg-opacity-25 text-white font-heading" style="font-size: 0.7rem;">
-            3 REGISTROS RECIENTES CON FOTO
-        </span>
-    </div>
-    <div class="fn-card-body p-3">
+        <p class="text-muted small mb-3">Tus fotografías corporales ordenadas cronológicamente para comparar resultados.</p>
+
         <div class="row g-3">
-            <!-- Registro 1: Hace 2 días -->
-            <div class="col-md-4">
-                <div class="history-card h-100">
-                    <div class="history-img-wrapper">
-                        <img src="/img/blog/blog-1.jpg" alt="Evolución 04/10/2026" class="history-img"
-                             onerror="this.onerror=null; this.src='/img/logo/logo-Fitnet-sinfondo.webp';" />
-                        <span class="history-date-badge">
-                            <i class="fa-solid fa-calendar me-1 text-primary-fn"></i> 04/10/2026
-                        </span>
-                    </div>
-                    <div class="p-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="font-heading text-white mb-0" style="font-size: 1.1rem;">74.5 KG</h5>
-                            <span class="badge bg-primary-fn text-dark font-heading" style="font-size: 0.7rem;">
-                                14.8% GRASA
+            @foreach (var photoRecord in Model.Records.Where(r => !string.IsNullOrEmpty(r.ImagePath)))
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="rounded-3 border border-fn bg-card-fn overflow-hidden h-100">
+                        <a href="@photoRecord.ImagePath" target="_blank">
+                            <img src="@photoRecord.ImagePath" alt="Evolución" class="w-100" style="height: 200px; object-fit: cover;" />
+                        </a>
+                        <div class="p-2 text-center bg-surface-fn border-top border-secondary border-opacity-25">
+                            <span class="font-heading text-white fw-bold d-block small">@photoRecord.Date.ToString("dd/MM/yyyy")</span>
+                            <span class="badge bg-primary-fn font-heading" style="font-size: 0.72rem;">
+                                @(photoRecord.Weight.HasValue ? $"{photoRecord.Weight.Value:F1} kg" : "Chequeo")
                             </span>
                         </div>
-                        <p class="text-muted small mb-0">
-                            "Excelente semana de bombeo. Fuerza en sentadilla subiendo, buena recuperación muscular y descanso óptimo."
-                        </p>
                     </div>
                 </div>
-            </div>
-
-            <!-- Registro 2: Hace 2 semanas -->
-            <div class="col-md-4">
-                <div class="history-card h-100">
-                    <div class="history-img-wrapper">
-                        <img src="/img/blog/blog-2.jpg" alt="Evolución 20/09/2026" class="history-img"
-                             onerror="this.onerror=null; this.src='/img/logo/logo-Fitnet-sinfondo.webp';" />
-                        <span class="history-date-badge">
-                            <i class="fa-solid fa-calendar me-1 text-primary-fn"></i> 20/09/2026
-                        </span>
-                    </div>
-                    <div class="p-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="font-heading text-white mb-0" style="font-size: 1.1rem;">75.3 KG</h5>
-                            <span class="badge bg-secondary bg-opacity-50 text-white font-heading" style="font-size: 0.7rem;">
-                                15.2% GRASA
-                            </span>
-                        </div>
-                        <p class="text-muted small mb-0">
-                            "Ajuste en carbohidratos según recomendación del profe Lucas. Mayor definición visible en deltoides."
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Registro 3: Hace 1 mes -->
-            <div class="col-md-4">
-                <div class="history-card h-100">
-                    <div class="history-img-wrapper">
-                        <img src="/img/blog/blog-3.jpg" alt="Evolución 01/09/2026" class="history-img"
-                             onerror="this.onerror=null; this.src='/img/logo/logo-Fitnet-sinfondo.webp';" />
-                        <span class="history-date-badge">
-                            <i class="fa-solid fa-calendar me-1 text-primary-fn"></i> 01/09/2026
-                        </span>
-                    </div>
-                    <div class="p-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="font-heading text-white mb-0" style="font-size: 1.1rem;">76.8 KG</h5>
-                            <span class="badge bg-secondary bg-opacity-50 text-white font-heading" style="font-size: 0.7rem;">
-                                16.3% GRASA
-                            </span>
-                        </div>
-                        <p class="text-muted small mb-0">
-                            "Medición inicial de la temporada de primavera. Objetivo: definición limpia con mantenimiento estricto de fuerza."
-                        </p>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
     </div>
-</div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('photoInput');
+            const preview = document.getElementById('photoPreview');
+            const container = document.getElementById('photoPreviewContainer');
+
+            if (input && preview && container) {
+                input.addEventListener('change', function (e) {
+                    const file = e.target.files && e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (evt) {
+                            preview.src = evt.target.result;
+                            container.classList.remove('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        container.classList.add('d-none');
+                    }
+                });
+            }
+        });
+    </script>
+}

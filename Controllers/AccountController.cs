@@ -16,6 +16,7 @@ public class AccountController : Controller
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ApplicationDbContext _context;
     private readonly IFileStorageService _fileStorageService;
+    private readonly IMembershipService _membershipService;
     private readonly ILogger<AccountController> _logger;
 
     public AccountController(
@@ -23,12 +24,14 @@ public class AccountController : Controller
         SignInManager<ApplicationUser> signInManager,
         ApplicationDbContext context,
         IFileStorageService fileStorageService,
+        IMembershipService membershipService,
         ILogger<AccountController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _context = context;
         _fileStorageService = fileStorageService;
+        _membershipService = membershipService;
         _logger = logger;
     }
 
@@ -211,16 +214,13 @@ public class AccountController : Controller
         var trainerProfile = await _context.TrainerProfiles
             .FirstOrDefaultAsync(t => t.UserId == user.Id);
 
-        var pName = memberProfile?.Membership?.Name ?? "Free";
-        var isTrActive = memberProfile != null && memberProfile.TrialEndsAt > DateTime.UtcNow;
-        var trHours = isTrActive && memberProfile != null ? Math.Max(0, (int)Math.Ceiling((memberProfile.TrialEndsAt - DateTime.UtcNow).TotalHours)) : 0;
-        var dRemaining = isTrActive && pName != "Free" && memberProfile != null ? Math.Max(1, (int)Math.Ceiling((memberProfile.TrialEndsAt - DateTime.UtcNow).TotalDays)) : 0;
+        var status = await _membershipService.GetMemberStatusAsync(user.Id);
 
-        ViewData["PlanName"] = pName;
-        ViewData["IsTrialActive"] = isTrActive;
-        ViewData["TrialHoursRemaining"] = trHours;
-        ViewData["DaysRemaining"] = dRemaining;
-        ViewData["ExpirationDate"] = memberProfile?.TrialEndsAt.ToString("dd/MM/yyyy") ?? "";
+        ViewData["PlanName"] = status.PlanName;
+        ViewData["IsTrialActive"] = status.IsTrial && status.IsActive;
+        ViewData["TrialHoursRemaining"] = status.RemainingHours;
+        ViewData["DaysRemaining"] = status.RemainingDays;
+        ViewData["ExpirationDate"] = status.ExpirationDate?.ToString("dd/MM/yyyy") ?? "";
 
         var model = new ProfileViewModel
         {
@@ -231,8 +231,8 @@ public class AccountController : Controller
             PhoneNumber = user.PhoneNumber,
             AvatarPath = user.AvatarPath,
             Role = primaryRole,
-            PlanName = memberProfile?.Membership?.Name ?? "No aplica",
-            TrialEndsAt = memberProfile?.TrialEndsAt,
+            PlanName = status.PlanName,
+            TrialEndsAt = status.ExpirationDate,
             Height = memberProfile?.Height,
             BirthDate = memberProfile?.BirthDate,
             Specialty = trainerProfile?.Specialty,
@@ -264,18 +264,7 @@ public class AccountController : Controller
 
         if (!ModelState.IsValid)
         {
-            // Restaurar datos de solo lectura para la vista
-            var roles = await _userManager.GetRolesAsync(user);
-            model.Role = roles.FirstOrDefault() ?? "Member";
-            model.Email = user.Email ?? string.Empty;
-            model.AvatarPath = user.AvatarPath;
-
-            var memberProf = await _context.MemberProfiles
-                .Include(m => m.Membership)
-                .FirstOrDefaultAsync(m => m.UserId == user.Id);
-            model.PlanName = memberProf?.Membership?.Name ?? "No aplica";
-            model.TrialEndsAt = memberProf?.TrialEndsAt;
-
+            await PopulateReadOnlyProfileDataAsync(model, user);
             return View(model);
         }
 
@@ -299,6 +288,7 @@ public class AccountController : Controller
             {
                 _logger.LogError(ex, "Error al procesar la subida del avatar para el usuario {UserId}", user.Id);
                 ModelState.AddModelError("AvatarFile", "Ocurrió un error al guardar la imagen de perfil.");
+                await PopulateReadOnlyProfileDataAsync(model, user);
                 return View(model);
             }
         }
@@ -320,6 +310,51 @@ public class AccountController : Controller
 
         TempData["MensajeExito"] = "Perfil actualizado correctamente.";
         return RedirectToAction("Profile");
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveAvatar()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return RedirectToAction("Login");
+        }
+
+        if (!string.IsNullOrEmpty(user.AvatarPath))
+        {
+            await _fileStorageService.DeleteFileAsync(user.AvatarPath);
+            user.AvatarPath = null;
+            await _userManager.UpdateAsync(user);
+            TempData["MensajeExito"] = "Foto de perfil eliminada correctamente.";
+        }
+
+        return RedirectToAction("Profile");
+    }
+
+    private async Task PopulateReadOnlyProfileDataAsync(ProfileViewModel model, ApplicationUser user)
+    {
+        var roles = await _userManager.GetRolesAsync(user);
+        model.Role = roles.FirstOrDefault() ?? "Member";
+        model.Email = user.Email ?? string.Empty;
+        model.AvatarPath = user.AvatarPath;
+
+        var status = await _membershipService.GetMemberStatusAsync(user.Id);
+        model.PlanName = status.PlanName;
+        model.TrialEndsAt = status.ExpirationDate;
+
+        var trainerProf = await _context.TrainerProfiles
+            .FirstOrDefaultAsync(t => t.UserId == user.Id);
+        model.Specialty = trainerProf?.Specialty;
+        model.Biography = trainerProf?.Biography;
+
+        ViewData["PlanName"] = status.PlanName;
+        ViewData["IsTrialActive"] = status.IsTrial && status.IsActive;
+        ViewData["TrialHoursRemaining"] = status.RemainingHours;
+        ViewData["DaysRemaining"] = status.RemainingDays;
+        ViewData["ExpirationDate"] = status.ExpirationDate?.ToString("dd/MM/yyyy") ?? "";
     }
 
     // ==========================================

@@ -8,7 +8,8 @@ public class FileStorageService : IFileStorageService
     // Constantes de validación defensiva server-side
     private const long MaxFileSizeInBytes = 2 * 1024 * 1024; // 2 Megabytes
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    private static readonly string[] AllowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+    private static readonly string[] AllowedMimeTypes = ["image/jpeg", "image/jpg", "image/png", "image/x-png", "image/webp", "image/pjpeg"];
+    private static readonly string[] AllowedSubfolders = ["avatars", "progress", "exercises"];
 
     public FileStorageService(IWebHostEnvironment environment, ILogger<FileStorageService> logger)
     {
@@ -23,9 +24,15 @@ public class FileStorageService : IFileStorageService
             throw new InvalidOperationException(error ?? "Archivo no válido para almacenamiento.");
         }
 
-        // 1. Limpiar y asegurar subcarpeta
+        // 1. Limpiar y asegurar subcarpeta permitida (evitar path traversal)
         var safeSubfolder = subfolder.Trim().Trim('/', '\\').ToLowerInvariant();
-        var uploadRoot = Path.Combine(_environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads", safeSubfolder);
+        if (!AllowedSubfolders.Contains(safeSubfolder))
+        {
+            throw new ArgumentException($"Subcarpeta no permitida: {subfolder}. Opciones válidas: avatars, progress, exercises.");
+        }
+
+        var webRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        var uploadRoot = Path.Combine(webRoot, "uploads", safeSubfolder);
 
         if (!Directory.Exists(uploadRoot))
         {
@@ -67,12 +74,22 @@ public class FileStorageService : IFileStorageService
             }
 
             var cleanRelativePath = normalizedPath.TrimStart('/');
-            var physicalPath = Path.Combine(_environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), cleanRelativePath);
+            var webRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var physicalPath = Path.Combine(webRoot, cleanRelativePath);
 
-            if (File.Exists(physicalPath))
+            // Validar que el archivo resida efectivamente dentro del directorio wwwroot/uploads
+            var fullPhysicalPath = Path.GetFullPath(physicalPath);
+            var uploadsRoot = Path.GetFullPath(Path.Combine(webRoot, "uploads"));
+            if (!fullPhysicalPath.StartsWith(uploadsRoot, StringComparison.OrdinalIgnoreCase))
             {
-                File.Delete(physicalPath);
-                _logger.LogInformation("Archivo anterior eliminado del disco: {Path}", physicalPath);
+                _logger.LogWarning("Intento de borrado fuera del directorio uploads: {Path}", relativeWebPath);
+                return Task.FromResult(false);
+            }
+
+            if (File.Exists(fullPhysicalPath))
+            {
+                File.Delete(fullPhysicalPath);
+                _logger.LogInformation("Archivo anterior eliminado del disco: {Path}", fullPhysicalPath);
                 return Task.FromResult(true);
             }
         }
