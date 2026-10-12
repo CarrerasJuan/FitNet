@@ -1,7 +1,10 @@
+using System.Text;
 using FitNet.Data;
 using FitNet.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,7 +47,30 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
-// MVC Controllers con Vistas
+// Configuración de Autenticación JWT Bearer para la API REST
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "FitNet_Super_Secret_Jwt_Security_Key_2026_Development_Key_ULP!";
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "FitNetServer";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "FitNetClient";
+
+builder.Services.AddAuthentication()
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+// MVC Controllers con Vistas y API Controllers
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
