@@ -38,13 +38,13 @@ project.fragment.lock.json
 artifacts/
 
 # =====================
-# Secretos / config local (NUNCA subir)
+# Secretos / config local
 # =====================
 appsettings.*.local.json
 appsettings.Local.json
 secrets.json
-.env
 .env.*
+!.env
 !appsettings.example.json
 
 # =====================
@@ -115,7 +115,9 @@ wwwroot/uploads/exercises/*
 postman/*local*
 
 # =====================
-# Scripts SQL locales (no subir a GitHub por ahora)
+# Scripts SQL (permitir esquema.sql oficial de entrega)
 # =====================
 *.sql
+!esquema.sql
+!script.sql
 
