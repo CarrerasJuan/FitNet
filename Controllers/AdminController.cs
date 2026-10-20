@@ -119,6 +119,16 @@ public class AdminController : Controller
         return View(trainers);
     }
 
+    // ==========================================
+    // 4. GESTIÓN REACTIVA DE EJERCICIOS (VUE 3 + AJAX)
+    // ==========================================
+    [HttpGet]
+    [Authorize(Roles = "Admin,Owner")]
+    public IActionResult Exercises()
+    {
+        return View();
+    }
+
     [HttpGet]
     [Authorize(Roles = "Owner")]
     public IActionResult Metrics()
