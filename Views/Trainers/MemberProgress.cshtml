@@ -1,0 +1,252 @@
+@model FitNet.ViewModels.Trainers.TrainerStudentProgressViewModel
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = $"Progreso de {Model.StudentFullName}";
+}
+
+<!-- Encabezado de Página (Metis UI) -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div class="d-flex align-items-center gap-3">
+        @if (!string.IsNullOrEmpty(Model.StudentAvatarPath))
+        {
+            <img src="@Model.StudentAvatarPath" alt="@Model.StudentFullName" class="rounded-circle border border-primary-fn shadow" style="width: 56px; height: 56px; object-fit: cover;" />
+        }
+        else
+        {
+            <div class="rounded-circle bg-surface-fn border border-primary-fn d-inline-flex align-items-center justify-content-center text-primary-fn font-heading" style="width: 56px; height: 56px; font-size: 1.25rem;">
+                @(Model.StudentFullName.Length >= 2 ? Model.StudentFullName.Substring(0, 2).ToUpper() : "FN")
+            </div>
+        }
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary-fn text-dark font-heading text-uppercase">
+                    <i class="fa-solid fa-user-check me-1"></i> Ficha del Alumno
+                </span>
+                <span class="badge bg-info bg-opacity-25 text-info font-heading text-uppercase">
+                    Plan @Model.PlanName
+                </span>
+            </div>
+            <h1 class="font-heading display-6 fw-bold text-white mb-0">@Model.StudentFullName</h1>
+            <p class="text-muted small mb-0">
+                @Model.StudentEmail &bull; @(Model.Age.HasValue ? $"{Model.Age} años" : "Edad s/d") &bull; @(Model.Height.HasValue ? $"{Model.Height} cm" : "Altura s/d")
+            </p>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a asp-action="Members" class="btn btn-outline-secondary text-white font-heading btn-sm">
+            <i class="fa-solid fa-arrow-left me-1"></i> Volver a Mis Alumnos
+        </a>
+        <a asp-controller="WorkoutPlans" asp-action="Create" asp-route-memberId="@Model.MemberProfileId" class="btn btn-primary-fn font-heading btn-sm">
+            <i class="fa-solid fa-dumbbell me-1"></i> Asignar Rutina
+        </a>
+    </div>
+</div>
+
+<!-- ==========================================
+     TARJETAS KPI DE EVOLUCIÓN BIOMÉTRICA
+     ========================================== -->
+<div class="row g-3 g-lg-4 mb-4">
+    <!-- Peso Actual -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-lime">
+                <i class="fa-solid fa-weight-scale"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Peso Actual</div>
+                <div class="stats-value">
+                    @(Model.LatestWeight.HasValue ? $"{Model.LatestWeight.Value:N1} kg" : "s/d")
+                </div>
+                <div class="stats-sub text-primary-fn">Último pesaje registrado</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Variación Acumulada -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-purple">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Variación Acumulada</div>
+                <div class="stats-value">
+                    @if (Model.WeightDifference.HasValue)
+                    {
+                        var diff = Model.WeightDifference.Value;
+                        <span class="@(diff < 0 ? "text-success" : diff > 0 ? "text-warning" : "text-white")">
+                            @(diff > 0 ? $"+{diff:N1}" : $"{diff:N1}") kg
+                        </span>
+                    }
+                    else
+                    {
+                        <span>0.0 kg</span>
+                    }
+                </div>
+                <div class="stats-sub text-muted">Desde el primer control</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Porcentaje Graso -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-blue">
+                <i class="fa-solid fa-percent"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Grasa Corporal</div>
+                <div class="stats-value">
+                    @(Model.LatestBodyFat.HasValue ? $"{Model.LatestBodyFat.Value:N1}%" : "s/d")
+                </div>
+                <div class="stats-sub text-info">Índice adiposo actual</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rutina Activa -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-lime">
+                <i class="fa-solid fa-dumbbell"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Rutina Activa</div>
+                <div class="stats-value text-truncate font-heading" style="font-size: 1.1rem;" title="@Model.ActiveWorkoutPlanName">
+                    @(Model.ActiveWorkoutPlanName ?? "Sin Rutina")
+                </div>
+                <div class="stats-sub text-muted">Plan de entrenamiento</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     GALERÍA FOTOGRÁFICA DE TRANSFORMACIÓN
+     ========================================== -->
+@{
+    var photoRecords = Model.Records.Where(r => !string.IsNullOrEmpty(r.ImagePath)).ToList();
+}
+
+@if (photoRecords.Count > 0)
+{
+    <div class="fn-card mb-4">
+        <div class="fn-card-header d-flex justify-content-between align-items-center">
+            <div class="fn-card-title">
+                <i class="fa-solid fa-camera text-primary-fn"></i>
+                <span>Galería Fotográfica de Transformación Física (@photoRecords.Count fotos)</span>
+            </div>
+        </div>
+        <div class="fn-card-body p-3">
+            <div class="row g-3">
+                @foreach (var rec in photoRecords)
+                {
+                    <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+                        <div class="card bg-surface-fn border border-secondary border-opacity-25 h-100 overflow-hidden shadow-sm">
+                            <a href="@rec.ImagePath" target="_blank" title="Ampliar fotografía">
+                                <img src="@rec.ImagePath" alt="Progreso @rec.Date.ToString("dd/MM/yyyy")" class="card-img-top" style="height: 150px; object-fit: cover;" />
+                            </a>
+                            <div class="card-body p-2 text-center">
+                                <div class="font-heading text-white fw-bold small">
+                                    @(rec.Weight.HasValue ? $"{rec.Weight.Value:N1} kg" : "Control")
+                                </div>
+                                <div class="text-muted small" style="font-size: 0.72rem;">
+                                    @rec.Date.ToString("dd/MM/yyyy")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ==========================================
+     HISTORIAL CRONOLÓGICO DE MEDICIONES
+     ========================================== -->
+<div class="fn-card">
+    <div class="fn-card-header">
+        <div class="fn-card-title">
+            <i class="fa-solid fa-clipboard-list text-primary-fn"></i>
+            <span>Historial Completo de Controles Biométricos</span>
+        </div>
+    </div>
+    <div class="fn-card-body p-0">
+        @if (Model.Records.Count == 0)
+        {
+            <div class="text-center py-5">
+                <i class="fa-solid fa-scale-unbalanced-flip fa-3x text-secondary mb-3 opacity-25"></i>
+                <h5 class="font-heading text-white">SIN REGISTROS BIOMÉTRICOS</h5>
+                <p class="text-muted small mb-0">El alumno todavía no ha registrado pesajes ni fotos corporales de evolución en su portal.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+                    <thead class="bg-surface-fn font-heading text-primary-fn small text-uppercase">
+                        <tr class="border-bottom border-secondary border-opacity-25">
+                            <th class="ps-4">Fecha de Control</th>
+                            <th>Peso (kg)</th>
+                            <th>Grasa Corporal (%)</th>
+                            <th>Fotografía</th>
+                            <th>Notas del Alumno</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        @foreach (var r in Model.Records)
+                        {
+                            <tr class="border-bottom border-secondary border-opacity-10">
+                                <td class="ps-4 font-heading text-white fw-bold">
+                                    <i class="fa-regular fa-calendar me-2 text-primary-fn"></i>
+                                    @r.Date.ToString("dd/MM/yyyy")
+                                </td>
+                                <td>
+                                    @if (r.Weight.HasValue)
+                                    {
+                                        <span class="badge bg-dark border border-secondary text-white font-heading" style="font-size: 0.9rem;">
+                                            @r.Weight.Value.ToString("N1") kg
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (r.BodyFat.HasValue)
+                                    {
+                                        <span class="badge bg-secondary bg-opacity-50 text-white font-heading">
+                                            @r.BodyFat.Value.ToString("N1")%
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(r.ImagePath))
+                                    {
+                                        <a href="@r.ImagePath" target="_blank" class="d-inline-flex align-items-center gap-1 text-primary-fn text-decoration-none small">
+                                            <i class="fa-solid fa-image"></i> Ver Foto
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small fst-italic">Sin foto</span>
+                                    }
+                                </td>
+                                <td class="text-muted small">
+                                    @(r.Notes ?? "Sin observaciones registradas.")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
