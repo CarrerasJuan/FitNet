@@ -1,0 +1,342 @@
+@model FitNet.ViewModels.Trainers.TrainerMembersViewModel
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = "Mis Alumnos Asignados";
+}
+
+<!-- Encabezado de Página (Metis UI) -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-primary-fn text-uppercase font-heading">
+                <i class="fa-solid fa-chalkboard-user me-1"></i> Área de Entrenamiento
+            </span>
+            <span class="badge bg-secondary font-heading text-uppercase">
+                Coach: @Model.TrainerName &bull; @Model.Specialty
+            </span>
+        </div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-1">MIS ATLETAS Y ALUMNOS ASIGNADOS</h1>
+        <p class="text-muted small mb-0">Seguimiento individualizado 1 a 1 de socios Premium, prescripción de rutinas y control de pesajes.</p>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a asp-controller="Trainers" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading btn-sm">
+            <i class="fa-solid fa-arrow-left me-1"></i> Volver a Panel Coach
+        </a>
+        <a asp-controller="WorkoutPlans" asp-action="Create" class="btn btn-primary-fn font-heading btn-sm">
+            <i class="fa-solid fa-plus me-1"></i> Nueva Rutina
+        </a>
+    </div>
+</div>
+
+<!-- Flash Notifications TempData -->
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success bg-success bg-opacity-25 border-success text-white alert-dismissible fade show mb-4 small" role="alert">
+        <i class="fa-solid fa-circle-check me-2 text-primary-fn"></i>
+        @TempData["MensajeExito"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger bg-danger bg-opacity-25 border-danger text-white alert-dismissible fade show mb-4 small" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        @TempData["MensajeError"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- ==========================================
+     TARJETAS KPI RESUMEN DE ATLETAS (Metis UI)
+     ========================================== -->
+<div class="row g-3 g-lg-4 mb-4">
+    <div class="col-sm-6 col-xl-4">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-lime">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Alumnos a Cargo</div>
+                <div class="stats-value">@Model.TotalAssignedCount</div>
+                <div class="stats-sub text-primary-fn">
+                    <i class="fa-solid fa-id-badge me-1"></i>Socios asignados en sistema
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-4">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-purple">
+                <i class="fa-solid fa-clipboard-check"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Con Rutina Activa</div>
+                <div class="stats-value">@Model.ActiveRoutinesCount</div>
+                <div class="stats-sub text-muted">Planificaciones en ejecución</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-4">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-blue">
+                <i class="fa-solid fa-user-clock"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Pendientes de Rutina</div>
+                <div class="stats-value">@Model.WithoutRoutineCount</div>
+                <div class="stats-sub @(Model.WithoutRoutineCount > 0 ? "text-warning" : "text-muted")">
+                    <i class="fa-solid fa-circle-exclamation me-1"></i>Requieren prescripción
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Barra de Filtros y Búsqueda Server-Side -->
+<div class="fn-card mb-4">
+    <div class="fn-card-body p-3">
+        <form method="get" asp-action="Members" class="row g-2 align-items-center">
+            <div class="col-12 col-md-8">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-surface-fn border-secondary border-opacity-25 text-muted">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" 
+                           name="search" 
+                           class="form-control form-control-sm bg-surface-fn border-secondary border-opacity-25 text-white" 
+                           placeholder="Buscar alumno por nombre, apellido o correo..." 
+                           value="@Model.Search" />
+                </div>
+            </div>
+            <div class="col-6 col-md-2">
+                <button type="submit" class="btn btn-primary-fn btn-sm font-heading w-100">
+                    <i class="fa-solid fa-filter me-1"></i> Filtrar
+                </button>
+            </div>
+            <div class="col-6 col-md-2">
+                <a asp-action="Members" class="btn btn-outline-secondary btn-sm text-white font-heading w-100">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==========================================
+     TABLA PAGINADA DE ALUMNOS ASIGNADOS
+     ========================================== -->
+<div class="fn-card">
+    <div class="fn-card-header d-flex justify-content-between align-items-center">
+        <div class="fn-card-title">
+            <i class="fa-solid fa-user-check text-primary-fn"></i>
+            <span>Listado de Alumnos (@Model.TotalItems registrados)</span>
+        </div>
+        <div class="small text-muted font-heading">
+            Página @Model.Page de @(Model.TotalPages > 0 ? Model.TotalPages : 1)
+        </div>
+    </div>
+
+    <div class="fn-card-body p-0">
+        @if (Model.Students.Count == 0)
+        {
+            <div class="text-center py-5">
+                <i class="fa-solid fa-user-xmark fa-3x text-secondary mb-3 opacity-25"></i>
+                <h5 class="font-heading text-white">NO SE ENCONTRARON ALUMNOS</h5>
+                <p class="text-muted small mb-0">
+                    @(string.IsNullOrEmpty(Model.Search) 
+                        ? "Aún no tenés socios asignados a tu cargo. Cuando la administración te vincule atletas Premium, los verás listados aquí." 
+                        : "No hay alumnos que coincidan con el término de búsqueda ingresado.")
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+                    <thead class="bg-surface-fn font-heading text-primary-fn small text-uppercase">
+                        <tr class="border-bottom border-secondary border-opacity-25">
+                            <th class="ps-4">Alumno</th>
+                            <th>Contacto</th>
+                            <th>Plan</th>
+                            <th>Biometría</th>
+                            <th>Rutina Asignada</th>
+                            <th>Último Control</th>
+                            <th class="text-end pe-4" style="width: 170px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        @foreach (var s in Model.Students)
+                        {
+                            <tr class="border-bottom border-secondary border-opacity-10">
+                                <!-- Alumno Avatar + Nombre -->
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if (!string.IsNullOrEmpty(s.AvatarPath))
+                                        {
+                                            <img src="@s.AvatarPath" alt="@s.FullName" class="rounded-circle border border-secondary" style="width: 36px; height: 36px; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="rounded-circle bg-surface-fn border border-secondary border-opacity-50 d-inline-flex align-items-center justify-content-center text-primary-fn font-heading" style="width: 36px; height: 36px; font-size: 0.85rem;">
+                                                @(s.FullName.Length >= 2 ? s.FullName.Substring(0, 2).ToUpper() : "FN")
+                                            </div>
+                                        }
+                                        <div>
+                                            <div class="font-heading text-white fw-bold" style="font-size: 0.95rem;">
+                                                @s.FullName
+                                            </div>
+                                            <div class="text-muted small" style="font-size: 0.75rem;">
+                                                ID Perfil: #@s.MemberProfileId
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Contacto -->
+                                <td>
+                                    <div class="text-white small">@s.Email</div>
+                                    @if (!string.IsNullOrEmpty(s.PhoneNumber))
+                                    {
+                                        <div class="text-muted small" style="font-size: 0.75rem;">
+                                            <i class="fa-solid fa-phone me-1 text-primary-fn"></i>@s.PhoneNumber
+                                        </div>
+                                    }
+                                </td>
+
+                                <!-- Plan -->
+                                <td>
+                                    @if (s.PlanName.Equals("Premium", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25 font-heading">
+                                            <i class="fa-solid fa-gem me-1"></i> PREMIUM
+                                        </span>
+                                    }
+                                    else if (s.PlanName.Equals("Gold", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-25 font-heading">
+                                            <i class="fa-solid fa-crown me-1"></i> GOLD
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary font-heading">@s.PlanName</span>
+                                    }
+                                </td>
+
+                                <!-- Datos Biométricos -->
+                                <td>
+                                    <div class="small text-white">
+                                        @(s.Height.HasValue ? $"{s.Height} cm" : "Altura s/d")
+                                    </div>
+                                    <div class="text-muted small" style="font-size: 0.75rem;">
+                                        @(s.Age.HasValue ? $"{s.Age} años" : "Edad s/d")
+                                    </div>
+                                </td>
+
+                                <!-- Rutina Asignada -->
+                                <td>
+                                    @if (!string.IsNullOrEmpty(s.ActiveWorkoutPlanName))
+                                    {
+                                        <div class="font-heading text-white fw-bold small">
+                                            <i class="fa-solid fa-dumbbell text-primary-fn me-1"></i>@s.ActiveWorkoutPlanName
+                                        </div>
+                                        <div class="text-muted small" style="font-size: 0.75rem;">
+                                            @s.ExercisesInRoutineCount ejercicios &bull; Desde @(s.AssignmentStartDate?.ToString("dd/MM/yyyy") ?? "-")
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25 font-heading">
+                                            Sin Rutina Asignada
+                                        </span>
+                                    }
+                                </td>
+
+                                <!-- Último Control de Peso -->
+                                <td>
+                                    @if (s.LatestWeight.HasValue)
+                                    {
+                                        <div class="font-heading text-white fw-bold small">
+                                            @s.LatestWeight.Value.ToString("N1") kg
+                                            @if (s.LatestBodyFat.HasValue)
+                                            {
+                                                <span class="text-muted fw-normal" style="font-size: 0.75rem;">(@s.LatestBodyFat.Value.ToString("N1")% GC)</span>
+                                            }
+                                        </div>
+                                        <div class="text-muted small" style="font-size: 0.75rem;">
+                                            @(s.LatestProgressDate?.ToString("dd/MM/yyyy") ?? "-") &bull; @s.TotalProgressRecords controles
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small fst-italic">Sin pesajes</span>
+                                    }
+                                </td>
+
+                                <!-- Acciones del Coach -->
+                                <td class="text-end pe-4">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="MemberProgress" 
+                                           asp-route-id="@s.MemberProfileId" 
+                                           class="btn btn-outline-light btn-sm font-heading" 
+                                           title="Ver evolución física y fotos">
+                                            <i class="fa-solid fa-chart-line text-primary-fn me-1"></i> Progreso
+                                        </a>
+                                        <a asp-controller="WorkoutPlans" 
+                                           asp-action="Create" 
+                                           asp-route-memberId="@s.MemberProfileId" 
+                                           class="btn btn-outline-secondary btn-sm text-white" 
+                                           title="Prescribir o cambiar rutina">
+                                            <i class="fa-solid fa-clipboard-plus"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginador Server-Side (Skip / Take) -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 p-3 border-top border-secondary border-opacity-25">
+                    <div class="text-muted small font-heading">
+                        Mostrando @(((Model.Page - 1) * Model.PageSize) + 1) - 
+                        @Math.Min(Model.Page * Model.PageSize, Model.TotalItems) de @Model.TotalItems alumnos
+                    </div>
+
+                    <div class="d-flex align-items-center gap-1">
+                        <a class="btn btn-outline-secondary btn-sm text-white font-heading @(!Model.HasPreviousPage ? "disabled" : "")" 
+                           asp-action="Members" 
+                           asp-route-page="@(Model.Page - 1)" 
+                           asp-route-search="@Model.Search">
+                            <i class="fa-solid fa-chevron-left me-1"></i> Anterior
+                        </a>
+
+                        @for (int p = Math.Max(1, Model.Page - 2); p <= Math.Min(Model.TotalPages, Model.Page + 2); p++)
+                        {
+                            <a class="btn btn-sm font-heading @(p == Model.Page ? "btn-primary-fn text-dark fw-bold" : "btn-outline-secondary text-white")"
+                               asp-action="Members"
+                               asp-route-page="@p"
+                               asp-route-search="@Model.Search">
+                                @p
+                            </a>
+                        }
+
+                        <a class="btn btn-outline-secondary btn-sm text-white font-heading @(!Model.HasNextPage ? "disabled" : "")" 
+                           asp-action="Members" 
+                           asp-route-page="@(Model.Page + 1)" 
+                           asp-route-search="@Model.Search">
+                            Siguiente <i class="fa-solid fa-chevron-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
