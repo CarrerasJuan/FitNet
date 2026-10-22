@@ -18,6 +18,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Inyección de Dependencias de Servicios de FitNet
 builder.Services.AddScoped<FitNet.Services.IFileStorageService, FitNet.Services.FileStorageService>();
 builder.Services.AddScoped<FitNet.Services.IMembershipService, FitNet.Services.MembershipService>();
+builder.Services.AddScoped<FitNet.Services.IMetricsService, FitNet.Services.MetricsService>();
 
 // Configuración de ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>

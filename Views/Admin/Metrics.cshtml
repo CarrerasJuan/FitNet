@@ -1,0 +1,367 @@
+@model FitNet.ViewModels.Admin.BusinessMetricsViewModel
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = "Métricas de Negocio y Performance";
+    var argCulture = System.Globalization.CultureInfo.GetCultureInfo("es-AR");
+}
+
+<!-- Encabezado de Página (Metis UI Pattern) -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-warning text-dark text-uppercase font-heading">
+                <i class="fa-solid fa-crown me-1"></i> Rol Owner Exclusivo
+            </span>
+            <span class="badge bg-secondary font-heading text-uppercase">
+                <i class="fa-solid fa-bolt me-1"></i> Consultas en Tiempo Real (MySQL)
+            </span>
+        </div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-1">MÉTRICAS DE NEGOCIO Y PERFORMANCE</h1>
+        <p class="text-muted small mb-0">Consolidado ejecutivo de ingresos proyectados, conversión de membresías y actividad de la plataforma.</p>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a asp-controller="Admin" asp-action="Metrics" class="btn btn-outline-secondary text-white font-heading btn-sm" title="Recalcular métricas">
+            <i class="fa-solid fa-rotate me-1"></i> Actualizar
+        </a>
+        <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading btn-sm">
+            <i class="fa-solid fa-arrow-left me-1"></i> Volver a Panel
+        </a>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     FILA 1: KPIs FINANCIEROS (INGRESOS RECURRENTES Y PROYECCIONES)
+     ========================================================================== -->
+<div class="row g-3 g-lg-4 mb-4">
+    <!-- MRR: Ingreso Mensual Proyectado -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-lime">
+                <i class="fa-solid fa-sack-dollar"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">MRR Mensual Proyectado</div>
+                <div class="stats-value text-primary-fn">@Model.ProjectedMonthlyRevenue.ToString("C0", argCulture)</div>
+                <div class="stats-sub text-muted">
+                    <i class="fa-solid fa-arrow-trend-up text-primary-fn me-1"></i>Socios de pago activos
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ingreso Semestral Proyectado (con 20% OFF) -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-purple">
+                <i class="fa-solid fa-calendar-days"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Semestral Proyectado</div>
+                <div class="stats-value">@Model.ProjectedSemiannualRevenue.ToString("C0", argCulture)</div>
+                <div class="stats-sub text-muted">
+                    <i class="fa-solid fa-tags text-info me-1"></i>Base 6 meses con 20% OFF
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ARR: Ingreso Anualizado Proyectado -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-blue">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">ARR Anualizado (Run Rate)</div>
+                <div class="stats-value">@Model.ProjectedAnnualRevenue.ToString("C0", argCulture)</div>
+                <div class="stats-sub text-info">
+                    <i class="fa-solid fa-calculator me-1"></i>MRR &times; 12 meses
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ARPU: Ingreso Promedio por Usuario de Pago -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-orange">
+                <i class="fa-solid fa-receipt"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Ticket Promedio (ARPU)</div>
+                <div class="stats-value">@Model.AverageRevenuePerUser.ToString("C0", argCulture)</div>
+                <div class="stats-sub text-warning">
+                    <i class="fa-solid fa-user-tag me-1"></i>Por socio Gold / Premium
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     FILA 2: DISTRIBUCIÓN DE PLANES & EMBUDO DE CONVERSIÓN
+     ========================================================================== -->
+<div class="row g-4 mb-4">
+    <!-- Distribución de Membresías -->
+    <div class="col-lg-6">
+        <div class="fn-card h-100">
+            <div class="fn-card-header d-flex justify-content-between align-items-center">
+                <div class="fn-card-title">
+                    <i class="fa-solid fa-pie-chart text-primary-fn"></i>
+                    <span>Distribución de Socios por Membresía</span>
+                </div>
+                <span class="badge bg-dark border border-secondary text-white font-monospace">
+                    @Model.TotalMembers socios totales
+                </span>
+            </div>
+
+            <div class="fn-card-body p-4">
+                <p class="text-muted small mb-4">
+                    Composición del padrón activo clasificado por nivel de membresía comercial:
+                </p>
+
+                <div class="d-flex flex-column gap-4">
+                    @foreach (var plan in Model.PlanDistribution)
+                    {
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-white font-heading">
+                                    <span class="badge bg-@plan.BadgeColor me-2">@plan.PlanName</span>
+                                    @if (plan.MonthlyPrice > 0)
+                                    {
+                                        <span class="text-muted small">(@plan.MonthlyPrice.ToString("C0", argCulture)/mes)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">(Trial Gratuito)</span>
+                                    }
+                                </span>
+                                <div class="text-end">
+                                    <strong class="text-white">@plan.MemberCount socios</strong>
+                                    <span class="text-muted small ms-1">(@plan.Percentage%)</span>
+                                </div>
+                            </div>
+                            <div class="progress bg-dark border border-secondary border-opacity-25" style="height: 10px;">
+                                <div class="progress-bar bg-@plan.BadgeColor" role="progressbar" style="width: @plan.Percentage%;" aria-valuenow="@plan.Percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between text-muted small">
+                    <span><i class="fa-solid fa-gem text-info me-1"></i> Premium: <strong>@Model.PremiumMembersCount</strong></span>
+                    <span><i class="fa-solid fa-crown text-warning me-1"></i> Gold: <strong>@Model.GoldMembersCount</strong></span>
+                    <span><i class="fa-solid fa-clock text-secondary me-1"></i> Free Trial: <strong>@Model.FreeMembersCount</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Embudo de Conversión de Trial a Planes Pagos -->
+    <div class="col-lg-6">
+        <div class="fn-card h-100">
+            <div class="fn-card-header d-flex justify-content-between align-items-center">
+                <div class="fn-card-title">
+                    <i class="fa-solid fa-filter-circle-dollar text-primary-fn"></i>
+                    <span>Tasa de Conversión (Free Trial &rarr; Pago)</span>
+                </div>
+                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">
+                    <i class="fa-solid fa-arrow-trend-up me-1"></i> Eficiencia Comercial
+                </span>
+            </div>
+
+            <div class="fn-card-body p-4">
+                <div class="d-flex align-items-center justify-content-between p-3 rounded bg-surface-fn border border-secondary border-opacity-25 mb-4">
+                    <div>
+                        <div class="text-muted small font-heading text-uppercase">Tasa de Conversión Global</div>
+                        <div class="display-5 fw-bold text-primary-fn font-heading">
+                            @Model.ConversionRate%
+                        </div>
+                        <div class="text-muted small">
+                            De atletas registrados que migraron a membresías Gold o Premium.
+                        </div>
+                    </div>
+                    <div class="rounded-circle bg-dark border border-primary-fn p-3 text-primary-fn d-none d-sm-block">
+                        <i class="fa-solid fa-users-viewfinder fa-2x"></i>
+                    </div>
+                </div>
+
+                <!-- Desglose de conversión -->
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="p-3 rounded bg-dark border border-secondary border-opacity-25">
+                            <div class="text-muted small font-heading">Socios de Pago</div>
+                            <div class="h4 fw-bold text-white mb-0 mt-1">@Model.PaidMembersCount</div>
+                            <small class="text-success"><i class="fa-solid fa-check me-1"></i>Planes Gold & Premium</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 rounded bg-dark border border-secondary border-opacity-25">
+                            <div class="text-muted small font-heading">En Plan Free</div>
+                            <div class="h4 fw-bold text-white mb-0 mt-1">@Model.FreeMembersCount</div>
+                            <small class="text-warning"><i class="fa-solid fa-user-clock me-1"></i>Trial 24h asignado</small>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="p-2 px-3 rounded bg-dark border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Trials Vigentes:</span>
+                            <strong class="text-success">@Model.ActiveTrialsCount</strong>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2 px-3 rounded bg-dark border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Trials Expirados:</span>
+                            <strong class="text-danger">@Model.ExpiredTrialsCount</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     FILA 3: SALUD DE ATLETAS & ECOSISTEMA OPERATIVO
+     ========================================================================== -->
+<div class="row g-4">
+    <!-- Atletas Activos vs Inactivos -->
+    <div class="col-lg-6">
+        <div class="fn-card h-100">
+            <div class="fn-card-header">
+                <div class="fn-card-title">
+                    <i class="fa-solid fa-heart-pulse text-primary-fn"></i>
+                    <span>Actividad y Retención de Atletas</span>
+                </div>
+            </div>
+
+            <div class="fn-card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-white font-heading">Retención del Padrón:</span>
+                    <strong class="text-primary-fn font-heading">@Model.ActiveAthletesPercentage% vigentes</strong>
+                </div>
+
+                <!-- Barra Doble Activo vs Inactivo -->
+                <div class="progress bg-dark border border-secondary border-opacity-25 mb-4" style="height: 14px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: @Model.ActiveAthletesPercentage%;" title="Activos: @Model.ActiveAthletesCount"></div>
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: @(100 - Model.ActiveAthletesPercentage)%;" title="Inactivos: @Model.InactiveAthletesCount"></div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="p-3 rounded bg-dark border border-success border-opacity-25">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-success rounded-circle p-1"></span>
+                                <span class="text-muted small font-heading">Atletas Activos</span>
+                            </div>
+                            <div class="h3 fw-bold text-white mb-0">@Model.ActiveAthletesCount</div>
+                            <small class="text-muted">Membresía o trial vigente</small>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="p-3 rounded bg-dark border border-danger border-opacity-25">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-danger rounded-circle p-1"></span>
+                                <span class="text-muted small font-heading">Atletas Inactivos</span>
+                            </div>
+                            <div class="h3 fw-bold text-white mb-0">@Model.InactiveAthletesCount</div>
+                            <small class="text-muted">Vencidos o trial finalizado</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-dark border border-secondary border-opacity-25 small text-muted mt-4 mb-0">
+                    <i class="fa-solid fa-circle-info text-primary-fn me-1"></i>
+                    Un socio se considera <strong>activo</strong> si su fecha límite (<code class="text-warning">TrialEndsAt</code>) es mayor al tiempo actual en UTC.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ecosistema Operativo del Gimnasio -->
+    <div class="col-lg-6">
+        <div class="fn-card h-100">
+            <div class="fn-card-header">
+                <div class="fn-card-title">
+                    <i class="fa-solid fa-cubes-stacked text-primary-fn"></i>
+                    <span>Ecosistema y Métricas de Operación</span>
+                </div>
+            </div>
+
+            <div class="fn-card-body p-4">
+                <div class="row g-3">
+                    <!-- Entrenadores -->
+                    <div class="col-6">
+                        <div class="p-3 rounded bg-surface-fn border border-secondary border-opacity-25 d-flex align-items-center gap-3">
+                            <div class="rounded bg-dark p-3 text-info border border-secondary border-opacity-50">
+                                <i class="fa-solid fa-user-tie fa-lg"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small font-heading">Staff Coaches</div>
+                                <div class="h4 fw-bold text-white mb-0">@Model.TotalTrainersCount</div>
+                                <small class="text-muted">Profesionales</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rutinas en Catálogo -->
+                    <div class="col-6">
+                        <div class="p-3 rounded bg-surface-fn border border-secondary border-opacity-25 d-flex align-items-center gap-3">
+                            <div class="rounded bg-dark p-3 text-warning border border-secondary border-opacity-50">
+                                <i class="fa-solid fa-clipboard-list fa-lg"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small font-heading">Rutinas Totales</div>
+                                <div class="h4 fw-bold text-white mb-0">@Model.TotalWorkoutPlansCount</div>
+                                <small class="text-muted">Planes creados</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Asignaciones Activas -->
+                    <div class="col-6">
+                        <div class="p-3 rounded bg-surface-fn border border-secondary border-opacity-25 d-flex align-items-center gap-3">
+                            <div class="rounded bg-dark p-3 text-primary-fn border border-secondary border-opacity-50">
+                                <i class="fa-solid fa-dumbbell fa-lg"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small font-heading">Rutinas Activas</div>
+                                <div class="h4 fw-bold text-white mb-0">@Model.ActiveWorkoutAssignmentsCount</div>
+                                <small class="text-muted">Asignadas a alumnos</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pesajes y Progreso -->
+                    <div class="col-6">
+                        <div class="p-3 rounded bg-surface-fn border border-secondary border-opacity-25 d-flex align-items-center gap-3">
+                            <div class="rounded bg-dark p-3 text-success border border-secondary border-opacity-50">
+                                <i class="fa-solid fa-weight-scale fa-lg"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small font-heading">Evoluciones</div>
+                                <div class="h4 fw-bold text-white mb-0">@Model.TotalProgressRecordsCount</div>
+                                <small class="text-muted">Fotos y pesajes</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded bg-dark border border-secondary border-opacity-25 text-center mt-4">
+                    <span class="text-muted small">
+                        <i class="fa-solid fa-database text-primary-fn me-1"></i>
+                        Todas las agregaciones financieras y operativas fueron computadas nativamente en MySQL sin desbordar memoria.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pie de Auditoría -->
+<div class="text-center text-muted small mt-4 pt-2">
+    <i class="fa-solid fa-shield-halved me-1 text-primary-fn"></i>
+    Auditoría ejecutiva generada el @Model.GeneratedAt.ToString("dd/MM/yyyy HH:mm:ss") UTC &bull; FitNet Business Intelligence
+</div>
