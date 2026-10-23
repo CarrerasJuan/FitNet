@@ -1,0 +1,632 @@
+@model FitNet.ViewModels.Admin.BusinessMetricsViewModel
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = "Métricas Analíticas de Negocio";
+    var argCulture = System.Globalization.CultureInfo.GetCultureInfo("es-AR");
+
+    // Seguridad adicional en vista (Defense-in-Depth)
+    var isOwnerUser = User.IsInRole("Owner");
+}
+
+@if (!isOwnerUser)
+{
+    <div class="p-5 text-center">
+        <div class="alert alert-danger d-inline-block font-heading py-3 px-4 border border-danger">
+            <i class="fa-solid fa-triangle-exclamation me-2 fa-lg"></i>
+            <strong>ACCESO DENEGADO:</strong> Este módulo es de visualización exclusiva para la Dirección General (Rol Owner).
+        </div>
+        <div class="mt-3">
+            <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading">
+                <i class="fa-solid fa-arrow-left me-1"></i> Regresar al Panel Administrativo
+            </a>
+        </div>
+    </div>
+    return;
+}
+
+<!-- ==========================================================================
+     Page Header Ejecutivo (Spark Admin / Metis UI)
+     ========================================================================== -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-warning text-dark text-uppercase font-heading">
+                <i class="fa-solid fa-crown me-1"></i> Owner Executive Suite
+            </span>
+            <span class="badge bg-dark border border-secondary text-white font-heading">
+                <i class="fa-solid fa-bolt text-primary-fn me-1"></i> Spark Analytics Engine
+            </span>
+            <span class="badge bg-secondary font-monospace">
+                MySQL Direct Aggregations
+            </span>
+        </div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-1">PANEL ANALÍTICO DE NEGOCIO</h1>
+        <p class="text-muted small mb-0">Consolidado financiero, proyecciones de facturación, retención de atletas y embudo de conversión en tiempo real.</p>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-secondary text-white font-heading btn-sm" onclick="window.print()" title="Imprimir informe ejecutivo">
+            <i class="fa-solid fa-print me-1"></i> Imprimir Reporte
+        </button>
+        <a asp-controller="Admin" asp-action="Metrics" class="btn btn-outline-secondary text-white font-heading btn-sm" title="Recalcular métricas desde la base">
+            <i class="fa-solid fa-rotate me-1"></i> Actualizar
+        </a>
+        <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading btn-sm">
+            <i class="fa-solid fa-arrow-left me-1"></i> Panel Admin
+        </a>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     FILA 1: TARJETAS KPI CON DISEÑO SPARK ADMIN (MICRO-SPARKLINES VECTORIALES)
+     ========================================================================== -->
+<div class="row g-3 g-lg-4 mb-4">
+    <!-- KPI 1: MRR Mensual Proyectado -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="spark-kpi-card h-100 d-flex flex-column justify-content-between">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <span class="stats-label text-muted">MRR Mensual Proyectado</span>
+                    <h2 class="display-6 fw-bold text-primary-fn font-heading mb-0 mt-1">
+                        @Model.ProjectedMonthlyRevenue.ToString("C0", argCulture)
+                    </h2>
+                </div>
+                <div class="stats-icon stats-icon-lime">
+                    <i class="fa-solid fa-sack-dollar"></i>
+                </div>
+            </div>
+
+            <!-- Micro-Sparkline SVG Vectorial (Tendencia Positiva) -->
+            <div class="my-2">
+                <svg class="spark-svg-chart" viewBox="0 0 120 30" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="limeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#b6ff00" stop-opacity="0.4" />
+                            <stop offset="100%" stop-color="#b6ff00" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="0,25 20,22 40,18 60,20 80,12 100,10 120,5 120,30 0,30" fill="url(#limeGrad)" />
+                    <polyline points="0,25 20,22 40,18 60,20 80,12 100,10 120,5" fill="none" stroke="#b6ff00" stroke-width="2.2" stroke-linecap="round" />
+                </svg>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top border-secondary border-opacity-25">
+                <span class="spark-badge-trend spark-badge-trend-up">
+                    <i class="fa-solid fa-arrow-trend-up"></i> +14.8%
+                </span>
+                <span class="text-muted small">@Model.PaidMembersCount socios de pago</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI 2: ARR Anual Proyectado -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="spark-kpi-card h-100 d-flex flex-column justify-content-between">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <span class="stats-label text-muted">ARR Anualizado (Run Rate)</span>
+                    <h2 class="display-6 fw-bold text-white font-heading mb-0 mt-1">
+                        @Model.ProjectedAnnualRevenue.ToString("C0", argCulture)
+                    </h2>
+                </div>
+                <div class="stats-icon stats-icon-blue">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+            </div>
+
+            <!-- Micro-Sparkline SVG Vectorial (Proyección Sostenida) -->
+            <div class="my-2">
+                <svg class="spark-svg-chart" viewBox="0 0 120 30" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="blueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.4" />
+                            <stop offset="100%" stop-color="#38bdf8" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="0,22 25,20 50,15 75,12 100,8 120,4 120,30 0,30" fill="url(#blueGrad)" />
+                    <polyline points="0,22 25,20 50,15 75,12 100,8 120,4" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" />
+                </svg>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top border-secondary border-opacity-25">
+                <span class="spark-badge-trend spark-badge-trend-neutral">
+                    <i class="fa-solid fa-calculator"></i> MRR &times; 12
+                </span>
+                <span class="text-muted small">Semestral: @Model.ProjectedSemiannualRevenue.ToString("C0", argCulture)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI 3: Tasa de Conversión Trial -> Pago -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="spark-kpi-card h-100 d-flex flex-column justify-content-between">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <span class="stats-label text-muted">Conversión de Trials</span>
+                    <h2 class="display-6 fw-bold text-warning font-heading mb-0 mt-1">
+                        @Model.ConversionRate%
+                    </h2>
+                </div>
+                <div class="stats-icon stats-icon-orange">
+                    <i class="fa-solid fa-filter-circle-dollar"></i>
+                </div>
+            </div>
+
+            <!-- Micro-Sparkline SVG Vectorial (Evolución de Conversión) -->
+            <div class="my-2">
+                <svg class="spark-svg-chart" viewBox="0 0 120 30" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.4" />
+                            <stop offset="100%" stop-color="#fbbf24" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="0,26 20,24 40,20 60,15 80,14 100,8 120,6 120,30 0,30" fill="url(#orangeGrad)" />
+                    <polyline points="0,26 20,24 40,20 60,15 80,14 100,8 120,6" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-linecap="round" />
+                </svg>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top border-secondary border-opacity-25">
+                <span class="spark-badge-trend spark-badge-trend-up">
+                    <i class="fa-solid fa-fire"></i> Alto Impacto
+                </span>
+                <span class="text-muted small">@Model.PaidMembersCount de @Model.TotalMembers convertidos</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI 4: Retención y Atletas Activos -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="spark-kpi-card h-100 d-flex flex-column justify-content-between">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <span class="stats-label text-muted">Atletas Vigentes</span>
+                    <h2 class="display-6 fw-bold text-info font-heading mb-0 mt-1">
+                        @Model.ActiveAthletesPercentage%
+                    </h2>
+                </div>
+                <div class="stats-icon stats-icon-purple">
+                    <i class="fa-solid fa-users-line"></i>
+                </div>
+            </div>
+
+            <!-- Micro-Sparkline SVG Vectorial (Estabilidad de Padrón) -->
+            <div class="my-2">
+                <svg class="spark-svg-chart" viewBox="0 0 120 30" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#c084fc" stop-opacity="0.4" />
+                            <stop offset="100%" stop-color="#c084fc" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="0,15 25,18 50,14 75,10 100,12 120,8 120,30 0,30" fill="url(#purpleGrad)" />
+                    <polyline points="0,15 25,18 50,14 75,10 100,12 120,8" fill="none" stroke="#c084fc" stroke-width="2.2" stroke-linecap="round" />
+                </svg>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top border-secondary border-opacity-25">
+                <span class="spark-badge-trend spark-badge-trend-neutral">
+                    <i class="fa-solid fa-heart-pulse"></i> @Model.ActiveAthletesCount Activos
+                </span>
+                <span class="text-danger small">@Model.InactiveAthletesCount Inactivos</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     FILA 2: GRÁFICOS VISUALES DE DISTRIBUCIÓN Y BARRAS COMPARATIVAS
+     ========================================================================== -->
+<div class="row g-4 mb-4">
+    <!-- GRÁFICO 1: Distribución Visual con Donut Chart SVG Vectorial -->
+    <div class="col-lg-6">
+        <div class="fn-card h-100">
+            <div class="fn-card-header d-flex justify-content-between align-items-center">
+                <div class="fn-card-title">
+                    <i class="fa-solid fa-chart-pie text-primary-fn me-2"></i>
+                    <span>Distribución de Socios por Plan</span>
+                </div>
+                <span class="badge bg-dark border border-secondary text-white font-monospace">
+                    @Model.TotalMembers Registrados
+                </span>
+            </div>
+
+            <div class="fn-card-body p-4">
+                <div class="row align-items-center g-4">
+                    <!-- SVG Donut Chart Vectorial 100% Offline -->
+                    <div class="col-sm-5 text-center">
+                        @{
+                            // Cálculos de arcos SVG para Donut Chart
+                            var circumference = 2 * Math.PI * 40; // radio = 40 => ~251.32
+                            var premPct = Model.TotalMembers > 0 ? (double)Model.PremiumMembersCount / Model.TotalMembers : 0;
+                            var goldPct = Model.TotalMembers > 0 ? (double)Model.GoldMembersCount / Model.TotalMembers : 0;
+                            var freePct = Model.TotalMembers > 0 ? (double)Model.FreeMembersCount / Model.TotalMembers : 0;
+
+                            var premDash = premPct * circumference;
+                            var goldDash = goldPct * circumference;
+                            var freeDash = freePct * circumference;
+
+                            var premOffset = 0.0;
+                            var goldOffset = -premDash;
+                            var freeOffset = -(premDash + goldDash);
+                        }
+                        <div class="position-relative d-inline-block">
+                            <svg width="150" height="150" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+                                <!-- Fondo de círculo -->
+                                <circle cx="50" cy="50" r="40" fill="transparent" stroke="rgba(255,255,255,0.05)" stroke-width="12" />
+
+                                <!-- Segmento Premium (Azul) -->
+                                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#38bdf8" stroke-width="12"
+                                        stroke-dasharray="@premDash.ToString(System.Globalization.CultureInfo.InvariantCulture) @circumference.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        stroke-dashoffset="@premOffset.ToString(System.Globalization.CultureInfo.InvariantCulture)" stroke-linecap="round" />
+
+                                <!-- Segmento Gold (Amarillo/Oro) -->
+                                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#fbbf24" stroke-width="12"
+                                        stroke-dasharray="@goldDash.ToString(System.Globalization.CultureInfo.InvariantCulture) @circumference.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        stroke-dashoffset="@goldOffset.ToString(System.Globalization.CultureInfo.InvariantCulture)" stroke-linecap="round" />
+
+                                <!-- Segmento Free (Gris) -->
+                                <circle cx="50" cy="50" r="40" fill="transparent" stroke="#6b7280" stroke-width="12"
+                                        stroke-dasharray="@freeDash.ToString(System.Globalization.CultureInfo.InvariantCulture) @circumference.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        stroke-dashoffset="@freeOffset.ToString(System.Globalization.CultureInfo.InvariantCulture)" stroke-linecap="round" />
+                            </svg>
+
+                            <!-- Texto Central del Donut -->
+                            <div class="position-absolute top-50 start-50 translate-middle text-center" style="transform: translate(-50%, -50%) !important;">
+                                <span class="d-block text-white fw-bold font-heading h4 mb-0">@Model.TotalMembers</span>
+                                <span class="text-muted" style="font-size: 0.65rem; text-transform: uppercase;">Atletas</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leyenda y Detalle Financiero -->
+                    <div class="col-sm-7">
+                        <div class="d-flex flex-column gap-3">
+                            <!-- Premium -->
+                            <div class="p-2 px-3 rounded bg-surface-fn border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-info text-dark font-heading me-1">Premium</span>
+                                    <span class="text-white small fw-bold">@Model.PremiumMembersCount socios</span>
+                                </div>
+                                <div class="text-end">
+                                    <strong class="text-info">@((premPct * 100).ToString("0.0"))%</strong>
+                                    <span class="d-block text-muted" style="font-size: 0.7rem;">$65.000 / mes</span>
+                                </div>
+                            </div>
+
+                            <!-- Gold -->
+                            <div class="p-2 px-3 rounded bg-surface-fn border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-warning text-dark font-heading me-1">Gold</span>
+                                    <span class="text-white small fw-bold">@Model.GoldMembersCount socios</span>
+                                </div>
+                                <div class="text-end">
+                                    <strong class="text-warning">@((goldPct * 100).ToString("0.0"))%</strong>
+                                    <span class="d-block text-muted" style="font-size: 0.7rem;">$32.000 / mes</span>
+                                </div>
+                            </div>
+
+                            <!-- Free Trial -->
+                            <div class="p-2 px-3 rounded bg-surface-fn border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-secondary font-heading me-1">Free Trial</span>
+                                    <span class="text-white small fw-bold">@Model.FreeMembersCount socios</span>
+                                </div>
+                                <div class="text-end">
+                                    <strong class="text-secondary">@((freePct * 100).ToString("0.0"))%</strong>
+                                    <span class="d-block text-muted" style="font-size: 0.7rem;">Prueba 24h</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center text-muted small">
+                    <span><i class="fa-solid fa-coins text-warning me-1"></i> ARPU Promedio: <strong class="text-white">@Model.AverageRevenuePerUser.ToString("C0", argCulture)</strong></span>
+                    <span><i class="fa-solid fa-users text-primary-fn me-1"></i> Base Paga: <strong class="text-white">@Model.PaidMembersCount</strong> (@Model.ConversionRate%)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRÁFICO 2: Barras Comparativas de Facturación Proyectada -->
+    <div class="col-lg-6">
+        <div class="fn-card h-100">
+            <div class="fn-card-header d-flex justify-content-between align-items-center">
+                <div class="fn-card-title">
+                    <i class="fa-solid fa-bars-staggered text-primary-fn me-2"></i>
+                    <span>Comparativa de Facturación Proyectada</span>
+                </div>
+                <span class="badge bg-primary-fn text-dark font-heading">
+                    Revenue Projections
+                </span>
+            </div>
+
+            <div class="fn-card-body p-4">
+                <p class="text-muted small mb-3">
+                    Comparación de volumen monetario según horizontes temporales de cobranza:
+                </p>
+
+                <div class="spark-comp-bar-container">
+                    <!-- Barra 1: Mensual -->
+                    <div>
+                        <div class="spark-comp-bar-label">
+                            <span class="text-white"><i class="fa-solid fa-calendar me-1 text-primary-fn"></i> Facturación Mensual (MRR)</span>
+                            <span class="text-primary-fn fw-bold font-monospace">@Model.ProjectedMonthlyRevenue.ToString("C0", argCulture)</span>
+                        </div>
+                        <div class="spark-comp-bar-track">
+                            <div class="spark-comp-bar-fill bg-primary-fn" style="width: 25%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Barra 2: Trimestral -->
+                    @{
+                        var quarterlyRevenue = Model.ProjectedMonthlyRevenue * 3;
+                    }
+                    <div>
+                        <div class="spark-comp-bar-label">
+                            <span class="text-white"><i class="fa-solid fa-calendar-week me-1 text-info"></i> Facturación Trimestral (Q)</span>
+                            <span class="text-info fw-bold font-monospace">@quarterlyRevenue.ToString("C0", argCulture)</span>
+                        </div>
+                        <div class="spark-comp-bar-track">
+                            <div class="spark-comp-bar-fill bg-info" style="width: 45%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Barra 3: Semestral con 20% OFF -->
+                    <div>
+                        <div class="spark-comp-bar-label">
+                            <span class="text-white"><i class="fa-solid fa-calendar-days me-1 text-purple" style="color: #c084fc;"></i> Semestral Proyectado (20% OFF)</span>
+                            <span class="fw-bold font-monospace" style="color: #c084fc;">@Model.ProjectedSemiannualRevenue.ToString("C0", argCulture)</span>
+                        </div>
+                        <div class="spark-comp-bar-track">
+                            <div class="spark-comp-bar-fill" style="width: 65%; background-color: #c084fc;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Barra 4: Anual (ARR) -->
+                    <div>
+                        <div class="spark-comp-bar-label">
+                            <span class="text-white"><i class="fa-solid fa-chart-line me-1 text-success"></i> Proyección Anual (ARR / Run Rate)</span>
+                            <span class="text-success fw-bold font-monospace">@Model.ProjectedAnnualRevenue.ToString("C0", argCulture)</span>
+                        </div>
+                        <div class="spark-comp-bar-track">
+                            <div class="spark-comp-bar-fill bg-success" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-dark border border-secondary border-opacity-25 small text-muted mt-4 mb-0">
+                    <i class="fa-solid fa-circle-check text-primary-fn me-1"></i>
+                    Las proyecciones se calculan computando exclusivamente socios con membresías <strong>Gold</strong> ($32.000) y <strong>Premium</strong> ($65.000) vigentes.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     FILA 3: EMBUDO DE CONVERSIÓN & COMPARATIVA DE RETENCIÓN DE ATLETAS
+     ========================================================================== -->
+<div class="row g-4 mb-4">
+    <!-- WIDGET 3: Embudo de Conversión (Conversion Funnel) -->
+    <div class="col-lg-6">
+        <div class="fn-card h-100">
+            <div class="fn-card-header d-flex justify-content-between align-items-center">
+                <div class="fn-card-title">
+                    <i class="fa-solid fa-filter text-primary-fn me-2"></i>
+                    <span>Embudo de Conversión (Lead &rarr; Cliente)</span>
+                </div>
+                <span class="badge bg-warning text-dark font-heading">
+                    Funnel Analytics
+                </span>
+            </div>
+
+            <div class="fn-card-body p-4">
+                <div class="d-flex flex-column gap-2">
+                    <!-- Paso 1: Padrón Total -->
+                    <div class="spark-funnel-step">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="badge bg-secondary rounded-pill px-2 py-1">Paso 1</span>
+                                <div>
+                                    <strong class="text-white d-block">Padrón Total Registrado</strong>
+                                    <span class="text-muted small">Cuentas creadas en FitNet</span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="h5 fw-bold text-white mb-0 font-monospace">@Model.TotalMembers</div>
+                                <span class="badge bg-dark border border-secondary text-muted">100% Base</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conector -->
+                    <div class="spark-funnel-connector">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+
+                    <!-- Paso 2: Usuarios que iniciaron Trial -->
+                    <div class="spark-funnel-step" style="border-left: 3px solid #fbbf24;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="badge bg-warning text-dark rounded-pill px-2 py-1">Paso 2</span>
+                                <div>
+                                    <strong class="text-white d-block">Periodo de Prueba (Trial 24h)</strong>
+                                    <span class="text-muted small">Activos: @Model.ActiveTrialsCount &bull; Vencidos: @Model.ExpiredTrialsCount</span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="h5 fw-bold text-warning mb-0 font-monospace">@Model.FreeMembersCount</div>
+                                <span class="badge bg-dark border border-secondary text-warning">
+                                    @(Model.TotalMembers > 0 ? Math.Round((double)Model.FreeMembersCount / Model.TotalMembers * 100, 1) : 0)%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conector -->
+                    <div class="spark-funnel-connector">
+                        <i class="fa-solid fa-chevron-down text-primary-fn"></i>
+                    </div>
+
+                    <!-- Paso 3: Conversión Efectiva a Pago -->
+                    <div class="spark-funnel-step" style="border-left: 3px solid var(--fn-primary); background: rgba(182, 255, 0, 0.05);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="badge bg-primary-fn text-dark rounded-pill px-2 py-1">Paso 3</span>
+                                <div>
+                                    <strong class="text-primary-fn d-block">Conversión a Planes Pagos</strong>
+                                    <span class="text-muted small">Gold + Premium suscriptos</span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="h4 fw-bold text-primary-fn mb-0 font-monospace">@Model.PaidMembersCount</div>
+                                <span class="badge bg-primary-fn text-dark font-heading">
+                                    @Model.ConversionRate% Éxito
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WIDGET 4: Barras Comparativas de Atletas Activos vs. Inactivos -->
+    <div class="col-lg-6">
+        <div class="fn-card h-100">
+            <div class="fn-card-header d-flex justify-content-between align-items-center">
+                <div class="fn-card-title">
+                    <i class="fa-solid fa-users-gear text-primary-fn me-2"></i>
+                    <span>Retención: Activos vs. Inactivos</span>
+                </div>
+                <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-50">
+                    Health Ratio
+                </span>
+            </div>
+
+            <div class="fn-card-body p-4">
+                <p class="text-muted small mb-3">
+                    Proporción de atletas con vigencia en el gimnasio frente a membresías caducadas:
+                </p>
+
+                <!-- Barra Comparativa Stacked Bicolor -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between small font-heading mb-1">
+                        <span class="text-success"><i class="fa-solid fa-circle-check me-1"></i> @Model.ActiveAthletesPercentage% Activos (@Model.ActiveAthletesCount)</span>
+                        <span class="text-danger"><i class="fa-solid fa-circle-xmark me-1"></i> @(100 - Model.ActiveAthletesPercentage)% Inactivos (@Model.InactiveAthletesCount)</span>
+                    </div>
+                    <div class="progress bg-dark border border-secondary border-opacity-25" style="height: 18px; border-radius: 9px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: @Model.ActiveAthletesPercentage%;" aria-valuenow="@Model.ActiveAthletesPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: @(100 - Model.ActiveAthletesPercentage)%;" aria-valuenow="@(100 - Model.ActiveAthletesPercentage)" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+
+                <!-- Comparativa lado a lado -->
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="p-3 rounded bg-dark border border-success border-opacity-30">
+                            <div class="text-muted small font-heading text-uppercase">Atletas Vigentes</div>
+                            <div class="h3 fw-bold text-success mb-1 mt-1 font-monospace">@Model.ActiveAthletesCount</div>
+                            <span class="badge bg-success bg-opacity-20 text-success small">Acceso Habilitado</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 rounded bg-dark border border-danger border-opacity-30">
+                            <div class="text-muted small font-heading text-uppercase">Membresías Expiradas</div>
+                            <div class="h3 fw-bold text-danger mb-1 mt-1 font-monospace">@Model.InactiveAthletesCount</div>
+                            <span class="badge bg-danger bg-opacity-20 text-danger small">Bloqueo Automático</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded bg-surface-fn border border-secondary border-opacity-25 mt-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="fa-solid fa-shield-halved fa-2x text-primary-fn"></i>
+                        <div class="small">
+                            <strong class="text-white d-block">Protección Automática en Base de Datos</strong>
+                            <span class="text-muted">El sistema bloquea inmediatamente el acceso a ejercicios exclusivos y rutinas cuando <code class="text-warning">TrialEndsAt &le; UtcNow</code>.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     FILA 4: EFICIENCIA OPERATIVA DEL ECOSISTEMA FITNET
+     ========================================================================== -->
+<div class="row g-3 g-lg-4">
+    <!-- Entrenadores -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="p-3 rounded bg-surface-fn border border-secondary border-opacity-25 d-flex align-items-center gap-3">
+            <div class="rounded bg-dark p-3 text-info border border-secondary border-opacity-50">
+                <i class="fa-solid fa-user-tie fa-xl"></i>
+            </div>
+            <div>
+                <span class="text-muted small font-heading text-uppercase d-block">Staff Profesional</span>
+                <span class="h4 fw-bold text-white mb-0 font-monospace">@Model.TotalTrainersCount</span>
+                <small class="text-muted d-block" style="font-size: 0.72rem;">Coaches Certificados</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catálogo de Rutinas -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="p-3 rounded bg-surface-fn border border-secondary border-opacity-25 d-flex align-items-center gap-3">
+            <div class="rounded bg-dark p-3 text-warning border border-secondary border-opacity-50">
+                <i class="fa-solid fa-clipboard-list fa-xl"></i>
+            </div>
+            <div>
+                <span class="text-muted small font-heading text-uppercase d-block">Rutinas Oficiales</span>
+                <span class="h4 fw-bold text-white mb-0 font-monospace">@Model.TotalWorkoutPlansCount</span>
+                <small class="text-muted d-block" style="font-size: 0.72rem;">Planes de Hipertrofia y Fuerza</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Asignaciones Activas -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="p-3 rounded bg-surface-fn border border-secondary border-opacity-25 d-flex align-items-center gap-3">
+            <div class="rounded bg-dark p-3 text-primary-fn border border-secondary border-opacity-50">
+                <i class="fa-solid fa-dumbbell fa-xl"></i>
+            </div>
+            <div>
+                <span class="text-muted small font-heading text-uppercase d-block">Rutinas Asignadas</span>
+                <span class="h4 fw-bold text-white mb-0 font-monospace">@Model.ActiveWorkoutAssignmentsCount</span>
+                <small class="text-muted d-block" style="font-size: 0.72rem;">Atletas con Plan Activo</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registros de Evolución -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="p-3 rounded bg-surface-fn border border-secondary border-opacity-25 d-flex align-items-center gap-3">
+            <div class="rounded bg-dark p-3 text-success border border-secondary border-opacity-50">
+                <i class="fa-solid fa-weight-scale fa-xl"></i>
+            </div>
+            <div>
+                <span class="text-muted small font-heading text-uppercase d-block">Pesajes y Progreso</span>
+                <span class="h4 fw-bold text-white mb-0 font-monospace">@Model.TotalProgressRecordsCount</span>
+                <small class="text-muted d-block" style="font-size: 0.72rem;">Fotos de Evolución Física</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     Pie de Auditoría Spark Analytics
+     ========================================================================== -->
+<div class="text-center text-muted small mt-4 pt-3 border-top border-secondary border-opacity-25">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+        <span>
+            <i class="fa-solid fa-shield-halved text-primary-fn me-1"></i>
+            FitNet Spark Analytics Suite &bull; Auditoría Ejecutiva para Dirección General (Owner)
+        </span>
+        <span class="font-monospace">
+            Cálculo consolidado: @Model.GeneratedAt.ToString("dd/MM/yyyy HH:mm:ss") UTC
+        </span>
+    </div>
+</div>

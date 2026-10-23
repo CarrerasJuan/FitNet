@@ -14,17 +14,20 @@ public class AdminController : Controller
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IMembershipService _membershipService;
+    private readonly IMetricsService _metricsService;
     private readonly ILogger<AdminController> _logger;
 
     public AdminController(
         ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
         IMembershipService membershipService,
+        IMetricsService metricsService,
         ILogger<AdminController> logger)
     {
         _context = context;
         _userManager = userManager;
         _membershipService = membershipService;
+        _metricsService = metricsService;
         _logger = logger;
     }
 
@@ -131,8 +134,9 @@ public class AdminController : Controller
 
     [HttpGet]
     [Authorize(Roles = "Owner")]
-    public IActionResult Metrics()
+    public async Task<IActionResult> Metrics()
     {
-        return View();
+        var model = await _metricsService.GetBusinessMetricsAsync();
+        return View(model);
     }
 }
