@@ -650,3 +650,139 @@ body.dashboard-body {
     display: none;
   }
 }
+
+/* ==========================================================================
+   Spark Admin & Metis UI Analytics Enhancements (Tarea 10.2)
+   ========================================================================== */
+.spark-kpi-card {
+  background: linear-gradient(145deg, rgba(26, 21, 37, 0.95), rgba(16, 12, 24, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.15rem 1.25rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.spark-kpi-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(182, 255, 0, 0.35);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5), 0 0 15px rgba(182, 255, 0, 0.08);
+}
+
+.spark-kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--fn-primary), transparent);
+  opacity: 0.6;
+}
+
+.spark-badge-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: var(--fn-font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  letter-spacing: 0.4px;
+}
+
+.spark-badge-trend-up {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.spark-badge-trend-neutral {
+  background: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+.spark-svg-chart {
+  width: 100%;
+  height: 52px;
+  overflow: visible;
+}
+
+.spark-funnel-step {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  position: relative;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.spark-funnel-step:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.spark-funnel-connector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--fn-text-muted);
+  font-size: 0.85rem;
+  padding: 0.2rem 0;
+}
+
+.spark-comp-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.spark-comp-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  font-family: var(--fn-font-heading);
+  margin-bottom: 0.25rem;
+}
+
+.spark-comp-bar-track {
+  height: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.spark-comp-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media print {
+  .dashboard-sidebar,
+  .dashboard-header,
+  .sidebar-backdrop,
+  .btn,
+  a[href] {
+    display: none !important;
+  }
+
+  .dashboard-main {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .fn-card,
+  .spark-kpi-card {
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+}
