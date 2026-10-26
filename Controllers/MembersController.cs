@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FitNet.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Member")]
 public class MembersController : Controller
 {
     private readonly ApplicationDbContext _context;
@@ -309,6 +309,13 @@ public class MembersController : Controller
     {
         var user = await _userManager.GetUserAsync(User);
         if (user == null) return RedirectToAction("Login", "Account");
+
+        var status = await _membershipService.GetMemberStatusAsync(user.Id);
+        if (!status.CanAccessProgress)
+        {
+            TempData["MensajeUpgrade"] = "La gestión de registros de progreso requiere una membresía activa Gold o Premium.";
+            return RedirectToAction("Dashboard");
+        }
 
         var memberProfile = await _context.MemberProfiles
             .FirstOrDefaultAsync(m => m.UserId == user.Id);

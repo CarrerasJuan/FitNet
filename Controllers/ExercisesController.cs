@@ -139,6 +139,21 @@ public class ExercisesController : Controller
             return NotFound();
         }
 
+        // Validación de bloqueo server-side para trial vencido en rutas manuales directas
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser != null)
+            {
+                var status = await _membershipService.GetMemberStatusAsync(currentUser.Id);
+                if (status.IsTrialExpired)
+                {
+                    TempData["MensajeError"] = "Tu período de prueba de 24 horas ha finalizado. Suscribite a Plan Gold o Premium para acceder al detalle de ejercicios.";
+                    return RedirectToAction("Checkout", "Billing", new { plan = "gold" });
+                }
+            }
+        }
+
         // Validación de permisos server-side para ejercicios exclusivos
         if (!exercise.IsPublic)
         {

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FitNet.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Member")]
 public class BillingController : Controller
 {
     private readonly ApplicationDbContext _context;

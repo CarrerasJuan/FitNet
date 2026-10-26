@@ -163,9 +163,30 @@ public class ExercisesApiController : ControllerBase
         }
 
         var isPrivileged = User.IsInRole("Admin") || User.IsInRole("Owner") || User.IsInRole("Trainer");
-        if (!isPrivileged && !exercise.IsActive)
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+
+        if (!isPrivileged)
         {
-            return NotFound(ApiResponseDto.Fail($"El ejercicio seleccionado no se encuentra disponible."));
+            if (!exercise.IsActive)
+            {
+                return NotFound(ApiResponseDto.Fail($"El ejercicio seleccionado no se encuentra disponible."));
+            }
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var status = await _membershipService.GetMemberStatusAsync(userId);
+                if (status.IsTrialExpired)
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden,
+                        ApiResponseDto.Fail("Tu período de prueba de 24 horas ha expirado. Suscribite a Plan Gold o Premium para acceder al detalle de este ejercicio."));
+                }
+
+                if (!exercise.IsPublic && !status.CanAccessFullLibrary)
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden,
+                        ApiResponseDto.Fail($"El ejercicio '{exercise.Name}' es exclusivo de los planes Gold y Premium."));
+                }
+            }
         }
 
         var dto = new ExerciseDto
@@ -417,6 +438,24 @@ public class ExercisesApiController : ControllerBase
         var query = _context.Exercises
             .AsNoTracking()
             .Where(e => e.IsActive);
+
+        var isPrivileged = User.IsInRole("Admin") || User.IsInRole("Owner") || User.IsInRole("Trainer");
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+
+        if (!isPrivileged && !string.IsNullOrEmpty(userId))
+        {
+            var status = await _membershipService.GetMemberStatusAsync(userId);
+            if (status.IsTrialExpired)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden,
+                    ApiResponseDto.Fail("Tu período de prueba de 24 horas ha expirado."));
+            }
+
+            if (!status.CanAccessFullLibrary)
+            {
+                query = query.Where(e => e.IsPublic);
+            }
+        }
 
         if (!string.IsNullOrWhiteSpace(q))
         {
