@@ -317,4 +317,55 @@ INSERT INTO `WorkoutExercises` (`WorkoutPlanId`, `ExerciseId`, `Order`, `Sets`, 
 (3, 4, 3, 3, 8, 75, 'Usar banda elástica si se requiere asistencia'),
 (3, 10, 4, 3, 40, 45, 'Mantener respiración fluida durante la isometría');
 
+-- 4.6. Usuarios Preconfigurados de Prueba (Contraseñas hasheadas con ASP.NET Core Identity)
+-- Contraseñas estándar:
+-- owner@fitnet.com    -> Owner123!
+-- admin@fitnet.com    -> Admin123!
+-- trainer@fitnet.com  -> Trainer123!
+-- member@fitnet.com   -> Member123!
+-- premium@fitnet.com  -> Premium123!
+-- trial@fitnet.com    -> Trial123!
+-- expired@fitnet.com  -> Expired123!
+INSERT INTO `AspNetUsers` (`Id`, `UserName`, `NormalizedUserName`, `Email`, `NormalizedEmail`, `EmailConfirmed`, `PasswordHash`, `SecurityStamp`, `ConcurrencyStamp`, `PhoneNumberConfirmed`, `TwoFactorEnabled`, `LockoutEnabled`, `AccessFailedCount`, `FirstName`, `LastName`, `AvatarPath`, `CreatedAt`, `IsActive`) VALUES
+('user-owner', 'owner@fitnet.com', 'OWNER@FITNET.COM', 'owner@fitnet.com', 'OWNER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Guillermo', 'Propietario', NULL, NOW(), 1),
+('user-admin', 'admin@fitnet.com', 'ADMIN@FITNET.COM', 'admin@fitnet.com', 'ADMIN@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Carlos', 'Administrador', NULL, NOW(), 1),
+('user-trainer', 'trainer@fitnet.com', 'TRAINER@FITNET.COM', 'trainer@fitnet.com', 'TRAINER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Lucas', 'Vázquez', NULL, NOW(), 1),
+('user-member', 'member@fitnet.com', 'MEMBER@FITNET.COM', 'member@fitnet.com', 'MEMBER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Federico', 'Socio', NULL, NOW(), 1),
+('user-premium', 'premium@fitnet.com', 'PREMIUM@FITNET.COM', 'premium@fitnet.com', 'PREMIUM@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Sofía', 'Atleta', NULL, NOW(), 1),
+('user-trial', 'trial@fitnet.com', 'TRIAL@FITNET.COM', 'trial@fitnet.com', 'TRIAL@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Juan', 'Prueba', NULL, NOW(), 1),
+('user-expired', 'expired@fitnet.com', 'EXPIRED@FITNET.COM', 'expired@fitnet.com', 'EXPIRED@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Tomás', 'Vencido', NULL, NOW(), 1);
+
+-- Vinculación de Roles
+INSERT INTO `AspNetUserRoles` (`UserId`, `RoleId`) VALUES
+('user-owner', 'role-owner'),
+('user-admin', 'role-admin'),
+('user-trainer', 'role-trainer'),
+('user-member', 'role-member'),
+('user-premium', 'role-member'),
+('user-trial', 'role-member'),
+('user-expired', 'role-member');
+
+-- Perfil de Entrenador
+INSERT INTO `TrainerProfiles` (`Id`, `UserId`, `Specialty`, `Biography`, `HireDate`, `IsActive`) VALUES
+(1, 'user-trainer', 'Hipertrofia & Fuerza', 'Licenciado en Educación Física especializado en biomecánica y sobrecarga progresiva.', NOW(), 1);
+
+-- Perfiles de Miembros
+INSERT INTO `MemberProfiles` (`Id`, `UserId`, `MembershipId`, `Height`, `BirthDate`, `TrialEndsAt`, `IsActive`) VALUES
+(1, 'user-member', 2, 178.00, '1998-05-14', DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
+(2, 'user-premium', 3, 168.00, '1999-11-22', DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
+(3, 'user-trial', 1, 175.00, '2001-08-20', DATE_ADD(NOW(), INTERVAL 24 HOUR), 1),
+(4, 'user-expired', 1, 180.00, '2000-03-10', DATE_SUB(NOW(), INTERVAL 2 DAY), 1);
+
+-- Asignación de Rutinas a Miembros
+INSERT INTO `WorkoutAssignments` (`Id`, `MemberId`, `WorkoutPlanId`, `AssignedByTrainerId`, `AssignedAt`, `StartDate`, `EndDate`, `IsActive`) VALUES
+(1, 1, 1, 'user-trainer', NOW(), CURDATE(), NULL, 1),
+(2, 2, 1, 'user-trainer', NOW(), CURDATE(), NULL, 1);
+
+-- Registros de Progreso Histórico
+INSERT INTO `ProgressRecords` (`Id`, `MemberId`, `Date`, `Weight`, `BodyFat`, `Notes`, `ImagePath`, `CreatedAt`) VALUES
+(1, 1, DATE_SUB(CURDATE(), INTERVAL 14 DAY), 78.50, 16.0, 'Inicio de ciclo de fuerza con Coach Lucas. Adaptación positiva en sentadillas.', NULL, DATE_SUB(NOW(), INTERVAL 14 DAY)),
+(2, 1, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 77.20, 15.3, 'Control quincenal. Descenso de 1.3 kg de grasa y mejoras en dominadas estrictas.', NULL, DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(3, 2, DATE_SUB(CURDATE(), INTERVAL 30 DAY), 62.50, 23.0, 'Evaluación inicial y diseño de plan personalizado por Coach Lucas.', NULL, DATE_SUB(NOW(), INTERVAL 30 DAY)),
+(4, 2, DATE_SUB(CURDATE(), INTERVAL 10 DAY), 61.20, 21.8, 'Excelente adherencia al plan de fuerza y reducción de porcentaje graso.', NULL, DATE_SUB(NOW(), INTERVAL 10 DAY));
+
 SET FOREIGN_KEY_CHECKS = 1;
