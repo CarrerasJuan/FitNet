@@ -2,15 +2,15 @@
 	"info": {
 		"_postman_id": "c1f7a0b3-96b4-4b47-a9a2-fitnetapi2026",
 		"name": "FitNet API - ULP Laboratorio II",
-		"description": "Colección oficial de endpoints REST para la API de FitNet.\nIncluye autenticación JWT Bearer y perfiles de usuario según el contrato canónico HTTP de la Fase 7.",
+		"description": "Colección oficial de endpoints REST para la API de FitNet.\nIncluye autenticación JWT Bearer, perfiles de usuario, catálogo de ejercicios paginado, subida de archivos multipart y validación de seguridad (RBAC y Trial Vencido).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Autenticación",
+			"name": "1. Autenticación (Auth API)",
 			"item": [
 				{
-					"name": "1. POST Login (Member - member@fitnet.com)",
+					"name": "1.1. POST Login (Member - member@fitnet.com)",
 					"event": [
 						{
 							"listen": "test",
@@ -20,7 +20,7 @@
 									"    var data = pm.response.json();",
 									"    pm.environment.set(\"jwt_token\", data.token);",
 									"    pm.collectionVariables.set(\"jwt_token\", data.token);",
-									"    console.log(\"Token JWT guardado exitosamente:\", data.token);",
+									"    console.log(\"Token JWT Member guardado exitosamente:\", data.token);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -50,12 +50,12 @@
 								"login"
 							]
 						},
-						"description": "Autentica un socio y devuelve el token JWT con los datos del usuario. Al responder 200 OK, el script de tests guarda el token automáticamente en la variable `jwt_token`."
+						"description": "Autentica un socio Gold y devuelve el token JWT con los datos del usuario. Al responder 200 OK, el test guarda el token en `jwt_token`."
 					},
 					"response": []
 				},
 				{
-					"name": "2. POST Login (Admin - admin@fitnet.com)",
+					"name": "1.2. POST Login (Admin - admin@fitnet.com)",
 					"event": [
 						{
 							"listen": "test",
@@ -65,6 +65,7 @@
 									"    var data = pm.response.json();",
 									"    pm.environment.set(\"jwt_token\", data.token);",
 									"    pm.collectionVariables.set(\"jwt_token\", data.token);",
+									"    console.log(\"Token JWT Admin guardado exitosamente:\", data.token);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -99,7 +100,97 @@
 					"response": []
 				},
 				{
-					"name": "3. POST Login (Credenciales Inválidas - 401)",
+					"name": "1.3. POST Login (Trainer - trainer@fitnet.com)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var data = pm.response.json();",
+									"    pm.environment.set(\"jwt_token\", data.token);",
+									"    pm.collectionVariables.set(\"jwt_token\", data.token);",
+									"    console.log(\"Token JWT Trainer guardado exitosamente:\", data.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"trainer@fitnet.com\",\n  \"password\": \"Trainer123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Autentica al entrenador Lucas Vázquez para obtener token con rol Trainer."
+					},
+					"response": []
+				},
+				{
+					"name": "1.4. POST Login (Trial Vencido - expired@fitnet.com)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var data = pm.response.json();",
+									"    pm.environment.set(\"jwt_token\", data.token);",
+									"    pm.collectionVariables.set(\"jwt_token\", data.token);",
+									"    console.log(\"Token JWT Expired guardado exitosamente:\", data.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"expired@fitnet.com\",\n  \"password\": \"Expired123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Autentica al usuario de prueba con período de gracia finalizado. Útil para verificar respuestas 403 Forbidden en endpoints de ejercicios."
+					},
+					"response": []
+				},
+				{
+					"name": "1.5. POST Login (Credenciales Inválidas - 401)",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -123,17 +214,17 @@
 								"login"
 							]
 						},
-						"description": "Prueba de seguridad: Debe responder con código HTTP 401 Unauthorized y mensaje descriptivo."
+						"description": "Prueba de seguridad: Comprueba que la API responda con código HTTP 401 Unauthorized ante contraseña errónea."
 					},
 					"response": []
 				}
 			]
 		},
 		{
-			"name": "Perfil Protegido",
+			"name": "2. Perfil Protegido",
 			"item": [
 				{
-					"name": "1. GET Mi Perfil (Bearer Token)",
+					"name": "2.1. GET Mi Perfil (Bearer Token)",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -168,7 +259,7 @@
 					"response": []
 				},
 				{
-					"name": "2. GET Mi Perfil (Sin Token - 401 Unauthorized)",
+					"name": "2.2. GET Mi Perfil (Sin Token - 401 Unauthorized)",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -189,6 +280,432 @@
 							]
 						},
 						"description": "Prueba de seguridad: Comprueba que el middleware rechace con código HTTP 401 a peticiones sin el header Authorization Bearer."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Biblioteca de Ejercicios (Exercises API)",
+			"item": [
+				{
+					"name": "3.1. GET Listado Paginado (Filtros y Ordenamiento)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/exercises?page=1&pageSize=6&muscleGroup=Piernas&difficulty=Intermedio&sortBy=name&isAscending=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"exercises"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "6"
+								},
+								{
+									"key": "muscleGroup",
+									"value": "Piernas"
+								},
+								{
+									"key": "difficulty",
+									"value": "Intermedio"
+								},
+								{
+									"key": "sortBy",
+									"value": "name"
+								},
+								{
+									"key": "isAscending",
+									"value": "true"
+								}
+							]
+						},
+						"description": "Retorna el catálogo paginado con envoltura ApiResponseDto<PagedResultDto<ExerciseDto>>. Los socios Free solo reciben ejercicios públicos; Gold y Premium reciben la biblioteca íntegra."
+					},
+					"response": []
+				},
+				{
+					"name": "3.2. GET Detalle de Ejercicio por ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/exercises/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"exercises",
+								"1"
+							]
+						},
+						"description": "Obtiene la ficha técnica individual del ejercicio. Valida que el socio tenga trial vigente y membresía suficiente si el ejercicio es exclusivo."
+					},
+					"response": []
+				},
+				{
+					"name": "3.3. GET Búsqueda Rápida / Autocompletado (q & muscle)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/exercises/search?q=sentadilla&muscle=Piernas",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"exercises",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "sentadilla"
+								},
+								{
+									"key": "muscle",
+									"value": "Piernas"
+								}
+							]
+						},
+						"description": "Búsqueda liviana optimizada para autocompletados y para el constructor reactivo de rutinas."
+					},
+					"response": []
+				},
+				{
+					"name": "3.4. POST Crear Ejercicio (Admin / Trainer / Owner)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Name",
+									"value": "Hip Thrust con Barra Olímpica",
+									"type": "text"
+								},
+								{
+									"key": "MuscleGroup",
+									"value": "Piernas",
+									"type": "text"
+								},
+								{
+									"key": "Difficulty",
+									"value": "Intermedio",
+									"type": "text"
+								},
+								{
+									"key": "Description",
+									"value": "Empuje de cadera apoyando la espalda en banco plano para activación focalizada del glúteo mayor.",
+									"type": "text"
+								},
+								{
+									"key": "VideoUrl",
+									"value": "https://www.youtube.com/watch?v=SEdqd1n0cvg",
+									"type": "text"
+								},
+								{
+									"key": "IsPublic",
+									"value": "false",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/exercises",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"exercises"
+							]
+						},
+						"description": "Da de alta un ejercicio con soporte multipart/form-data. Requiere token con rol Admin, Owner o Trainer. Devuelve HTTP 201 Created."
+					},
+					"response": []
+				},
+				{
+					"name": "3.5. PUT Actualizar Ejercicio (Admin / Trainer / Owner)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Name",
+									"value": "Press de Banca Plano con Barra - Modificado",
+									"type": "text"
+								},
+								{
+									"key": "MuscleGroup",
+									"value": "Pecho",
+									"type": "text"
+								},
+								{
+									"key": "Difficulty",
+									"value": "Intermedio",
+									"type": "text"
+								},
+								{
+									"key": "Description",
+									"value": "Empuje horizontal con técnica estricta y parada en el pecho.",
+									"type": "text"
+								},
+								{
+									"key": "VideoUrl",
+									"value": "https://www.youtube.com/watch?v=rT7DgCr-3pg",
+									"type": "text"
+								},
+								{
+									"key": "IsPublic",
+									"value": "true",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/exercises/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"exercises",
+								"1"
+							]
+						},
+						"description": "Actualiza los campos técnicos de un ejercicio existente. Requiere rol Admin, Owner o Trainer. Devuelve HTTP 200 OK."
+					},
+					"response": []
+				},
+				{
+					"name": "3.6. DELETE Eliminar Ejercicio (Smart Delete)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/exercises/11",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"exercises",
+								"11"
+							]
+						},
+						"description": "Aplica borrado inteligente: si el ejercicio está vinculado en rutinas se efectúa borrado lógico (IsActive=false); si no tiene dependencias se elimina físicamente junto a su archivo de imagen."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Pruebas de Seguridad (RBAC & Trial Vencido)",
+			"item": [
+				{
+					"name": "4.1. GET Ejercicios con Trial Vencido (HTTP 403 Forbidden)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/exercises",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"exercises"
+							]
+						},
+						"description": "Prueba de seguridad: Realizar login previo con `expired@fitnet.com`. El endpoint debe rechazar la solicitud con código HTTP 403 Forbidden indicando que el período de prueba de 24hs ha vencido."
+					},
+					"response": []
+				},
+				{
+					"name": "4.2. POST Ejercicio como Socio Member (HTTP 403 Forbidden)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Name",
+									"value": "Intento no autorizado de creacion",
+									"type": "text"
+								},
+								{
+									"key": "MuscleGroup",
+									"value": "Pecho",
+									"type": "text"
+								},
+								{
+									"key": "Difficulty",
+									"value": "Principiante",
+									"type": "text"
+								},
+								{
+									"key": "Description",
+									"value": "Un socio regular no tiene permisos para crear ejercicios en el catalogo maestro.",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/exercises",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"exercises"
+							]
+						},
+						"description": "Prueba de RBAC: Realizar login previo con `member@fitnet.com`. La mutación debe responder HTTP 403 Forbidden porque los socios regulares carecen de rol Admin, Owner o Trainer."
+					},
+					"response": []
+				},
+				{
+					"name": "4.3. GET Ejercicios Sin Token (HTTP 401 Unauthorized)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/exercises",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"exercises"
+							]
+						},
+						"description": "Prueba de middleware: Petición anónima sin cabecera Authorization Bearer ni cookie de sesión. Debe responder con HTTP 401 Unauthorized."
 					},
 					"response": []
 				}
