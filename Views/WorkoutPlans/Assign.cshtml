@@ -1,0 +1,265 @@
+@model FitNet.ViewModels.WorkoutPlans.WorkoutAssignmentCreateViewModel
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = "Asignar Rutina a Atleta";
+}
+
+<!-- Encabezado de Página (Metis UI) -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <a asp-action="Index" class="badge bg-secondary text-white text-decoration-none font-heading text-uppercase">
+                <i class="fa-solid fa-arrow-left me-1"></i> Rutinas
+            </a>
+            <span class="badge bg-primary-fn text-uppercase font-heading">
+                <i class="fa-solid fa-user-check me-1"></i> Asignación Deportiva
+            </span>
+        </div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-1">ASIGNACIÓN DE RUTINAS A ATLETAS</h1>
+        <p class="text-muted small mb-0">Vinculación formal de un plan de entrenamiento activo con control de vigencia y fechas de seguimiento.</p>
+    </div>
+
+    <a asp-action="Index" class="btn btn-outline-secondary text-white font-heading btn-sm">
+        <i class="fa-solid fa-xmark me-1"></i> Cancelar
+    </a>
+</div>
+
+<!-- Resumen de Validación Server-Side -->
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger bg-danger bg-opacity-25 border-danger text-white alert-dismissible fade show mb-4 small" role="alert">
+        <div class="fw-bold mb-1">
+            <i class="fa-solid fa-circle-exclamation me-1"></i> Se encontraron errores de validación de membresía o fechas:
+        </div>
+        <div asp-validation-summary="All" class="text-white mb-0"></div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<form method="post" asp-action="Assign">
+    @Html.AntiForgeryToken()
+
+    <div class="row g-4">
+        <!-- ==========================================
+             COLUMNA IZQUIERDA: SELECCIÓN DE RUTINA Y ALUMNO
+             ========================================== -->
+        <div class="col-lg-7">
+            <!-- 1. Selección de Rutina -->
+            <div class="fn-card mb-4">
+                <div class="fn-card-header d-flex justify-content-between align-items-center">
+                    <div class="fn-card-title">
+                        <i class="fa-solid fa-clipboard-list text-primary-fn"></i>
+                        <span>1. Seleccionar Rutina de Entrenamiento</span>
+                    </div>
+                    <span class="badge bg-dark border border-secondary text-white font-monospace">
+                        @Model.AvailablePlans.Count disponibles
+                    </span>
+                </div>
+
+                <div class="p-4">
+                    @if (!string.IsNullOrEmpty(Model.PreselectedPlanName))
+                    {
+                        <!-- Rutina Preseleccionada (Contextual) -->
+                        <div class="p-3 rounded-3 bg-surface-fn border border-primary-fn border-opacity-50 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-primary-fn text-dark font-heading">Rutina Preseleccionada</span>
+                                @if (Model.PreselectedPlanIsGeneral == true)
+                                {
+                                    <span class="badge bg-warning text-dark font-heading">
+                                        <i class="fa-solid fa-crown me-1"></i> General Club (Gold & Premium)
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info text-dark font-heading">
+                                        <i class="fa-solid fa-user-gear me-1"></i> Personalizada (Solo Premium)
+                                    </span>
+                                }
+                            </div>
+                            <h4 class="font-heading fw-bold text-white mb-1">@Model.PreselectedPlanName</h4>
+                            <input type="hidden" asp-for="WorkoutPlanId" />
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Selector Desplegable de Rutinas -->
+                        <div class="mb-3">
+                            <label asp-for="WorkoutPlanId" class="form-label text-muted small text-uppercase font-heading">
+                                Selecciona la Rutina del Gimnasio <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="WorkoutPlanId" class="form-select bg-dark border-secondary border-opacity-50 text-white" required>
+                                <option value="">-- Elige una rutina disponible --</option>
+                                <optgroup label="Rutinas Generales Oficiales (Gold y Premium)">
+                                    @foreach (var plan in Model.AvailablePlans.Where(p => p.IsGeneral))
+                                    {
+                                        <option value="@plan.Id">@plan.Name (@plan.ExercisesCount ejercicios)</option>
+                                    }
+                                </optgroup>
+                                <optgroup label="Rutinas Personalizadas de Entrenador (Solo Premium)">
+                                    @foreach (var plan in Model.AvailablePlans.Where(p => !p.IsGeneral))
+                                    {
+                                        <option value="@plan.Id">@plan.Name (Coach: @plan.TrainerName - @plan.ExercisesCount ejercicios)</option>
+                                    }
+                                </optgroup>
+                            </select>
+                            <span asp-validation-for="WorkoutPlanId" class="text-danger small"></span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- 2. Selección de Alumno -->
+            <div class="fn-card">
+                <div class="fn-card-header d-flex justify-content-between align-items-center">
+                    <div class="fn-card-title">
+                        <i class="fa-solid fa-users text-primary-fn"></i>
+                        <span>2. Seleccionar Atleta / Alumno</span>
+                    </div>
+                    <span class="badge bg-dark border border-secondary text-white font-monospace">
+                        @Model.AvailableMembers.Count socios elegibles
+                    </span>
+                </div>
+
+                <div class="p-4">
+                    @if (!string.IsNullOrEmpty(Model.PreselectedMemberName))
+                    {
+                        <!-- Alumno Preseleccionado (Contextual) -->
+                        <div class="p-3 rounded-3 bg-surface-fn border border-info border-opacity-50 mb-3 d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="@(string.IsNullOrEmpty(Model.PreselectedMemberAvatar) ? "/img/default-avatar.png" : Model.PreselectedMemberAvatar)" 
+                                     alt="Avatar" class="rounded-circle border border-info" style="width: 44px; height: 44px; object-fit: cover;" />
+                                <div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <h5 class="font-heading fw-bold text-white mb-0">@Model.PreselectedMemberName</h5>
+                                        <span class="badge @(Model.PreselectedMemberPlan == "Premium" ? "bg-info text-dark" : "bg-warning text-dark") font-heading">
+                                            @Model.PreselectedMemberPlan
+                                        </span>
+                                    </div>
+                                    <span class="text-muted small">@Model.PreselectedMemberEmail</span>
+                                </div>
+                            </div>
+                            <input type="hidden" asp-for="MemberProfileId" />
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Selector Desplegable de Alumnos -->
+                        <div class="mb-3">
+                            <label asp-for="MemberProfileId" class="form-label text-muted small text-uppercase font-heading">
+                                Selecciona el Socio Destinatario <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="MemberProfileId" class="form-select bg-dark border-secondary border-opacity-50 text-white" required>
+                                <option value="">-- Elige un socio elegible (Gold o Premium) --</option>
+                                @if (Model.AvailableMembers.Any(m => m.PlanName == "Premium"))
+                                {
+                                    <optgroup label="Socios Plan Premium (Seguimiento Personalizado)">
+                                        @foreach (var m in Model.AvailableMembers.Where(m => m.PlanName == "Premium"))
+                                        {
+                                            <option value="@m.Id">
+                                                @m.FullName (@m.Email) @(!string.IsNullOrEmpty(m.CurrentWorkoutName) ? $"— Rutina actual: {m.CurrentWorkoutName}" : "— Sin rutina activa")
+                                            </option>
+                                        }
+                                    </optgroup>
+                                }
+                                @if (Model.AvailableMembers.Any(m => m.PlanName == "Gold"))
+                                {
+                                    <optgroup label="Socios Plan Gold (Rutinas de Entrenamiento)">
+                                        @foreach (var m in Model.AvailableMembers.Where(m => m.PlanName == "Gold"))
+                                        {
+                                            <option value="@m.Id">
+                                                @m.FullName (@m.Email) @(!string.IsNullOrEmpty(m.CurrentWorkoutName) ? $"— Rutina actual: {m.CurrentWorkoutName}" : "— Sin rutina activa")
+                                            </option>
+                                        }
+                                    </optgroup>
+                                }
+                            </select>
+                            <span asp-validation-for="MemberProfileId" class="text-danger small"></span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             COLUMNA DERECHA: FECHAS Y REGLAS DE NEGOCIO
+             ========================================== -->
+        <div class="col-lg-5">
+            <!-- Tarjeta de Fechas -->
+            <div class="fn-card mb-4">
+                <div class="fn-card-header">
+                    <div class="fn-card-title">
+                        <i class="fa-regular fa-calendar-check text-primary-fn"></i>
+                        <span>3. Cronograma de la Asignación</span>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <!-- Fecha de Inicio -->
+                    <div class="mb-3">
+                        <label asp-for="StartDate" class="form-label text-muted small text-uppercase font-heading">
+                            Fecha de Inicio del Plan <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="StartDate" class="form-control bg-dark border-secondary border-opacity-50 text-white font-monospace" required />
+                        <span asp-validation-for="StartDate" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Fecha de Fin Opcional -->
+                    <div class="mb-3">
+                        <label asp-for="EndDate" class="form-label text-muted small text-uppercase font-heading">
+                            Fecha de Finalización (Opcional)
+                        </label>
+                        <input asp-for="EndDate" class="form-control bg-dark border-secondary border-opacity-50 text-white font-monospace" />
+                        <span asp-validation-for="EndDate" class="text-danger small"></span>
+                        <div class="text-muted small mt-1" style="font-size: 0.75rem;">
+                            Si se deja vacía, la rutina permanecerá activa por tiempo indeterminado hasta que sea reemplazada.
+                        </div>
+                    </div>
+
+                    <!-- Botón de Confirmación -->
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-fn-primary w-100 font-heading py-2 d-flex align-items-center justify-content-center gap-2">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                            <span>Confirmar Asignación</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta Informativa de Reglas de Membresía (Auditoría) -->
+            <div class="fn-card">
+                <div class="fn-card-header">
+                    <div class="fn-card-title">
+                        <i class="fa-solid fa-shield-halved text-primary-fn"></i>
+                        <span>Reglas de Acceso del Gimnasio</span>
+                    </div>
+                </div>
+                <div class="p-4 small text-muted" style="line-height: 1.6;">
+                    <div class="d-flex align-items-start gap-2 mb-3">
+                        <i class="fa-solid fa-circle-check text-success mt-1"></i>
+                        <div>
+                            <strong class="text-white">Plan Premium:</strong> Acceso completo a rutinas institucionales generales y a planes personalizados confeccionados por un profesor.
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-2 mb-3">
+                        <i class="fa-solid fa-circle-check text-warning mt-1"></i>
+                        <div>
+                            <strong class="text-white">Plan Gold:</strong> Acceso exclusivo a rutinas generales del establecimiento. Si se intenta asignar una rutina personalizada, el servidor rechazará la operación.
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-2 mb-3">
+                        <i class="fa-solid fa-ban text-danger mt-1"></i>
+                        <div>
+                            <strong class="text-white">Plan Free (Trial 24h):</strong> No tiene acceso a rutinas guiadas. Debe abonar una suscripción para que el coach pueda prescribirle un plan.
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="fa-solid fa-rotate text-info mt-1"></i>
+                        <div>
+                            <strong class="text-white">Reemplazo Automático:</strong> Al confirmar, cualquier rutina previa activa del atleta se marcará como inactiva en el historial para evitar superposiciones.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

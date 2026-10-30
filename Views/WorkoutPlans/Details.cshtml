@@ -1,0 +1,352 @@
+@model FitNet.ViewModels.WorkoutPlans.WorkoutPlanDetailsViewModel
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = $"Ficha de Rutina: {Model.Name}";
+}
+
+<!-- ==========================================
+     CABECERA Y ACCIONES DE LA RUTINA (Metis UI)
+     ========================================== -->
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
+    <div>
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+            <a asp-action="Index" class="badge rounded-pill bg-dark border border-secondary text-white-50 text-decoration-none font-heading text-uppercase px-3 py-2">
+                <i class="fa-solid fa-arrow-left me-1"></i> Directorio
+            </a>
+            @if (Model.IsGeneral)
+            {
+                <span class="badge rounded-pill bg-warning text-dark font-heading px-3 py-2">
+                    <i class="fa-solid fa-crown me-1"></i> General del Club
+                </span>
+            }
+            else
+            {
+                <span class="badge rounded-pill bg-primary-fn text-dark font-heading px-3 py-2">
+                    <i class="fa-solid fa-user-gear me-1"></i> Rutina Personalizada
+                </span>
+            }
+        </div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-2 text-uppercase">@Model.Name</h1>
+        
+        <!-- Meta información limpia y horizontal -->
+        <div class="d-flex flex-wrap align-items-center gap-3 text-muted small">
+            <div class="d-flex align-items-center gap-2">
+                <img src="@(string.IsNullOrEmpty(Model.TrainerAvatar) ? "/img/default-avatar.png" : Model.TrainerAvatar)" 
+                     alt="@Model.TrainerName" class="rounded-circle border border-primary-fn" 
+                     style="width: 26px; height: 26px; object-fit: cover;" />
+                <span class="text-white">Coach: <strong>@Model.TrainerName</strong></span>
+            </div>
+            <span>&bull;</span>
+            <span><i class="fa-regular fa-calendar me-1"></i>Diseñada: <strong class="text-white">@Model.CreatedAt.ToString("dd/MM/yyyy")</strong></span>
+            <span>&bull;</span>
+            <span><i class="fa-solid fa-dumbbell me-1 text-primary-fn"></i><strong class="text-white">@Model.Exercises.Count</strong> ejercicios</span>
+            <span>&bull;</span>
+            <span><i class="fa-solid fa-users me-1 text-info"></i><strong class="text-white">@Model.AssignedAthletes.Count</strong> atletas asignados</span>
+        </div>
+    </div>
+
+    <!-- Botones de Acción Estilizados y Redondeados -->
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+        @if (Model.CanEditOrDelete)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-fn-primary rounded-pill px-3 py-2 font-heading shadow-sm">
+                <i class="fa-solid fa-pen-to-square me-1"></i> Seguir Editando
+            </a>
+        }
+        <a asp-action="Assign" asp-route-planId="@Model.Id" class="btn btn-outline-light rounded-pill px-3 py-2 font-heading shadow-sm">
+            <i class="fa-solid fa-user-plus me-1 text-primary-fn"></i> Asignar a Alumno
+        </a>
+        <button type="button" onclick="window.print()" class="btn btn-outline-secondary rounded-pill px-3 py-2 text-white font-heading shadow-sm">
+            <i class="fa-solid fa-print me-1"></i> Imprimir Ficha
+        </button>
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-3 py-2 text-white font-heading shadow-sm">
+            <i class="fa-solid fa-layer-group me-1"></i> Ver Rutinas
+        </a>
+        @if (Model.CanEditOrDelete)
+        {
+            <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-2 font-heading shadow-sm" 
+                    data-bs-toggle="modal" data-bs-target="#deleteDetailModal">
+                <i class="fa-solid fa-trash-can me-1"></i> Eliminar
+            </button>
+        }
+    </div>
+</div>
+
+<!-- Flash Notifications TempData -->
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success bg-success bg-opacity-25 border-success text-white alert-dismissible fade show mb-4 small" role="alert">
+        <i class="fa-solid fa-circle-check me-2 text-primary-fn"></i>
+        @TempData["MensajeExito"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger bg-danger bg-opacity-25 border-danger text-white alert-dismissible fade show mb-4 small" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        @TempData["MensajeError"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- ==========================================================================
+     CONTENEDOR 1: PRESCRIPCIÓN DE MOVIMIENTOS Y CARGAS (LA RUTINA COMPLETA)
+     ========================================================================== -->
+<div class="fn-card mb-4 shadow-sm">
+    <div class="fn-card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+        <div class="fn-card-title">
+            <i class="fa-solid fa-dumbbell text-primary-fn me-2"></i>
+            <span>Prescripción de Movimientos y Cargas</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-dark border border-secondary text-primary-fn font-monospace px-3 py-2">
+                @Model.Exercises.Count movimientos prescriptos
+            </span>
+            @if (Model.CanEditOrDelete)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm rounded-pill text-white font-heading">
+                    <i class="fa-solid fa-pen-to-square me-1 text-primary-fn"></i> Modificar Cargas
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- Si posee descripción o notas generales del plan -->
+    @if (!string.IsNullOrWhiteSpace(Model.Description))
+    {
+        <div class="p-3 bg-surface-fn border-bottom border-secondary border-opacity-25 text-white-50 small d-flex align-items-center gap-2">
+            <i class="fa-solid fa-circle-info text-primary-fn"></i>
+            <span>@Model.Description</span>
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+            <thead>
+                <tr class="text-muted small border-secondary border-opacity-50" style="text-transform: uppercase; font-size: 0.75rem;">
+                    <th class="ps-4" style="width: 50px;">#</th>
+                    <th>Ejercicio</th>
+                    <th>Zona / Dificultad</th>
+                    <th class="text-center" style="width: 140px;">Series &times; Reps</th>
+                    <th class="text-center" style="width: 130px;">Descanso</th>
+                    <th class="pe-4">Observaciones Técnicas</th>
+                </tr>
+            </thead>
+            <tbody class="border-secondary border-opacity-25">
+                @if (Model.Exercises.Any())
+                {
+                    @foreach (var ex in Model.Exercises)
+                    {
+                        <tr>
+                            <!-- Orden de ejecución -->
+                            <td class="ps-4">
+                                <span class="badge bg-primary-fn text-dark font-monospace fw-bold rounded-circle p-2" style="width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;">
+                                    @ex.Order
+                                </span>
+                            </td>
+
+                            <!-- Ejercicio con animación / miniatura -->
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    @if (!string.IsNullOrEmpty(ex.ImagePath))
+                                    {
+                                        <img src="@ex.ImagePath" alt="@ex.ExerciseName" 
+                                             class="rounded border border-secondary border-opacity-50" 
+                                             style="width: 48px; height: 48px; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded bg-black bg-opacity-50 border border-secondary border-opacity-50 d-flex align-items-center justify-content-center text-muted" 
+                                             style="width: 48px; height: 48px;">
+                                            <i class="fa-solid fa-dumbbell"></i>
+                                        </div>
+                                    }
+                                    <div>
+                                        <div class="font-heading fw-bold text-white fs-6">@ex.ExerciseName</div>
+                                        @if (!string.IsNullOrEmpty(ex.VideoUrl))
+                                        {
+                                            <a href="@ex.VideoUrl" target="_blank" class="small text-primary-fn text-decoration-none" style="font-size: 0.75rem;">
+                                                <i class="fa-solid fa-play me-1"></i> Ver Video Técnico
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Grupo Muscular y Dificultad -->
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <span class="badge bg-secondary text-white font-heading">@ex.MuscleGroup</span>
+                                    <span class="badge @(ex.Difficulty == "Principiante" ? "bg-success" : ex.Difficulty == "Intermedio" ? "bg-warning text-dark" : "bg-danger") font-heading">
+                                        @ex.Difficulty
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Series y Repeticiones -->
+                            <td class="text-center font-monospace">
+                                <span class="badge bg-dark border border-secondary border-opacity-50 text-white px-3 py-2 fs-6">
+                                    @ex.Sets <span class="text-primary-fn">&times;</span> @ex.Repetitions
+                                </span>
+                            </td>
+
+                            <!-- Descanso -->
+                            <td class="text-center font-monospace">
+                                <span class="badge bg-dark border border-secondary border-opacity-50 text-warning px-3 py-2">
+                                    <i class="fa-solid fa-stopwatch me-1"></i>@ex.RestSeconds seg
+                                </span>
+                            </td>
+
+                            <!-- Observaciones del Coach -->
+                            <td class="pe-4">
+                                <span class="small text-light fst-italic">
+                                    @(string.IsNullOrWhiteSpace(ex.Notes) ? "Ejecución estándar." : ex.Notes)
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted small">
+                            No hay ejercicios agregados a esta rutina.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     CONTENEDOR 2: ATLETAS CON ESTA RUTINA EN CURSO (ASIGNACIONES)
+     ========================================================================== -->
+<div class="fn-card shadow-sm">
+    <div class="fn-card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+        <div class="fn-card-title">
+            <i class="fa-solid fa-users text-primary-fn me-2"></i>
+            <span>Atletas con esta Rutina en Curso</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-dark border border-secondary text-info font-monospace px-3 py-2">
+                @Model.AssignedAthletes.Count activos
+            </span>
+            <a asp-action="Assign" asp-route-planId="@Model.Id" class="btn btn-fn-primary btn-sm rounded-pill font-heading">
+                <i class="fa-solid fa-user-plus me-1"></i> Asignar a Nuevo Alumno
+            </a>
+        </div>
+    </div>
+
+    @if (Model.AssignedAthletes.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+                <thead>
+                    <tr class="text-muted small border-secondary border-opacity-50" style="text-transform: uppercase; font-size: 0.75rem;">
+                        <th class="ps-4">Socio Destinatario</th>
+                        <th>Plan</th>
+                        <th>Fecha de Asignación</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="border-secondary border-opacity-25">
+                    @foreach (var athlete in Model.AssignedAthletes)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="@(string.IsNullOrEmpty(athlete.AvatarPath) ? "/img/default-avatar.png" : athlete.AvatarPath)" 
+                                         alt="@athlete.FullName" class="rounded-circle border border-primary-fn" 
+                                         style="width: 38px; height: 38px; object-fit: cover;" />
+                                    <div>
+                                        <div class="font-heading fw-bold text-white fs-6">@athlete.FullName</div>
+                                        <div class="text-muted small">@athlete.Email</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge @(athlete.PlanName == "Premium" ? "bg-primary-fn text-dark" : "bg-warning text-dark") font-heading">
+                                    Plan @athlete.PlanName
+                                </span>
+                            </td>
+                            <td class="font-monospace small text-muted">
+                                <i class="fa-regular fa-calendar-check me-1"></i>@athlete.StartDate.ToString("dd/MM/yyyy")
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-inline-flex gap-2">
+                                    <a asp-controller="Trainers" asp-action="MemberProgress" asp-route-id="@athlete.MemberProfileId" 
+                                       class="btn btn-outline-light btn-sm rounded-pill font-heading px-3" title="Ver evolución física del alumno">
+                                        <i class="fa-solid fa-chart-line text-primary-fn me-1"></i> Ver Evolución
+                                    </a>
+                                    @if (Model.CanEditOrDelete)
+                                    {
+                                        <form method="post" asp-action="Unassign" asp-route-id="@athlete.AssignmentId" class="d-inline"
+                                              onsubmit="return confirm('¿Confirmas finalizar la asignación de esta rutina para este alumno?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill font-heading px-3" title="Finalizar asignación">
+                                                <i class="fa-solid fa-user-xmark me-1"></i> Finalizar
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="p-5 text-center text-muted">
+            <div class="d-inline-flex p-3 rounded-circle bg-dark border border-secondary border-opacity-25 mb-3 text-muted">
+                <i class="fa-solid fa-user-clock fa-2x text-primary-fn"></i>
+            </div>
+            <h5 class="font-heading text-white">Esta rutina aún no tiene alumnos asignados</h5>
+            <p class="small text-muted mb-3">
+                Puedes asignarla a cualquier socio activo con plan Gold o Premium con un solo clic.
+            </p>
+            <a asp-action="Assign" asp-route-planId="@Model.Id" class="btn btn-fn-primary rounded-pill font-heading px-4">
+                <i class="fa-solid fa-user-plus me-1"></i> Asignar a un Alumno Ahora
+            </a>
+        </div>
+    }
+</div>
+
+<!-- ==========================================
+     MODAL DE CONFIRMACIÓN DE ELIMINACIÓN
+     ========================================== -->
+@if (Model.CanEditOrDelete)
+{
+    <div class="modal fade" id="deleteDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border border-danger text-white">
+                <div class="modal-header border-secondary border-opacity-50">
+                    <h5 class="modal-title font-heading text-danger">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i> Confirmar Baja de Rutina
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body small">
+                    <p class="mb-2">¿Estás seguro de que deseas eliminar permanentemente la rutina <strong class="text-warning">@Model.Name</strong>?</p>
+                    <div class="alert alert-warning bg-warning bg-opacity-10 border-warning text-warning small mb-0">
+                        <i class="fa-solid fa-shield-halved me-1"></i>
+                        Si la rutina está activa en atletas asignados, la eliminación será rechazada por el servidor para proteger la integridad histórica de sus entrenamientos.
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary border-opacity-50">
+                    <button type="button" class="btn btn-outline-secondary font-heading btn-sm rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                    <form method="post" asp-action="Delete" asp-route-id="@Model.Id">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger font-heading btn-sm rounded-pill px-3">
+                            <i class="fa-solid fa-trash-can me-1"></i> Confirmar Eliminación
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}

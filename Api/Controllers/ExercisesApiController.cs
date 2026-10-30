@@ -212,7 +212,7 @@ public class ExercisesApiController : ControllerBase
     // Alta de ejercicio con soporte multipart para imagen técnica vía FileStorageService
     // ==========================================
     [HttpPost]
-    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Admin,Owner")]
+    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Admin,Owner,Trainer")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(ApiResponseDto<ExerciseDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -288,7 +288,7 @@ public class ExercisesApiController : ControllerBase
     // Modificación completa y actualización / reemplazo de imagen técnica
     // ==========================================
     [HttpPut("{id:int}")]
-    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Admin,Owner")]
+    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Admin,Owner,Trainer")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(ApiResponseDto<ExerciseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -381,7 +381,7 @@ public class ExercisesApiController : ControllerBase
     // Baja lógica o física controlada según relaciones activas
     // ==========================================
     [HttpDelete("{id:int}")]
-    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Admin,Owner")]
+    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Admin,Owner,Trainer")]
     [ProducesResponseType(typeof(ApiResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
@@ -427,13 +427,13 @@ public class ExercisesApiController : ControllerBase
     }
 
     // ==========================================
-    // 6. GET /api/exercises/search?q=
-    // Búsqueda rápida optimizada (máx. 10 registros) para selects dinámicos y autocompletados
+    // 6. GET /api/exercises/search?q=&muscle=
+    // Búsqueda rápida optimizada con soporte para zonas musculares y autocompletado
     // ==========================================
     [HttpGet("search")]
     [Authorize(AuthenticationSchemes = AuthSchemes)]
     [ProducesResponseType(typeof(ApiResponseDto<List<ExerciseSearchDto>>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Search([FromQuery] string? q)
+    public async Task<IActionResult> Search([FromQuery] string? q, [FromQuery] string? muscle = null)
     {
         var query = _context.Exercises
             .AsNoTracking()
@@ -457,6 +457,13 @@ public class ExercisesApiController : ControllerBase
             }
         }
 
+        // Filtro por zona del cuerpo / grupo muscular
+        if (!string.IsNullOrWhiteSpace(muscle) && !muscle.Equals("all", StringComparison.OrdinalIgnoreCase) && !muscle.Equals("todos", StringComparison.OrdinalIgnoreCase))
+        {
+            var m = muscle.Trim().ToLower();
+            query = query.Where(e => e.MuscleGroup.ToLower() == m);
+        }
+
         if (!string.IsNullOrWhiteSpace(q))
         {
             var term = q.Trim().ToLower();
@@ -464,8 +471,9 @@ public class ExercisesApiController : ControllerBase
         }
 
         var results = await query
-            .OrderBy(e => e.Name)
-            .Take(10)
+            .OrderBy(e => e.MuscleGroup)
+            .ThenBy(e => e.Name)
+            .Take(30)
             .Select(e => new ExerciseSearchDto
             {
                 Id = e.Id,

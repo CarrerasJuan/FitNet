@@ -6,9 +6,9 @@ public class FileStorageService : IFileStorageService
     private readonly ILogger<FileStorageService> _logger;
 
     // Constantes de validación defensiva server-side
-    private const long MaxFileSizeInBytes = 2 * 1024 * 1024; // 2 Megabytes
-    private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    private static readonly string[] AllowedMimeTypes = ["image/jpeg", "image/jpg", "image/png", "image/x-png", "image/webp", "image/pjpeg"];
+    private const long MaxFileSizeInBytes = 5 * 1024 * 1024; // 5 Megabytes (soporte para GIFs animados)
+    private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+    private static readonly string[] AllowedMimeTypes = ["image/jpeg", "image/jpg", "image/png", "image/x-png", "image/webp", "image/pjpeg", "image/gif"];
     private static readonly string[] AllowedSubfolders = ["avatars", "progress", "exercises"];
 
     public FileStorageService(IWebHostEnvironment environment, ILogger<FileStorageService> logger)
@@ -120,7 +120,7 @@ public class FileStorageService : IFileStorageService
         var extension = Path.GetExtension(file.FileName)?.ToLowerInvariant();
         if (string.IsNullOrEmpty(extension) || !AllowedExtensions.Contains(extension))
         {
-            errorMessage = $"Formato de archivo no admitido ({extension}). Formatos permitidos: JPG, JPEG, PNG, WEBP.";
+            errorMessage = $"Formato de archivo no admitido ({extension}). Formatos permitidos: JPG, JPEG, PNG, WEBP, GIF.";
             return false;
         }
 

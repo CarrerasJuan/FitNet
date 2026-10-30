@@ -1,0 +1,39 @@
+<!-- ==========================================
+     FITNET CYBERPUNK HUD PRELOADER (Splash Screen)
+     Activación exclusiva para Login y Logout
+     ========================================== -->
+<div id="fitnet-preloader" class="preloader-overlay">
+    <!-- Efecto Grid y Scanline de fondo -->
+    <div class="preloader-grid"></div>
+    <div class="preloader-scanline"></div>
+
+    <div class="preloader-center-content">
+        <!-- Logotipo FitNet con Efecto de Anillos HUD -->
+        <div class="preloader-logo-wrapper">
+            <div class="cyber-ring-outer"></div>
+            <div class="cyber-ring-inner"></div>
+            <img src="~/img/logo/logo-Fitnet-sinfondo.webp" 
+                 alt="FitNet" 
+                 class="preloader-logo-img"
+                 onerror="this.onerror=null; this.src='/img/logo/logo-Fitnet-sinfondo.png';" />
+        </div>
+
+        <!-- Barra de Carga con Brillo Cyberlime -->
+        <div class="cyber-progress-container">
+            <div class="cyber-progress-track">
+                <div id="preloader-progress-bar" class="cyber-progress-fill" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <!-- Contador de Porcentaje -->
+        <div class="preloader-percentage-box">
+            <span id="preloader-percent-num" class="percentage-number">0</span><span class="percentage-symbol">%</span>
+        </div>
+
+        <!-- Textos de Estado Cyberpunk -->
+        <div class="preloader-status-container">
+            <div class="preloader-status-main">// INICIANDO SESIÓN //</div>
+            <div id="preloader-status-sub" class="preloader-status-sub">[ VERIFICANDO CREDENCIALES DEL SISTEMA ]</div>
+        </div>
+    </div>
+</div>

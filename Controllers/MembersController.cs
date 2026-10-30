@@ -127,7 +127,8 @@ public class MembersController : Controller
                 .Include(a => a.WorkoutPlan)
                     .ThenInclude(wp => wp.WorkoutExercises.OrderBy(we => we.Order))
                         .ThenInclude(we => we.Exercise)
-                .Where(a => a.MemberId == memberProfile.Id && a.IsActive)
+                .Where(a => a.MemberId == memberProfile.Id && a.IsActive && (!a.EndDate.HasValue || a.EndDate.Value >= DateTime.UtcNow.Date))
+                .OrderByDescending(a => a.AssignedAt)
                 .ToListAsync();
         }
 

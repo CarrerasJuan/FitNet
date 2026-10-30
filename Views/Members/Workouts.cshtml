@@ -19,9 +19,14 @@
         <p class="text-muted small mb-0">Planes estructurados, series, repeticiones y recomendaciones de descanso.</p>
     </div>
 
-    <a asp-controller="Members" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading btn-sm">
-        <i class="fa-solid fa-arrow-left me-1"></i> Volver a mi Dashboard
-    </a>
+    <div class="d-flex gap-2">
+        <button type="button" onclick="window.print()" class="btn btn-outline-secondary text-white font-heading btn-sm">
+            <i class="fa-solid fa-print me-1"></i> Imprimir Ficha
+        </button>
+        <a asp-controller="Members" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading btn-sm">
+            <i class="fa-solid fa-arrow-left me-1"></i> Volver a mi Dashboard
+        </a>
+    </div>
 </div>
 
 <!-- ==========================================
@@ -29,15 +34,48 @@
      ========================================== -->
 @if (Model.ActiveAssignments.Any())
 {
-    @foreach (var assignment in Model.ActiveAssignments)
+    @if (Model.ActiveAssignments.Count > 1)
     {
-        <div class="p-4 p-md-5 rounded-3 border border-fn bg-card-fn mb-5 position-relative">
+        <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 mb-4">
+            <span class="text-muted small font-heading text-uppercase">
+                <i class="fa-solid fa-calendar-week text-primary-fn me-1"></i> Planificación Semanal:
+            </span>
+            <div class="d-inline-flex p-1 rounded-pill bg-dark border border-secondary border-opacity-50 gap-1 flex-wrap shadow-sm">
+                @for (int i = 0; i < Model.ActiveAssignments.Count; i++)
+                {
+                    var a = Model.ActiveAssignments[i];
+                    <button type="button" 
+                            class="btn btn-sm rounded-pill font-heading px-3 py-1 routine-split-tab @(i == 0 ? "btn-fn-primary text-dark fw-bold shadow-sm" : "text-white-50 border-0")"
+                            onclick="showRoutineTab(@i)">
+                        <i class="fa-solid fa-dumbbell me-1"></i> @a.WorkoutPlan.Name.ToUpper()
+                    </button>
+                }
+            </div>
+        </div>
+    }
+
+    @for (int i = 0; i < Model.ActiveAssignments.Count; i++)
+    {
+        var assignment = Model.ActiveAssignments[i];
+        <div id="routine-card-@i" class="routine-card-container p-4 p-md-5 rounded-3 border border-fn bg-card-fn mb-5 position-relative shadow-sm" style="@(i > 0 ? "display: none;" : "")">
             <!-- Badge de Rutina Activa -->
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 pb-3 border-bottom border-secondary border-opacity-25">
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-1">
                         <span class="badge bg-primary-fn text-uppercase font-heading">Rutina Activa Personalizada</span>
-                        <span class="text-muted small">Asignada el @assignment.AssignedAt.ToString("dd/MM/yyyy")</span>
+                        <span class="text-muted small">Asignada el @assignment.StartDate.ToString("dd/MM/yyyy")</span>
+                        @if (assignment.EndDate.HasValue)
+                        {
+                            <span class="badge bg-dark border border-secondary text-warning font-monospace small">
+                                <i class="fa-solid fa-hourglass-half me-1"></i>Válida hasta @assignment.EndDate.Value.ToString("dd/MM/yyyy")
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-dark border border-secondary text-primary-fn font-monospace small">
+                                <i class="fa-solid fa-infinity me-1"></i>Vigente continua
+                            </span>
+                        }
                     </div>
                     <h2 class="font-heading fs-3 fw-bold text-white mb-0">@assignment.WorkoutPlan.Name.ToUpper()</h2>
                 </div>
@@ -95,7 +133,25 @@
                                 <tr>
                                     <td class="ps-3 font-heading text-primary-fn fw-bold">@we.Order</td>
                                     <td>
-                                        <span class="text-white fw-bold d-block">@we.Exercise.Name</span>
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if (!string.IsNullOrEmpty(we.Exercise.ImagePath))
+                                            {
+                                                <img src="@we.Exercise.ImagePath" alt="@we.Exercise.Name" 
+                                                     class="rounded border border-secondary border-opacity-50" 
+                                                     style="width: 38px; height: 38px; object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded bg-black bg-opacity-50 border border-secondary border-opacity-50 d-flex align-items-center justify-content-center text-muted" 
+                                                     style="width: 38px; height: 38px;">
+                                                    <i class="fa-solid fa-dumbbell"></i>
+                                                </div>
+                                            }
+                                            <div>
+                                                <span class="text-white fw-bold d-block">@we.Exercise.Name</span>
+                                                <span class="badge bg-secondary font-heading" style="font-size: 0.65rem;">@we.Exercise.Difficulty</span>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td>
                                         <span class="badge bg-surface-fn border border-fn text-white-50 font-heading">
@@ -118,9 +174,17 @@
                                         @(string.IsNullOrEmpty(we.Notes) ? "—" : we.Notes)
                                     </td>
                                     <td class="text-end pe-3">
-                                        <a asp-controller="Exercises" asp-action="Details" asp-route-id="@we.ExerciseId" class="btn btn-outline-light btn-sm py-1 px-2 font-heading" title="Ver técnica">
-                                            <i class="fa-solid fa-eye"></i>
-                                        </a>
+                                        <div class="d-flex justify-content-end gap-1">
+                                            <button type="button" class="btn btn-fn-primary btn-sm py-1 px-2 font-heading" 
+                                                    data-bs-toggle="modal" data-bs-target="#modalDemo-@assignment.Id-@we.ExerciseId" 
+                                                    title="Ver animación técnica y cronómetro">
+                                                <i class="fa-solid fa-play me-1"></i> Demo
+                                            </button>
+                                            <a asp-controller="Exercises" asp-action="Details" asp-route-id="@we.ExerciseId" 
+                                               class="btn btn-outline-light btn-sm py-1 px-2 font-heading" title="Ver ficha técnica completa">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -137,6 +201,108 @@
                 </table>
             </div>
         </div>
+
+        <!-- Modales de Demostración Técnica en Vivo y Temporizador para cada Ejercicio -->
+        @foreach (var we in assignment.WorkoutPlan.WorkoutExercises)
+        {
+            <div class="modal fade" id="modalDemo-@assignment.Id-@we.ExerciseId" tabindex="-1" aria-labelledby="modalDemoLabel-@assignment.Id-@we.ExerciseId" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content bg-card-fn border border-fn text-white shadow-lg">
+                        <div class="modal-header border-secondary border-opacity-25 pb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary-fn text-dark font-heading text-uppercase">#@we.Order</span>
+                                <span class="badge bg-secondary font-heading text-uppercase">@we.Exercise.MuscleGroup</span>
+                                <h5 class="modal-title font-heading fw-bold text-white mb-0" id="modalDemoLabel-@assignment.Id-@we.ExerciseId">
+                                    @we.Exercise.Name.ToUpper()
+                                </h5>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="row g-4 align-items-center">
+                                <!-- Columna Izquierda: Animación GIF en bucle -->
+                                <div class="col-md-6 text-center">
+                                    @if (!string.IsNullOrEmpty(we.Exercise.ImagePath))
+                                    {
+                                        <div class="position-relative d-inline-block rounded-3 overflow-hidden border border-fn shadow">
+                                            <img src="@we.Exercise.ImagePath" alt="@we.Exercise.Name" 
+                                                 class="img-fluid" style="max-height: 280px; width: auto; object-fit: contain; background: #000;" />
+                                            <span class="position-absolute bottom-0 start-0 m-2 badge bg-dark bg-opacity-75 text-primary-fn font-monospace small">
+                                                <i class="fa-solid fa-circle text-danger fa-fade me-1"></i> EN VIVO (LOOP)
+                                            </span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-3 bg-dark border border-secondary p-5 text-muted">
+                                            <i class="fa-solid fa-dumbbell fa-3x mb-2 text-primary-fn"></i>
+                                            <div>Sin animación disponible</div>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Columna Derecha: Prescripción del Coach + Temporizador -->
+                                <div class="col-md-6">
+                                    <!-- Metas de Carga del Coach -->
+                                    <div class="p-3 rounded-3 bg-surface-fn border border-secondary border-opacity-50 mb-3">
+                                        <div class="font-heading small text-muted text-uppercase mb-2">Prescripción del Entrenador</div>
+                                        <div class="d-flex justify-content-around text-center">
+                                            <div>
+                                                <div class="font-heading fw-bold fs-4 text-white">@we.Sets</div>
+                                                <div class="text-white-50 small" style="font-size: 0.7rem;">SERIES</div>
+                                            </div>
+                                            <div class="border-start border-secondary border-opacity-25"></div>
+                                            <div>
+                                                <div class="font-heading fw-bold fs-4 text-primary-fn">@we.Repetitions</div>
+                                                <div class="text-white-50 small" style="font-size: 0.7rem;">REPETICIONES</div>
+                                            </div>
+                                            <div class="border-start border-secondary border-opacity-25"></div>
+                                            <div>
+                                                <div class="font-heading fw-bold fs-4 text-warning">@we.RestSeconds"</div>
+                                                <div class="text-white-50 small" style="font-size: 0.7rem;">DESCANSO</div>
+                                            </div>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(we.Notes))
+                                        {
+                                            <div class="mt-2 pt-2 border-top border-secondary border-opacity-25 small text-info">
+                                                <i class="fa-solid fa-circle-info me-1"></i><strong>Nota técnica:</strong> @we.Notes
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- Temporizador Interactivo de Descanso -->
+                                    <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-50 text-center">
+                                        <div class="font-heading small text-white-50 mb-1">TEMPORIZADOR DE DESCANSO</div>
+                                        <div class="font-monospace fw-bold fs-2 text-warning mb-2" id="timerDisplay-@assignment.Id-@we.ExerciseId">
+                                            @we.RestSeconds seg
+                                        </div>
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            <button type="button" class="btn btn-sm btn-outline-warning font-heading" 
+                                                    onclick="startRestTimer('@assignment.Id-@we.ExerciseId', @we.RestSeconds)">
+                                                <i class="fa-solid fa-stopwatch me-1"></i> Iniciar Descanso
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary text-white font-heading" 
+                                                    onclick="resetRestTimer('@assignment.Id-@we.ExerciseId', @we.RestSeconds)">
+                                                <i class="fa-solid fa-rotate-left"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Descripción Técnica del Movimiento -->
+                                    @if (!string.IsNullOrEmpty(we.Exercise.Description))
+                                    {
+                                        <div class="mt-3 small text-muted">
+                                            <strong class="text-white">Técnica:</strong> @we.Exercise.Description
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
     }
 }
 else
@@ -277,3 +443,55 @@ else
         color: var(--fn-primary, #00f2fe) !important;
     }
 </style>
+
+@section Scripts {
+    <script>
+        function showRoutineTab(index) {
+            document.querySelectorAll('.routine-card-container').forEach((el, idx) => {
+                el.style.display = (idx === index) ? 'block' : 'none';
+            });
+            document.querySelectorAll('.routine-split-tab').forEach((btn, idx) => {
+                if (idx === index) {
+                    btn.className = 'btn btn-sm rounded-pill font-heading px-3 py-1 routine-split-tab btn-fn-primary text-dark fw-bold shadow-sm';
+                } else {
+                    btn.className = 'btn btn-sm rounded-pill font-heading px-3 py-1 routine-split-tab text-white-50 border-0';
+                }
+            });
+        }
+
+        const restIntervals = {};
+
+        function startRestTimer(id, totalSeconds) {
+            clearInterval(restIntervals[id]);
+            let remaining = totalSeconds;
+            const display = document.getElementById('timerDisplay-' + id);
+            if (!display) return;
+
+            display.textContent = remaining + ' seg';
+            display.classList.remove('text-warning', 'text-success');
+            display.classList.add('text-primary-fn');
+
+            restIntervals[id] = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(restIntervals[id]);
+                    display.textContent = '¡A ENTRENAR! SERIE LISTA';
+                    display.classList.remove('text-primary-fn');
+                    display.classList.add('text-success');
+                } else {
+                    display.textContent = remaining + ' seg';
+                }
+            }, 1000);
+        }
+
+        function resetRestTimer(id, originalSeconds) {
+            clearInterval(restIntervals[id]);
+            const display = document.getElementById('timerDisplay-' + id);
+            if (display) {
+                display.textContent = originalSeconds + ' seg';
+                display.classList.remove('text-primary-fn', 'text-success');
+                display.classList.add('text-warning');
+            }
+        }
+    </script>
+}

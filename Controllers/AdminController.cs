@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FitNet.Controllers;
 
-[Authorize(Roles = "Admin,Owner")]
+[Authorize(Roles = "Admin,Owner,Trainer")]
 public class AdminController : Controller
 {
     private readonly ApplicationDbContext _context;
@@ -35,6 +35,7 @@ public class AdminController : Controller
     // 0. ACCESO RÁPIDO / ALIAS (/ad y /admin)
     // ==========================================
     [HttpGet]
+    [Authorize(Roles = "Admin,Owner")]
     [Route("ad")]
     [Route("admin")]
     public IActionResult AdminAlias()
@@ -46,6 +47,7 @@ public class AdminController : Controller
     // 1. DASHBOARD DE ADMINISTRACIÓN GENERAL
     // ==========================================
     [HttpGet]
+    [Authorize(Roles = "Admin,Owner")]
     public async Task<IActionResult> Dashboard()
     {
         var totalMembers = await _context.MemberProfiles.CountAsync();
@@ -72,6 +74,7 @@ public class AdminController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Owner")]
     public async Task<IActionResult> Members()
     {
         var members = await _context.MemberProfiles
@@ -85,6 +88,7 @@ public class AdminController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Owner")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateMemberPlan(string userId, string planName, int durationMonths = 1, string? returnUrl = null)
     {
@@ -113,6 +117,7 @@ public class AdminController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Owner")]
     public async Task<IActionResult> Trainers()
     {
         var trainers = await _context.TrainerProfiles
@@ -126,7 +131,7 @@ public class AdminController : Controller
     // 4. GESTIÓN REACTIVA DE EJERCICIOS (VUE 3 + AJAX)
     // ==========================================
     [HttpGet]
-    [Authorize(Roles = "Admin,Owner")]
+    [Authorize(Roles = "Admin,Owner,Trainer")]
     public IActionResult Exercises()
     {
         return View();
@@ -138,5 +143,15 @@ public class AdminController : Controller
     {
         var model = await _metricsService.GetBusinessMetricsAsync();
         return View(model);
+    }
+
+    // ==========================================
+    // 5. GESTIÓN DE RUTINAS GENERALES (REDIRECCIÓN)
+    // ==========================================
+    [HttpGet]
+    [Authorize(Roles = "Admin,Owner")]
+    public IActionResult WorkoutPlans()
+    {
+        return RedirectToAction("Index", "WorkoutPlans", new { filter = "general" });
     }
 }

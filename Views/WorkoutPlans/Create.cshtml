@@ -1,0 +1,470 @@
+@model FitNet.ViewModels.WorkoutPlans.WorkoutPlanCreateViewModel
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = "Diseñador de Rutina y Prescripción";
+
+    var initialExercisesJson = System.Text.Json.JsonSerializer.Serialize(Model.Exercises ?? new());
+    var availableMembersJson = System.Text.Json.JsonSerializer.Serialize(Model.AvailableMembers.Select(m => new {
+        id = m.Id,
+        fullName = m.FullName,
+        email = m.Email,
+        planName = m.PlanName,
+        avatarPath = m.AvatarPath,
+        currentWorkoutName = m.CurrentWorkoutName
+    }));
+}
+
+<!-- Encabezado de Página (Metis UI) -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <a asp-action="Index" class="badge bg-secondary text-white text-decoration-none font-heading text-uppercase">
+                <i class="fa-solid fa-arrow-left me-1"></i> Directorio de Rutinas
+            </a>
+            <span class="badge bg-primary-fn text-uppercase font-heading">
+                <i class="fa-solid fa-bolt me-1"></i> Prescriptor Deportivo
+            </span>
+        </div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-1">
+            @(ViewBag.IsEditing == true ? "MODIFICAR RUTINA Y CARGAS" : "DISEÑADOR DE RUTINA Y ASIGNACIÓN")
+        </h1>
+        <p class="text-muted small mb-0">
+            @(ViewBag.IsEditing == true ? "Ajusta las series, repeticiones o agrega nuevos ejercicios a esta rutina." : "Selecciona el alumno, elige ejercicios por zona del cuerpo y define series y repeticiones en tiempo real.")
+        </p>
+    </div>
+
+    <a asp-action="Index" class="btn btn-outline-secondary text-white font-heading btn-sm rounded-pill px-3">
+        <i class="fa-solid fa-xmark me-1"></i> Cancelar
+    </a>
+</div>
+
+<!-- Notificaciones Flash del Servidor -->
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger bg-danger bg-opacity-25 border-danger text-white alert-dismissible fade show mb-4 small" role="alert">
+        <div class="fw-bold mb-1">
+            <i class="fa-solid fa-circle-exclamation me-1"></i> Errores de validación:
+        </div>
+        <div asp-validation-summary="All" class="text-white mb-0"></div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- ==========================================
+     CONTENEDOR PRINCIPAL REACTIVO (VUE 3 APP)
+     ========================================== -->
+<div id="routine-builder">
+    <!-- Notificación Flotante Toast -->
+    <div v-if="notification.visible" 
+         class="position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+        <div class="toast show align-items-center text-white border-0 shadow-lg" 
+             :class="'bg-' + notification.type" role="alert">
+            <div class="d-flex">
+                <div class="toast-body small fw-bold">
+                    <i class="fa-solid fa-bell me-2"></i> {{ notification.message }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" asp-action="@(ViewBag.IsEditing == true ? "Edit" : "Create")" asp-route-id="@ViewBag.EditPlanId" @@submit="validateBeforeSubmit">
+        @Html.AntiForgeryToken()
+
+        <!-- Campos Ocultos para Model Binding MVC -->
+        <input type="hidden" name="MemberProfileId" :value="selectedMemberId > 0 ? selectedMemberId : ''" />
+        <input type="hidden" name="MemberName" :value="selectedMemberName" />
+        <input type="hidden" name="MemberEmail" :value="selectedMemberEmail" />
+        <input type="hidden" name="MemberAvatar" :value="selectedMemberAvatar" />
+        <input type="hidden" name="Name" :value="routineName" />
+        <input type="hidden" name="Description" :value="routineDescription" />
+
+        <!-- ==========================================
+             PASO 1: DESTINATARIO Y DATOS BÁSICOS
+             ========================================== -->
+        <div class="fn-card mb-4">
+            <div class="fn-card-header d-flex justify-content-between align-items-center">
+                <div class="fn-card-title">
+                    <i class="fa-solid fa-user-check text-primary-fn"></i>
+                    <span>1. Destinatario y Datos del Plan</span>
+                </div>
+                <span class="badge bg-dark border border-secondary text-primary-fn font-monospace small">
+                    Paso 1 de 3
+                </span>
+            </div>
+            <div class="p-3 p-lg-4">
+                <div class="row g-3">
+                    <!-- Selector de Alumno -->
+                    <div class="col-lg-6">
+                        <label class="form-label text-muted small text-uppercase font-heading mb-1">
+                            Asignar Directamente a Alumno (Opcional)
+                        </label>
+                        <select class="form-select bg-dark border-secondary border-opacity-50 text-white font-heading" 
+                                v-model="selectedMemberId" @@change="onMemberChanged">
+                            <option :value="0">-- Guardar como Plantilla en Catálogo (Sin asignar) --</option>
+                            <option v-for="m in availableMembers" :key="m.id" :value="m.id">
+                                {{ m.fullName }} (Plan {{ m.planName }}) &bull; {{ m.email }}
+                            </option>
+                        </select>
+
+                        <!-- Banner Contextual del Alumno Seleccionado -->
+                        <div v-if="currentMember" class="mt-3 p-3 rounded-3 bg-dark border border-secondary border-opacity-50 d-flex align-items-center gap-3">
+                            <img :src="currentMember.avatarPath || '/img/default-avatar.png'" 
+                                 alt="Avatar Alumno" class="rounded-circle border border-primary-fn" 
+                                 style="width: 44px; height: 44px; object-fit: cover;" />
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="font-heading fw-bold text-white fs-6">{{ currentMember.fullName }}</span>
+                                    <span class="badge bg-primary-fn text-dark font-heading small">Plan {{ currentMember.planName }}</span>
+                                </div>
+                                <div class="text-muted small" style="font-size: 0.78rem;">
+                                    <span v-if="currentMember.currentWorkoutName" class="text-warning">
+                                        <i class="fa-solid fa-clock-rotate-left me-1"></i>Reemplazará su rutina actual: <strong>{{ currentMember.currentWorkoutName }}</strong>
+                                    </span>
+                                    <span v-else class="text-info">
+                                        <i class="fa-solid fa-circle-check me-1"></i>El alumno está pendiente de rutina (sin asignación activa).
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nombre y Notas del Plan -->
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small text-uppercase font-heading mb-1">
+                                Nombre de la Rutina
+                            </label>
+                            <input type="text" class="form-control bg-dark border-secondary border-opacity-50 text-white font-heading" 
+                                   v-model="routineName" :placeholder="computedNamePlaceholder" />
+                            <div class="text-muted" style="font-size: 0.72rem;">
+                                Puedes escribir un nombre o dejarlo vacío para asignarlo automáticamente.
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="form-label text-muted small text-uppercase font-heading mb-1">
+                                Objetivo o Recomendaciones Técnicas (Opcional)
+                            </label>
+                            <input type="text" class="form-control bg-dark border-secondary border-opacity-50 text-white" 
+                                   v-model="routineDescription" :placeholder="computedDescPlaceholder" />
+                        </div>
+
+                        @if (Model.CanSetGeneral)
+                        {
+                            <div class="form-check form-switch mt-3">
+                                <input class="form-check-input" type="checkbox" asp-for="IsGeneral" id="switchGeneral" />
+                                <label class="form-check-label text-white font-heading small" for="switchGeneral">
+                                    ¿Rutina Oficial General del Gimnasio? (Visible para todos los socios Gold/Premium)
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             PASO 2: SELECCIÓN DE EJERCICIOS POR ZONA DEL CUERPO
+             ========================================== -->
+        <div class="fn-card mb-4">
+            <div class="fn-card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+                <div class="fn-card-title">
+                    <i class="fa-solid fa-dumbbell text-primary-fn"></i>
+                    <span>2. Seleccionar Ejercicios por Zona del Cuerpo</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <a asp-controller="Trainers" asp-action="Exercises" target="_blank" 
+                       class="btn btn-outline-secondary btn-sm font-heading text-white" 
+                       title="Crear un ejercicio que no esté en el stock">
+                        <i class="fa-solid fa-plus text-primary-fn me-1"></i> Crear Ejercicio en Stock
+                    </a>
+                </div>
+            </div>
+
+            <div class="p-3 p-lg-4">
+                <!-- Botones / Píldoras de Zonas Musculares -->
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button v-for="z in zones" :key="z.id" type="button" 
+                            class="btn btn-sm font-heading d-inline-flex align-items-center gap-2 shadow-sm transition"
+                            :class="activeZone === z.id ? 'btn-fn-primary' : 'btn-outline-secondary text-white border-opacity-50'"
+                            @@click="selectZone(z.id)">
+                        <i :class="z.icon"></i>
+                        <span>{{ z.name }}</span>
+                    </button>
+                </div>
+
+                <!-- Buscador de Texto Complementario -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text bg-dark border-secondary border-opacity-50 text-muted">
+                        <i class="fa-solid fa-magnifying-glass" :class="{ 'fa-spin text-primary-fn': isLoadingCatalog }"></i>
+                    </span>
+                    <input type="text" class="form-control bg-dark border-secondary border-opacity-50 text-white" 
+                           placeholder="Filtrar por nombre dentro de esta zona (ej: press, sentadilla, mancuerna, polea)..."
+                           v-model="searchQuery" @@input="onSearchInput" />
+                    <button v-if="searchQuery" type="button" class="btn btn-outline-secondary text-white" @@click="clearSearch">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Skeleton Loader reactivo mientras carga el catálogo vía AJAX -->
+                <div v-if="isLoadingCatalog" class="row g-2 g-md-3">
+                    <div v-for="n in 3" :key="n" class="col-12 col-md-6 col-xl-4">
+                        <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25 d-flex align-items-center justify-content-between gap-3 h-100">
+                            <div class="d-flex align-items-center gap-3 w-100">
+                                <div class="fn-skeleton rounded" style="width: 44px; height: 44px; flex-shrink: 0;"></div>
+                                <div class="w-100">
+                                    <div class="fn-skeleton mb-2" style="height: 14px; width: 70%;"></div>
+                                    <div class="fn-skeleton" style="height: 10px; width: 40%;"></div>
+                                </div>
+                            </div>
+                            <div class="fn-skeleton rounded" style="width: 70px; height: 28px; flex-shrink: 0;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grilla de Tarjetas de Ejercicios de la Zona -->
+                <div v-else-if="catalogExercises.length > 0" class="row g-2 g-md-3">
+                    <div v-for="ex in catalogExercises" :key="ex.id" class="col-12 col-md-6 col-xl-4">
+                        <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-50 d-flex align-items-center justify-content-between gap-3 h-100 hover-item">
+                            <div class="d-flex align-items-center gap-3 overflow-hidden">
+                                <img v-if="ex.imagePath" :src="ex.imagePath" alt="Preview" 
+                                     class="rounded border border-secondary border-opacity-50 flex-shrink-0" 
+                                     style="width: 44px; height: 44px; object-fit: cover;" />
+                                <div v-else class="rounded bg-black bg-opacity-50 border border-secondary border-opacity-50 d-flex align-items-center justify-content-center text-muted flex-shrink-0" 
+                                     style="width: 44px; height: 44px;">
+                                    <i class="fa-solid fa-dumbbell"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <div class="font-heading fw-bold text-white text-truncate small" :title="ex.name">
+                                        {{ ex.name }}
+                                    </div>
+                                    <div class="d-flex gap-1 mt-1">
+                                        <span class="badge bg-secondary font-heading" style="font-size: 0.65rem;">{{ ex.muscleGroup }}</span>
+                                        <span class="badge font-heading" style="font-size: 0.65rem;"
+                                              :class="ex.difficulty === 'Principiante' ? 'bg-success' : ex.difficulty === 'Intermedio' ? 'bg-warning text-dark' : 'bg-danger'">
+                                            {{ ex.difficulty }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button v-if="!isExerciseInRoutine(ex.id)" type="button" 
+                                    class="btn btn-fn-primary btn-sm font-heading flex-shrink-0 d-inline-flex align-items-center gap-1 shadow-sm"
+                                    @@click="addExercise(ex)" title="Agregar a la rutina">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Agregar</span>
+                            </button>
+                            <span v-else class="badge bg-secondary font-heading flex-shrink-0" style="font-size: 0.72rem;">
+                                <i class="fa-solid fa-check me-1 text-primary-fn"></i>En Rutina
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado Vacío del Catálogo -->
+                <div v-else-if="!isLoadingCatalog" class="text-center py-4 text-muted small bg-dark rounded-3 border border-secondary border-opacity-25">
+                    <i class="fa-solid fa-circle-exclamation text-warning me-1"></i>
+                    No se encontraron ejercicios activos para los filtros seleccionados.
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             PASO 3: EJERCICIOS PRESCRIPTOS Y CARGAS
+             ========================================== -->
+        <div class="fn-card mb-4">
+            <div class="fn-card-header d-flex justify-content-between align-items-center">
+                <div class="fn-card-title">
+                    <i class="fa-solid fa-clipboard-list text-primary-fn"></i>
+                    <span>3. Ejercicios Prescriptos en la Rutina ({{ selectedExercises.length }})</span>
+                </div>
+                <span class="badge bg-dark border border-secondary text-primary-fn font-monospace fs-6">
+                    {{ totalSeries }} Series Totales
+                </span>
+            </div>
+
+            <!-- Listado de Ejercicios en la Rutina -->
+            <div v-if="selectedExercises.length > 0" class="p-3 p-lg-4">
+                <div class="d-flex flex-column gap-3">
+                    <div v-for="(item, index) in selectedExercises" :key="item.exerciseId" 
+                         class="p-3 rounded-3 bg-dark border border-secondary border-opacity-50 shadow-sm">
+                        
+                        <!-- Encabezado del Ejercicio en Rutina -->
+                        <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <!-- Botones de Orden -->
+                                <div class="btn-group-vertical btn-group-sm me-1" role="group">
+                                    <button type="button" class="btn btn-outline-secondary btn-xs py-0 px-1 border-opacity-50 text-white" 
+                                            :disabled="index === 0" @@click="moveUp(index)" title="Subir orden">
+                                        <i class="fa-solid fa-chevron-up" style="font-size: 0.65rem;"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-xs py-0 px-1 border-opacity-50 text-white" 
+                                            :disabled="index === selectedExercises.length - 1" @@click="moveDown(index)" title="Bajar orden">
+                                        <i class="fa-solid fa-chevron-down" style="font-size: 0.65rem;"></i>
+                                    </button>
+                                </div>
+
+                                <span class="badge bg-primary-fn text-dark font-monospace fw-bold fs-6">
+                                    #{{ item.order }}
+                                </span>
+
+                                <span class="badge bg-secondary font-heading text-uppercase ms-1" style="font-size: 0.72rem;">
+                                    {{ item.muscleGroup }}
+                                </span>
+
+                                <span class="font-heading fw-bold text-white fs-6 ms-1">
+                                    {{ item.exerciseName }}
+                                </span>
+                            </div>
+
+                            <button type="button" class="btn btn-outline-danger btn-sm" @@click="removeExercise(index)" title="Quitar de la rutina">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+
+                        <!-- Inputs de Carga: Series, Repeticiones, Descanso y Notas -->
+                        <div class="row g-2">
+                            <div class="col-6 col-md-2">
+                                <label class="form-label text-muted small mb-1" style="font-size: 0.72rem; text-transform: uppercase;">
+                                    Series
+                                </label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-black border-secondary border-opacity-50 text-muted">
+                                        <i class="fa-solid fa-repeat"></i>
+                                    </span>
+                                    <input type="number" class="form-control bg-black border-secondary border-opacity-50 text-white font-monospace fw-bold text-center" 
+                                           min="1" max="30" v-model.number="item.sets" required />
+                                </div>
+                            </div>
+
+                            <div class="col-6 col-md-2">
+                                <label class="form-label text-muted small mb-1" style="font-size: 0.72rem; text-transform: uppercase;">
+                                    Repeticiones
+                                </label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-black border-secondary border-opacity-50 text-muted">
+                                        <i class="fa-solid fa-hashtag"></i>
+                                    </span>
+                                    <input type="number" class="form-control bg-black border-secondary border-opacity-50 text-white font-monospace fw-bold text-center" 
+                                           min="1" max="100" v-model.number="item.repetitions" required />
+                                </div>
+                            </div>
+
+                            <div class="col-6 col-md-3">
+                                <label class="form-label text-muted small mb-1" style="font-size: 0.72rem; text-transform: uppercase;">
+                                    Descanso (seg)
+                                </label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-black border-secondary border-opacity-50 text-muted">
+                                        <i class="fa-solid fa-stopwatch"></i>
+                                    </span>
+                                    <input type="number" class="form-control bg-black border-secondary border-opacity-50 text-white font-monospace text-center" 
+                                           min="10" max="600" step="5" v-model.number="item.restSeconds" required />
+                                    <span class="input-group-text bg-black border-secondary border-opacity-50 text-muted small">seg</span>
+                                </div>
+                            </div>
+
+                            <div class="col-6 col-md-5">
+                                <label class="form-label text-muted small mb-1" style="font-size: 0.72rem; text-transform: uppercase;">
+                                    Notas Técnicas del Entrenador
+                                </label>
+                                <input type="text" class="form-control form-control-sm bg-black border-secondary border-opacity-50 text-white" 
+                                       placeholder="ej: Controlar la bajada, pausa de 1 segundo..." 
+                                       v-model="item.notes" maxlength="255" />
+                            </div>
+                        </div>
+
+                        <!-- Hidden Inputs para Model Binding MVC -->
+                        <input type="hidden" :name="'Exercises[' + index + '].ExerciseId'" :value="item.exerciseId" />
+                        <input type="hidden" :name="'Exercises[' + index + '].Order'" :value="item.order" />
+                        <input type="hidden" :name="'Exercises[' + index + '].Sets'" :value="item.sets" />
+                        <input type="hidden" :name="'Exercises[' + index + '].Repetitions'" :value="item.repetitions" />
+                        <input type="hidden" :name="'Exercises[' + index + '].RestSeconds'" :value="item.restSeconds" />
+                        <input type="hidden" :name="'Exercises[' + index + '].Notes'" :value="item.notes" />
+                        <input type="hidden" :name="'Exercises[' + index + '].ExerciseName'" :value="item.exerciseName" />
+                        <input type="hidden" :name="'Exercises[' + index + '].MuscleGroup'" :value="item.muscleGroup" />
+                        <input type="hidden" :name="'Exercises[' + index + '].Difficulty'" :value="item.difficulty" />
+                        <input type="hidden" :name="'Exercises[' + index + '].ImagePath'" :value="item.imagePath" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estado Vacío de la Prescripción -->
+            <div v-else class="text-center py-5 text-muted">
+                <div class="d-inline-flex p-3 rounded-circle bg-dark border border-secondary border-opacity-25 mb-3 text-muted">
+                    <i class="fa-solid fa-dumbbell fa-2x text-primary-fn"></i>
+                </div>
+                <h5 class="font-heading text-white">No has agregado movimientos aún</h5>
+                <p class="small text-muted mb-0">
+                    Selecciona una zona del cuerpo arriba (ej: Pecho, Piernas) y presiona <strong>"+ Agregar"</strong> para incorporar el ejercicio a la rutina.
+                </p>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             BARRA DE ACCIÓN Y GUARDADO
+             ========================================== -->
+        <div class="fn-card p-3 p-md-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 shadow-lg">
+            <div>
+                <div class="font-heading fw-bold text-white fs-6">
+                    <i class="fa-solid fa-circle-check text-primary-fn me-1"></i>
+                    {{ selectedExercises.length }} Ejercicio(s) Seleccionado(s) &bull; {{ totalSeries }} Series en Total
+                </div>
+                <div class="text-muted small">
+                    Destinatario: 
+                    <strong class="text-white">{{ currentMember ? currentMember.fullName + ' (Plan ' + currentMember.planName + ')' : 'Plantilla Reutilizable en Catálogo' }}</strong>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a asp-action="Index" class="btn btn-outline-secondary text-white font-heading px-4 rounded-pill">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-fn-primary font-heading px-4 py-2 fs-6 shadow rounded-pill">
+                    <i class="fa-solid fa-floppy-disk me-2"></i>
+                    <span>{{ isEditing ? 'Guardar Cambios de la Rutina' : (currentMember ? 'Guardar y Asignar a ' + currentMember.fullName : 'Guardar Rutina en Catálogo') }}</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    @@keyframes fn-skeleton-pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 0.2; }
+        100% { opacity: 0.6; }
+    }
+    .fn-skeleton {
+        animation: fn-skeleton-pulse 1.2s ease-in-out infinite;
+        background-color: rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+    }
+    .hover-item {
+        transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .hover-item:hover {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border-color: rgba(182, 255, 0, 0.4) !important;
+        transform: translateY(-1px);
+    }
+</style>
+
+@section Scripts {
+    <!-- Inyección de librerías locales (100% Offline, sin Node ni CDNs) -->
+    <script src="~/lib/vue/vue.global.prod.js"></script>
+    <script src="~/lib/axios/axios.min.js"></script>
+
+    <!-- Estado inicial inyectado desde el modelo Razor -->
+    <script>
+        window.__IS_EDITING__ = @(ViewBag.IsEditing == true ? "true" : "false");
+        window.__INITIAL_EXERCISES__ = @Html.Raw(initialExercisesJson);
+        window.__AVAILABLE_MEMBERS__ = @Html.Raw(availableMembersJson);
+        window.__PRESELECTED_MEMBER_ID__ = @(Model.MemberProfileId ?? 0);
+        window.__INITIAL_NAME__ = "@Html.Raw(Model.Name ?? "")";
+        window.__INITIAL_DESCRIPTION__ = "@Html.Raw(Model.Description ?? "")";
+    </script>
+
+    <!-- Aplicación Vue 3 del Constructor de Rutinas -->
+    <script src="~/js/vue-apps/rutinas/builder.js" asp-append-version="true"></script>
+}

@@ -20,10 +20,10 @@
     </div>
 
     <div class="d-flex gap-2">
-        <a asp-controller="Trainers" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading btn-sm">
+        <a asp-controller="Trainers" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading btn-sm rounded-pill px-3 py-2 shadow-sm">
             <i class="fa-solid fa-arrow-left me-1"></i> Volver a Panel Coach
         </a>
-        <a asp-controller="WorkoutPlans" asp-action="Create" class="btn btn-primary-fn font-heading btn-sm">
+        <a asp-controller="WorkoutPlans" asp-action="Create" class="btn btn-fn-primary font-heading btn-sm rounded-pill px-3 py-2 shadow-sm">
             <i class="fa-solid fa-plus me-1"></i> Nueva Rutina
         </a>
     </div>
@@ -102,23 +102,23 @@
         <form method="get" asp-action="Members" class="row g-2 align-items-center">
             <div class="col-12 col-md-8">
                 <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-surface-fn border-secondary border-opacity-25 text-muted">
+                    <span class="input-group-text bg-surface-fn border-secondary border-opacity-25 text-muted rounded-start-pill ps-3">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </span>
                     <input type="text" 
                            name="search" 
-                           class="form-control form-control-sm bg-surface-fn border-secondary border-opacity-25 text-white" 
+                           class="form-control form-control-sm bg-surface-fn border-secondary border-opacity-25 text-white rounded-end-pill" 
                            placeholder="Buscar alumno por nombre, apellido o correo..." 
                            value="@Model.Search" />
                 </div>
             </div>
             <div class="col-6 col-md-2">
-                <button type="submit" class="btn btn-primary-fn btn-sm font-heading w-100">
+                <button type="submit" class="btn btn-fn-primary btn-sm rounded-pill font-heading w-100 py-2 shadow-sm">
                     <i class="fa-solid fa-filter me-1"></i> Filtrar
                 </button>
             </div>
             <div class="col-6 col-md-2">
-                <a asp-action="Members" class="btn btn-outline-secondary btn-sm text-white font-heading w-100">
+                <a asp-action="Members" class="btn btn-outline-secondary btn-sm rounded-pill text-white font-heading w-100 py-2 shadow-sm">
                     <i class="fa-solid fa-rotate-left me-1"></i> Limpiar
                 </a>
             </div>
@@ -165,7 +165,7 @@
                             <th>Biometría</th>
                             <th>Rutina Asignada</th>
                             <th>Último Control</th>
-                            <th class="text-end pe-4" style="width: 170px;">Acciones</th>
+                            <th class="text-end pe-4" style="min-width: 290px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="border-top-0">
@@ -278,20 +278,27 @@
                                 </td>
 
                                 <!-- Acciones del Coach -->
-                                <td class="text-end pe-4">
-                                    <div class="btn-group btn-group-sm">
+                                <td class="text-end pe-4 text-nowrap">
+                                    <div class="d-inline-flex align-items-center gap-2">
                                         <a asp-action="MemberProgress" 
                                            asp-route-id="@s.MemberProfileId" 
-                                           class="btn btn-outline-light btn-sm font-heading" 
-                                           title="Ver evolución física y fotos">
+                                           class="btn btn-outline-light btn-sm rounded-pill px-3 font-heading shadow-sm" 
+                                           title="Ver evolución física y pesajes">
                                             <i class="fa-solid fa-chart-line text-primary-fn me-1"></i> Progreso
+                                        </a>
+                                        <a asp-controller="WorkoutPlans" 
+                                           asp-action="Assign" 
+                                           asp-route-memberId="@s.MemberProfileId" 
+                                           class="btn btn-outline-secondary text-white btn-sm rounded-pill px-3 font-heading shadow-sm" 
+                                           title="Asignar una rutina existente">
+                                            <i class="fa-solid fa-clipboard-check text-info me-1"></i> Asignar
                                         </a>
                                         <a asp-controller="WorkoutPlans" 
                                            asp-action="Create" 
                                            asp-route-memberId="@s.MemberProfileId" 
-                                           class="btn btn-outline-secondary btn-sm text-white" 
-                                           title="Prescribir o cambiar rutina">
-                                            <i class="fa-solid fa-clipboard-plus"></i>
+                                           class="btn btn-fn-primary btn-sm rounded-pill px-3 font-heading shadow-sm" 
+                                           title="Diseñar y prescribir nueva rutina">
+                                            <i class="fa-solid fa-plus me-1"></i> Rutina
                                         </a>
                                     </div>
                                 </td>

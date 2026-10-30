@@ -52,6 +52,7 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="dashboard-body">
+    <partial name="_Preloader" />
     <div class="dashboard-app">
         <!-- ==========================================
              1. TOPBAR SUPERIOR (Admin Header - Compact Density)
@@ -268,9 +269,9 @@
                         </a>
                     </li>
                     <li class="sidebar-nav-item">
-                        <a class="sidebar-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Exercises" ? "active" : "")" asp-controller="Exercises" asp-action="Index">
+                        <a class="sidebar-nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Exercises" ? "active" : "")" asp-controller="Trainers" asp-action="Exercises">
                             <i class="fa-solid fa-dumbbell"></i>
-                            <span>Ejercicios</span>
+                            <span>Stock de Ejercicios</span>
                         </a>
                     </li>
                     <li class="sidebar-nav-item mt-2">
@@ -377,6 +378,7 @@
             }
         });
     </script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

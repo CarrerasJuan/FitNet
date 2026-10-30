@@ -1,59 +1,57 @@
 /**
  * FitNet - Preloader Cyberpunk HUD Controller
- * Anima el porcentaje (0% -> 100%), la barra de progreso Cyberlime
- * y conmuta los estados de inicialización antes de desvanecer suavemente.
+ * Activación EXCLUSIVA en transiciones de Login y Logout
+ * La navegación general carga de forma instantánea (0 ms) sin bloqueos ni esperas artificiales.
  */
-document.addEventListener('DOMContentLoaded', () => {
+
+window.triggerAuthPreloader = function (mainMsg, subMsg) {
     const preloader = document.getElementById('fitnet-preloader');
     if (!preloader) return;
 
     const percentEl = document.getElementById('preloader-percent-num');
     const progressBar = document.getElementById('preloader-progress-bar');
+    const statusMain = preloader.querySelector('.preloader-status-main');
     const statusSub = document.getElementById('preloader-status-sub');
 
-    let currentPercent = 0;
-    const targetPercent = 100;
-    const duration = 1600; // ~1.6 segundos para una carga fluida e impactante
-    const intervalTime = 20;
-    const increment = targetPercent / (duration / intervalTime);
+    if (statusMain && mainMsg) statusMain.textContent = mainMsg;
+    if (statusSub && subMsg) statusSub.textContent = subMsg;
 
-    const statusMessages = [
-        { limit: 25, text: '[ CARGANDO RECURSOS BIOMECÁNICOS ]' },
-        { limit: 55, text: '[ SINCRONIZANDO MÓDULOS DE ENTRENAMIENTO ]' },
-        { limit: 80, text: '[ OPTIMIZANDO INTERFAZ FITNET ]' },
-        { limit: 95, text: '[ VERIFICANDO CREDENCIALES DEL SISTEMA ]' },
-        { limit: 100, text: '[ ACCESO CONCEDIDO · BIENVENIDO ]' }
-    ];
+    preloader.classList.remove('fade-out');
+    preloader.classList.add('active');
+
+    let currentPercent = 15;
+    if (percentEl) percentEl.textContent = '15';
+    if (progressBar) progressBar.style.width = '15%';
 
     const interval = setInterval(() => {
-        currentPercent += increment;
-
-        if (currentPercent >= targetPercent) {
-            currentPercent = targetPercent;
+        currentPercent += 12;
+        if (currentPercent >= 98) {
+            currentPercent = 98;
             clearInterval(interval);
-
-            if (percentEl) percentEl.textContent = '100';
-            if (progressBar) progressBar.style.width = '100%';
-            if (statusSub) statusSub.textContent = '[ ACCESO CONCEDIDO · BIENVENIDO ]';
-
-            // Pausa breve de 250ms en 100% y desvanecimiento
-            setTimeout(() => {
-                preloader.classList.add('fade-out');
-                setTimeout(() => {
-                    preloader.style.display = 'none';
-                }, 650);
-            }, 250);
-        } else {
-            const displayVal = Math.floor(currentPercent);
-            if (percentEl) percentEl.textContent = displayVal;
-            if (progressBar) progressBar.style.width = `${displayVal}%`;
-
-            if (statusSub) {
-                const currentMsg = statusMessages.find(m => displayVal <= m.limit);
-                if (currentMsg && statusSub.textContent !== currentMsg.text) {
-                    statusSub.textContent = currentMsg.text;
-                }
-            }
         }
-    }, intervalTime);
+        if (percentEl) percentEl.textContent = Math.floor(currentPercent);
+        if (progressBar) progressBar.style.width = `${Math.floor(currentPercent)}%`;
+    }, 40);
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Conectar con el formulario de Login
+    const loginForm = document.querySelector('form[action*="Login"]') || document.querySelector('form[action*="login"]');
+    if (loginForm) {
+        loginForm.addEventListener('submit', () => {
+            const emailInput = loginForm.querySelector('input[name="Email"]') || loginForm.querySelector('#txtEmail');
+            const passInput = loginForm.querySelector('input[name="Password"]') || loginForm.querySelector('#txtPassword');
+            if (emailInput && emailInput.value && passInput && passInput.value) {
+                window.triggerAuthPreloader('// INICIANDO SESIÓN //', '[ VERIFICANDO CREDENCIALES DEL SISTEMA ]');
+            }
+        });
+    }
+
+    // 2. Conectar con los formularios de Logout (en navbar público y dashboard)
+    const logoutForms = document.querySelectorAll('form[action*="Logout"], form[action*="logout"]');
+    logoutForms.forEach(form => {
+        form.addEventListener('submit', () => {
+            window.triggerAuthPreloader('// CERRANDO SESIÓN //', '[ DESCONECTANDO CUENTA DE FORMA SEGURA ]');
+        });
+    });
 });

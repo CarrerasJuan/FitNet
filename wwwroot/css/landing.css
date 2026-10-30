@@ -697,20 +697,27 @@ body.fitnet-landing {
   height: 100vh;
   background: radial-gradient(circle at center, #261138 0%, #110619 65%, #08030c 100%);
   z-index: 999999;
-  display: flex;
+  display: none; /* Oculto por defecto: navegación limpia instantánea sin bloqueo */
+  opacity: 0;
+  visibility: hidden;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1), 
-              visibility 0.65s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.65s ease;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), 
+              visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
 
+.preloader-overlay.active {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 .preloader-overlay.fade-out {
-  opacity: 0;
-  visibility: hidden;
-  transform: scale(1.04);
-  pointer-events: none;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: scale(1.02);
+  pointer-events: none !important;
 }
 
 /* Grilla y Scanline Cyberpunk de Fondo */

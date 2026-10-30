@@ -1,0 +1,364 @@
+@model FitNet.ViewModels.WorkoutPlans.WorkoutPlanIndexViewModel
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = "Planes y Rutinas de Entrenamiento";
+}
+
+<!-- Encabezado de Página (Metis UI) -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-primary-fn text-uppercase font-heading">
+                <i class="fa-solid fa-clipboard-list me-1"></i> Entrenamiento
+            </span>
+            <span class="badge bg-secondary font-heading text-uppercase">Directorio de Rutinas</span>
+        </div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-1">PLANES Y RUTINAS DE ENTRENAMIENTO</h1>
+        <p class="text-muted small mb-0">Gestión de rutinas oficiales generales del gimnasio y planes personalizados para atletas Premium.</p>
+    </div>
+
+    <div class="d-flex gap-2">
+        @if (Model.IsTrainer)
+        {
+            <a asp-controller="Trainers" asp-action="Members" class="btn btn-outline-secondary text-white font-heading btn-sm">
+                <i class="fa-solid fa-users me-1"></i> Mis Alumnos
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading btn-sm">
+                <i class="fa-solid fa-arrow-left me-1"></i> Panel Admin
+            </a>
+        }
+        <a asp-action="Create" class="btn btn-fn-primary font-heading btn-sm d-flex align-items-center gap-2">
+            <i class="fa-solid fa-plus"></i>
+            <span>Nueva Rutina</span>
+        </a>
+    </div>
+</div>
+
+<!-- Flash Notifications TempData -->
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success bg-success bg-opacity-25 border-success text-white alert-dismissible fade show mb-4 small" role="alert">
+        <i class="fa-solid fa-circle-check me-2 text-primary-fn"></i>
+        @TempData["MensajeExito"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger bg-danger bg-opacity-25 border-danger text-white alert-dismissible fade show mb-4 small" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        @TempData["MensajeError"]
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- ==========================================
+     TARJETAS KPI RESUMEN DE RUTINAS
+     ========================================== -->
+<div class="row g-3 g-lg-4 mb-4">
+    <div class="col-sm-6 col-xl-4">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-lime">
+                <i class="fa-solid fa-clipboard-check"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Total de Rutinas</div>
+                <div class="stats-value">@Model.TotalPlansCount</div>
+                <div class="stats-sub text-primary-fn">
+                    <i class="fa-solid fa-layer-group me-1"></i>Planes registrados en FitNet
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-4">
+        <div class="stats-card">
+            <div class="stats-icon" style="background: rgba(255, 193, 7, 0.15); color: #ffc107;">
+                <i class="fa-solid fa-building-columns"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Rutinas Generales</div>
+                <div class="stats-value">@Model.GeneralPlansCount</div>
+                <div class="stats-sub text-warning">
+                    <i class="fa-solid fa-crown me-1"></i>Planes base (Socios Gold & Premium)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-4">
+        <div class="stats-card">
+            <div class="stats-icon" style="background: rgba(13, 202, 240, 0.15); color: #0dcaf0;">
+                <i class="fa-solid fa-user-gear"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Rutinas de Coach</div>
+                <div class="stats-value">@Model.PersonalPlansCount</div>
+                <div class="stats-sub text-info">
+                    <i class="fa-solid fa-dumbbell me-1"></i>Prescripciones personalizadas
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     BARRA DE FILTROS Y BÚSQUEDA SERVER-SIDE
+     ========================================== -->
+<div class="fn-card mb-4">
+    <div class="p-3 bg-surface-fn border-bottom border-secondary border-opacity-25">
+        <form method="get" asp-action="Index" class="row g-3 align-items-center">
+            <!-- Filtro por Alcance (Segmented Control Redondeado) -->
+            <div class="col-12 col-md-7 col-lg-6">
+                <div class="d-inline-flex p-1 rounded-pill bg-dark border border-secondary border-opacity-50 shadow-sm w-100 justify-content-between">
+                    <a asp-action="Index" asp-route-filter="all" asp-route-search="@Model.Search" 
+                       class="btn btn-sm rounded-pill font-heading flex-fill text-center transition @(Model.Filter == "all" ? "btn-fn-primary text-dark fw-bold shadow-sm" : "text-white-50 border-0")">
+                        <i class="fa-solid fa-layer-group me-1"></i> Todas (@Model.TotalPlansCount)
+                    </a>
+                    <a asp-action="Index" asp-route-filter="general" asp-route-search="@Model.Search" 
+                       class="btn btn-sm rounded-pill font-heading flex-fill text-center transition @(Model.Filter == "general" ? "btn-fn-primary text-dark fw-bold shadow-sm" : "text-white-50 border-0")">
+                        <i class="fa-solid fa-building-columns me-1"></i> Generales (@Model.GeneralPlansCount)
+                    </a>
+                    <a asp-action="Index" asp-route-filter="mine" asp-route-search="@Model.Search" 
+                       class="btn btn-sm rounded-pill font-heading flex-fill text-center transition @(Model.Filter == "mine" ? "btn-fn-primary text-dark fw-bold shadow-sm" : "text-white-50 border-0")">
+                        <i class="fa-solid fa-user-check me-1"></i> Mis Rutinas (@Model.PersonalPlansCount)
+                    </a>
+                </div>
+            </div>
+
+            <!-- Búsqueda Textual -->
+            <div class="col-12 col-md-5 col-lg-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-dark border-secondary border-opacity-50 text-muted rounded-start-pill ps-3">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="hidden" name="filter" value="@Model.Filter" />
+                    <input type="text" name="search" value="@Model.Search" 
+                           class="form-control bg-dark border-secondary border-opacity-50 text-white" 
+                           placeholder="Buscar rutina por nombre o descripción..." />
+                    @if (!string.IsNullOrWhiteSpace(Model.Search))
+                    {
+                        <a asp-action="Index" asp-route-filter="@Model.Filter" class="btn btn-outline-secondary border-opacity-50 text-white">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    }
+                    <button type="submit" class="btn btn-fn-primary rounded-end-pill px-3 font-heading">Buscar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- ==========================================
+         GRILLA DE TARJETAS DE RUTINAS
+         ========================================== -->
+    <div class="p-3 p-lg-4">
+        @if (Model.Plans.Any())
+        {
+            <div class="row g-3 g-lg-4">
+                @foreach (var plan in Model.Plans)
+                {
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card h-100 bg-dark border border-secondary border-opacity-25 rounded-3 shadow-sm d-flex flex-column hover-card">
+                            <div class="card-body p-4 d-flex flex-column">
+                                <!-- Badges y Estado -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    @if (plan.IsGeneral)
+                                    {
+                                        <span class="badge bg-warning text-dark font-heading">
+                                            <i class="fa-solid fa-crown me-1"></i> General Club
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info text-dark font-heading">
+                                            <i class="fa-solid fa-user-gear me-1"></i> Personalizada
+                                        </span>
+                                    }
+                                    <span class="text-muted font-monospace small">
+                                        <i class="fa-regular fa-calendar me-1"></i>@plan.CreatedAt.ToString("dd/MM/yyyy")
+                                    </span>
+                                </div>
+
+                                <!-- Título de la Rutina -->
+                                <h5 class="font-heading fw-bold text-white mb-2 line-clamp-1" title="@plan.Name">
+                                    @plan.Name
+                                </h5>
+
+                                <!-- Descripción -->
+                                <p class="text-muted small flex-grow-1 mb-3 line-clamp-2" style="min-height: 2.6rem;">
+                                    @(string.IsNullOrWhiteSpace(plan.Description) ? "Sin descripción técnica adicional registrada." : plan.Description)
+                                </p>
+
+                                <!-- Información del Coach -->
+                                <div class="d-flex align-items-center gap-2 p-2 rounded bg-black bg-opacity-25 border border-secondary border-opacity-25 mb-3">
+                                    <img src="@(string.IsNullOrEmpty(plan.TrainerAvatar) ? "/img/default-avatar.png" : plan.TrainerAvatar)" 
+                                         alt="Avatar" class="rounded-circle border border-secondary" style="width: 28px; height: 28px; object-fit: cover;" />
+                                    <div class="small text-truncate">
+                                        <span class="text-muted">Diseñado por:</span>
+                                        <strong class="text-white ms-1">@plan.TrainerName</strong>
+                                    </div>
+                                </div>
+
+                                <!-- Métricas de la Rutina -->
+                                <div class="row g-2 text-center border-top border-secondary border-opacity-25 pt-3 mt-auto">
+                                    <div class="col-6">
+                                        <div class="bg-surface-fn py-1 px-2 rounded border border-secondary border-opacity-25">
+                                            <div class="text-primary-fn font-monospace fw-bold fs-6">
+                                                <i class="fa-solid fa-dumbbell me-1"></i>@plan.ExercisesCount
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.72rem; text-transform: uppercase;">Ejercicios</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="bg-surface-fn py-1 px-2 rounded border border-secondary border-opacity-25">
+                                            <div class="text-info font-monospace fw-bold fs-6">
+                                                <i class="fa-solid fa-users me-1"></i>@plan.ActiveAssignmentsCount
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.72rem; text-transform: uppercase;">Atletas Activos</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer de Acciones -->
+                            <div class="card-footer bg-surface-fn border-top border-secondary border-opacity-25 p-3 d-flex justify-content-between align-items-center">
+                                <div class="d-flex gap-2">
+                                    <a asp-action="Details" asp-route-id="@plan.Id" class="btn btn-outline-light btn-sm rounded-pill px-3 font-heading">
+                                        <i class="fa-solid fa-eye text-primary-fn me-1"></i> Ficha
+                                    </a>
+                                    @if (plan.CanEditOrDelete)
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-outline-secondary btn-sm rounded-pill text-white font-heading" title="Seguir editando">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                    }
+                                    <a asp-action="Assign" asp-route-planId="@plan.Id" class="btn btn-fn-primary btn-sm rounded-pill px-3 font-heading" title="Asignar a un alumno">
+                                        <i class="fa-solid fa-user-plus me-1"></i> Asignar
+                                    </a>
+                                </div>
+
+                                @if (plan.CanEditOrDelete)
+                                {
+                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-2" 
+                                            data-bs-toggle="modal" data-bs-target="#deleteModal-@plan.Id"
+                                            title="Eliminar rutina">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+
+                                    <!-- Modal de Confirmación de Baja -->
+                                    <div class="modal fade" id="deleteModal-@plan.Id" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content bg-dark border border-danger text-white">
+                                                <div class="modal-header border-secondary border-opacity-50">
+                                                    <h5 class="modal-title font-heading text-danger">
+                                                        <i class="fa-solid fa-triangle-exclamation me-2"></i> Confirmar Eliminación
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body small">
+                                                    <p class="mb-2">¿Estás seguro de que deseas eliminar permanentemente la rutina <strong class="text-warning">@plan.Name</strong>?</p>
+                                                    <div class="alert alert-warning bg-warning bg-opacity-10 border-warning text-warning small mb-0">
+                                                        <i class="fa-solid fa-shield-halved me-1"></i>
+                                                        Si la rutina está asignada a atletas en curso, el sistema bloqueará la baja para proteger su entrenamiento.
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer border-secondary border-opacity-50">
+                                                    <button type="button" class="btn btn-outline-secondary font-heading btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                                                    <form method="post" asp-action="Delete" asp-route-id="@plan.Id">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-danger font-heading btn-sm">
+                                                            <i class="fa-solid fa-trash-can me-1"></i> Eliminar Rutina
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Paginador Server-Side (Skip / Take) -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 mt-4 pt-3 border-top border-secondary border-opacity-25">
+                    <span class="text-muted small font-monospace">
+                        Mostrando página <strong class="text-white">@Model.Page</strong> de <strong class="text-white">@Model.TotalPages</strong> 
+                        (@Model.TotalItems rutinas en total)
+                    </span>
+
+                    <ul class="pagination pagination-sm mb-0">
+                        <!-- Anterior -->
+                        <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                            <a class="page-link bg-dark border-secondary border-opacity-50 text-white" 
+                               asp-action="Index" 
+                               asp-route-page="@(Model.Page - 1)" 
+                               asp-route-filter="@Model.Filter" 
+                               asp-route-search="@Model.Search">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        <!-- Páginas Numéricas -->
+                        @for (int p = 1; p <= Model.TotalPages; p++)
+                        {
+                            <li class="page-item @(p == Model.Page ? "active" : "")">
+                                <a class="page-link @(p == Model.Page ? "bg-primary-fn border-primary-fn text-black fw-bold" : "bg-dark border-secondary border-opacity-50 text-white")" 
+                                   asp-action="Index" 
+                                   asp-route-page="@p" 
+                                   asp-route-filter="@Model.Filter" 
+                                   asp-route-search="@Model.Search">
+                                    @p
+                                </a>
+                            </li>
+                        }
+
+                        <!-- Siguiente -->
+                        <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                            <a class="page-link bg-dark border-secondary border-opacity-50 text-white" 
+                               asp-action="Index" 
+                               asp-route-page="@(Model.Page + 1)" 
+                               asp-route-filter="@Model.Filter" 
+                               asp-route-search="@Model.Search">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            }
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="text-center py-5">
+                <div class="d-inline-flex p-4 rounded-circle bg-dark border border-secondary border-opacity-50 text-muted mb-3">
+                    <i class="fa-solid fa-clipboard-question fa-3x text-primary-fn"></i>
+                </div>
+                <h4 class="font-heading text-white">No se encontraron rutinas registradas</h4>
+                <p class="text-muted small mb-3">
+                    @(string.IsNullOrWhiteSpace(Model.Search) 
+                        ? "Aún no hay rutinas creadas bajo el filtro seleccionado." 
+                        : $"No hay coincidencias para el término '{Model.Search}'.")
+                </p>
+                <div class="d-flex justify-content-center gap-2">
+                    @if (!string.IsNullOrWhiteSpace(Model.Search) || Model.Filter != "all")
+                    {
+                        <a asp-action="Index" class="btn btn-outline-secondary font-heading btn-sm text-white">
+                            <i class="fa-solid fa-rotate-left me-1"></i> Restablecer Filtros
+                        </a>
+                    }
+                    <a asp-action="Create" class="btn btn-fn-primary font-heading btn-sm">
+                        <i class="fa-solid fa-plus me-1"></i> Crear la Primera Rutina
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

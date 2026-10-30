@@ -786,3 +786,33 @@ body.dashboard-body {
     box-shadow: none !important;
   }
 }
+
+/* ==========================================================================
+   Botones de Acción Global FitNet (Cyberlime & High Contrast)
+   ========================================================================== */
+.btn-fn-primary,
+.btn-primary-fn {
+  background-color: var(--fn-primary, #b6ff00) !important;
+  color: #100817 !important;
+  font-family: var(--fn-font-heading);
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid var(--fn-primary, #b6ff00) !important;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.btn-fn-primary:hover,
+.btn-primary-fn:hover {
+  background-color: #a3e600 !important;
+  border-color: #a3e600 !important;
+  color: #000000 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(182, 255, 0, 0.4);
+}
+

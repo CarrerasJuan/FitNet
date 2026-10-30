@@ -72,24 +72,16 @@ public class TrainersController : Controller
 
         var isStaffAdmin = User.IsInRole("Admin") || User.IsInRole("Owner");
 
+        // Base query: todos los socios activos con membresía del club (Gold o Premium)
         var baseQuery = _context.MemberProfiles
             .Include(m => m.User)
             .Include(m => m.Membership)
-            .Include(m => m.Assignments.Where(a => a.IsActive))
+            .Include(m => m.Assignments.Where(a => a.IsActive && (!a.EndDate.HasValue || a.EndDate.Value >= DateTime.UtcNow.Date)))
                 .ThenInclude(a => a.WorkoutPlan)
                     .ThenInclude(wp => wp.WorkoutExercises)
             .Include(m => m.ProgressRecords)
+            .Where(m => m.User.IsActive && m.Membership.Name != "Free")
             .AsNoTracking();
-
-        if (!isStaffAdmin)
-        {
-            baseQuery = baseQuery.Where(m => m.Assignments.Any(a => a.IsActive && a.AssignedByTrainerId == user.Id));
-        }
-        else
-        {
-            // Admin u Owner ven los socios que tienen asignaciones o son Premium
-            baseQuery = baseQuery.Where(m => m.Assignments.Any(a => a.IsActive) || m.Membership.Name == "Premium");
-        }
 
         // Filtro de búsqueda server-side
         if (!string.IsNullOrWhiteSpace(search))
@@ -149,9 +141,13 @@ public class TrainersController : Controller
             };
         }).ToList();
 
-        var totalAssigned = totalItems;
-        var activeRoutines = studentItems.Count(s => s.ActiveWorkoutPlanId.HasValue);
-        var withoutRoutine = studentItems.Count(s => !s.ActiveWorkoutPlanId.HasValue);
+        var totalAssigned = await _context.MemberProfiles
+            .CountAsync(m => m.User.IsActive && m.Membership.Name != "Free");
+
+        var activeRoutines = await _context.WorkoutAssignments
+            .CountAsync(a => a.IsActive && (!a.EndDate.HasValue || a.EndDate.Value >= DateTime.UtcNow.Date));
+
+        var withoutRoutine = Math.Max(0, totalAssigned - activeRoutines);
 
         var viewModel = new TrainerMembersViewModel
         {
@@ -193,12 +189,11 @@ public class TrainersController : Controller
             return RedirectToAction("Members");
         }
 
-        var isStaffAdmin = User.IsInRole("Admin") || User.IsInRole("Owner");
-        var isAssignedToThisTrainer = memberProfile.Assignments.Any(a => a.IsActive && a.AssignedByTrainerId == user.Id);
+        var isStaffOrTrainer = User.IsInRole("Admin") || User.IsInRole("Owner") || User.IsInRole("Trainer");
 
-        if (!isStaffAdmin && !isAssignedToThisTrainer)
+        if (!isStaffOrTrainer || memberProfile.Membership.Name == "Free")
         {
-            TempData["MensajeError"] = "No tenés autorización para ver el progreso de un alumno no asignado a tu cargo.";
+            TempData["MensajeError"] = "No tienes permisos para visualizar el progreso de este socio.";
             return RedirectToAction("Members");
         }
 
@@ -244,5 +239,15 @@ public class TrainersController : Controller
         };
 
         return View(viewModel);
+    }
+
+    // ==========================================
+    // 4. GESTIÓN DE STOCK DE EJERCICIOS (SPA VUE 3)
+    // ==========================================
+    [HttpGet]
+    [Authorize(Roles = "Trainer,Admin,Owner")]
+    public IActionResult Exercises()
+    {
+        return View("~/Views/Admin/Exercises.cshtml");
     }
 }
