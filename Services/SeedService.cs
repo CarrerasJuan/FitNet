@@ -13,6 +13,17 @@ public static class SeedService
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var logger = scope.ServiceProvider.GetService<ILoggerFactory>()?.CreateLogger("SeedService");
+
+        // 0. Garantizar Creación de Base de Datos y Tablas en MySQL si se levanta limpia
+        try
+        {
+            await context.Database.EnsureCreatedAsync();
+        }
+        catch (Exception ex)
+        {
+            logger?.LogInformation("Esquema relacional verificado: {Message}", ex.Message);
+        }
 
         // 1. Asegurar Roles de Seguridad
         string[] roles = ["Owner", "Admin", "Trainer", "Member"];
@@ -57,6 +68,7 @@ public static class SeedService
         }
 
         var goldMembership = await context.Memberships.FirstAsync(m => m.Name == "Gold");
+        var premiumMembership = await context.Memberships.FirstAsync(m => m.Name == "Premium");
         var freeMembership = await context.Memberships.FirstAsync(m => m.Name == "Free");
 
         // 3. Usuarios de Prueba para cada Rol (Requerimiento Académico)
@@ -102,7 +114,7 @@ public static class SeedService
         // 3.3. Usuario Trainer
         if (await userManager.FindByEmailAsync("trainer@fitnet.com") == null)
         {
-            var trainer = new ApplicationUser
+            var newTrainer = new ApplicationUser
             {
                 UserName = "trainer@fitnet.com",
                 Email = "trainer@fitnet.com",
@@ -111,13 +123,13 @@ public static class SeedService
                 EmailConfirmed = true,
                 IsActive = true
             };
-            var result = await userManager.CreateAsync(trainer, "Trainer123!");
+            var result = await userManager.CreateAsync(newTrainer, "Trainer123!");
             if (result.Succeeded)
             {
-                await userManager.AddToRoleAsync(trainer, "Trainer");
+                await userManager.AddToRoleAsync(newTrainer, "Trainer");
                 context.TrainerProfiles.Add(new TrainerProfile
                 {
-                    UserId = trainer.Id,
+                    UserId = newTrainer.Id,
                     Specialty = "Hipertrofia & Fuerza",
                     Biography = "Licenciado en Educación Física especializado en biomecánica y sobrecarga progresiva."
                 });
@@ -176,6 +188,62 @@ public static class SeedService
                     Height = 175,
                     BirthDate = new DateTime(2001, 8, 20),
                     TrialEndsAt = DateTime.UtcNow.AddHours(24) // 24 horas exactas de prueba
+                });
+                await context.SaveChangesAsync();
+            }
+        }
+
+        // 3.6. Usuario Member (Premium Activo con Coach Asignado)
+        if (await userManager.FindByEmailAsync("premium@fitnet.com") == null)
+        {
+            var premiumMember = new ApplicationUser
+            {
+                UserName = "premium@fitnet.com",
+                Email = "premium@fitnet.com",
+                FirstName = "Sofía",
+                LastName = "Atleta",
+                EmailConfirmed = true,
+                IsActive = true
+            };
+            var result = await userManager.CreateAsync(premiumMember, "Premium123!");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(premiumMember, "Member");
+                context.MemberProfiles.Add(new MemberProfile
+                {
+                    UserId = premiumMember.Id,
+                    MembershipId = premiumMembership.Id,
+                    Height = 168,
+                    BirthDate = new DateTime(1999, 11, 22),
+                    TrialEndsAt = DateTime.UtcNow.AddYears(1)
+                });
+                await context.SaveChangesAsync();
+            }
+        }
+
+        // 3.7. Usuario Member (Trial Vencido - para Evaluación Inmediata de Seguridad)
+        if (await userManager.FindByEmailAsync("expired@fitnet.com") == null)
+        {
+            var expiredMember = new ApplicationUser
+            {
+                UserName = "expired@fitnet.com",
+                Email = "expired@fitnet.com",
+                FirstName = "Tomás",
+                LastName = "Vencido",
+                EmailConfirmed = true,
+                IsActive = true
+            };
+            var result = await userManager.CreateAsync(expiredMember, "Expired123!");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(expiredMember, "Member");
+                context.MemberProfiles.Add(new MemberProfile
+                {
+                    UserId = expiredMember.Id,
+                    MembershipId = freeMembership.Id,
+                    Height = 180,
+                    BirthDate = new DateTime(2000, 3, 10),
+                    TrialEndsAt = DateTime.UtcNow.AddDays(-2) // Expirado hace 48hs
                 });
                 await context.SaveChangesAsync();
             }
@@ -334,26 +402,32 @@ public static class SeedService
 
             context.WorkoutPlans.AddRange(generalPlan, personalizedPlan);
             await context.SaveChangesAsync();
+        }
 
-            // 5.3. Asignación activa al socio de prueba (member@fitnet.com)
+        // 6. Asegurar Asignaciones y Registros de Progreso Iniciales
+        var coachTrainer = await userManager.FindByEmailAsync("trainer@fitnet.com");
+        var activePersonalizedPlan = await context.WorkoutPlans.FirstOrDefaultAsync(wp => !wp.IsGeneral);
+
+        if (activePersonalizedPlan != null)
+        {
+            // 6.1. Asignación activa a member@fitnet.com (Gold)
             var memberUser = await userManager.FindByEmailAsync("member@fitnet.com");
             if (memberUser != null)
             {
                 var memberProfile = await context.MemberProfiles.FirstOrDefaultAsync(m => m.UserId == memberUser.Id);
-                if (memberProfile != null)
+                if (memberProfile != null && !await context.WorkoutAssignments.AnyAsync(a => a.MemberId == memberProfile.Id))
                 {
                     context.WorkoutAssignments.Add(new WorkoutAssignment
                     {
                         MemberId = memberProfile.Id,
-                        WorkoutPlanId = personalizedPlan.Id,
-                        AssignedByTrainerId = trainer?.Id,
-                        StartDate = DateTime.UtcNow.Date,
+                        WorkoutPlanId = activePersonalizedPlan.Id,
+                        AssignedByTrainerId = coachTrainer?.Id,
+                        StartDate = DateTime.UtcNow.Date.AddDays(-14),
                         IsActive = true
                     });
                     await context.SaveChangesAsync();
 
-                    // 5.4. Registros de progreso iniciales para member@fitnet.com
-                    if (!await context.ProgressRecords.AnyAsync())
+                    if (!await context.ProgressRecords.AnyAsync(p => p.MemberId == memberProfile.Id))
                     {
                         context.ProgressRecords.AddRange(
                             new ProgressRecord
@@ -373,6 +447,50 @@ public static class SeedService
                                 BodyFat = 15.3m,
                                 Notes = "Control quincenal. Descenso de 1.3 kg de grasa y mejoras en dominadas estrictas.",
                                 CreatedAt = DateTime.UtcNow.AddDays(-2)
+                            }
+                        );
+                        await context.SaveChangesAsync();
+                    }
+                }
+            }
+
+            // 6.2. Asignación activa a premium@fitnet.com (Premium con Coach)
+            var premiumUser = await userManager.FindByEmailAsync("premium@fitnet.com");
+            if (premiumUser != null)
+            {
+                var premiumProfile = await context.MemberProfiles.FirstOrDefaultAsync(m => m.UserId == premiumUser.Id);
+                if (premiumProfile != null && !await context.WorkoutAssignments.AnyAsync(a => a.MemberId == premiumProfile.Id))
+                {
+                    context.WorkoutAssignments.Add(new WorkoutAssignment
+                    {
+                        MemberId = premiumProfile.Id,
+                        WorkoutPlanId = activePersonalizedPlan.Id,
+                        AssignedByTrainerId = coachTrainer?.Id,
+                        StartDate = DateTime.UtcNow.Date.AddDays(-30),
+                        IsActive = true
+                    });
+                    await context.SaveChangesAsync();
+
+                    if (!await context.ProgressRecords.AnyAsync(p => p.MemberId == premiumProfile.Id))
+                    {
+                        context.ProgressRecords.AddRange(
+                            new ProgressRecord
+                            {
+                                MemberId = premiumProfile.Id,
+                                Date = DateTime.UtcNow.Date.AddDays(-30),
+                                Weight = 62.5m,
+                                BodyFat = 23.0m,
+                                Notes = "Evaluación inicial y diseño de plan personalizado por Coach Lucas.",
+                                CreatedAt = DateTime.UtcNow.AddDays(-30)
+                            },
+                            new ProgressRecord
+                            {
+                                MemberId = premiumProfile.Id,
+                                Date = DateTime.UtcNow.Date.AddDays(-10),
+                                Weight = 61.2m,
+                                BodyFat = 21.8m,
+                                Notes = "Excelente adherencia al plan de fuerza y reducción de porcentaje graso.",
+                                CreatedAt = DateTime.UtcNow.AddDays(-10)
                             }
                         );
                         await context.SaveChangesAsync();
