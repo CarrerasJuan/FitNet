@@ -26,13 +26,19 @@ public class MemberProgressViewModel
     [Display(Name = "Peso Corporal (kg)")]
     public decimal? Weight { get; set; }
 
+    private string? _notes;
+
     [Range(3, 60, ErrorMessage = "El porcentaje de grasa debe estar entre 3% y 60%.")]
     [Display(Name = "Grasa Corporal (%)")]
     public decimal? BodyFat { get; set; }
 
     [StringLength(500, ErrorMessage = "Las observaciones no pueden superar los 500 caracteres.")]
     [Display(Name = "Notas y Sensaciones de Entrenamiento")]
-    public string? Notes { get; set; }
+    public string? Notes
+    {
+        get => _notes;
+        set => _notes = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
 
     [Display(Name = "Fotografía de Evolución Corporal")]
     public IFormFile? ProgressPhoto { get; set; }

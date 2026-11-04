@@ -25,10 +25,16 @@ public class WorkoutPlanExerciseInputModel
     [Range(1, 100, ErrorMessage = "Las repeticiones deben estar entre 1 y 100.")]
     public int Repetitions { get; set; } = 10;
 
+    private string? _notes;
+
     [Required(ErrorMessage = "El tiempo de descanso es obligatorio.")]
     [Range(0, 600, ErrorMessage = "El descanso debe estar entre 0 y 600 segundos.")]
     public int RestSeconds { get; set; } = 60;
 
     [StringLength(250, ErrorMessage = "Las notas técnicas no pueden superar 250 caracteres.")]
-    public string? Notes { get; set; }
+    public string? Notes
+    {
+        get => _notes;
+        set => _notes = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
 }

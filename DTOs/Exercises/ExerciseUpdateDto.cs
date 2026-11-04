@@ -9,28 +9,54 @@ namespace FitNet.DTOs.Exercises;
 /// </summary>
 public class ExerciseUpdateDto
 {
+    private string _name = string.Empty;
+    private string? _description;
+    private string _muscleGroup = string.Empty;
+    private string _difficulty = string.Empty;
+    private string? _videoUrl;
+
     [Required(ErrorMessage = "El identificador del ejercicio es obligatorio.")]
     [Range(1, int.MaxValue, ErrorMessage = "El identificador debe ser un entero positivo.")]
     public int Id { get; set; }
 
     [Required(ErrorMessage = "El nombre del ejercicio es obligatorio.")]
     [StringLength(150, MinimumLength = 2, ErrorMessage = "El nombre debe tener entre 2 y 150 caracteres.")]
-    public string Name { get; set; } = string.Empty;
+    public string Name
+    {
+        get => _name;
+        set => _name = value?.Trim() ?? string.Empty;
+    }
 
     [StringLength(2000, ErrorMessage = "La descripción no puede superar los 2000 caracteres.")]
-    public string? Description { get; set; }
+    public string? Description
+    {
+        get => _description;
+        set => _description = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
 
     [Required(ErrorMessage = "El grupo muscular es obligatorio.")]
     [StringLength(80, ErrorMessage = "El grupo muscular no puede superar los 80 caracteres.")]
-    public string MuscleGroup { get; set; } = string.Empty;
+    public string MuscleGroup
+    {
+        get => _muscleGroup;
+        set => _muscleGroup = value?.Trim() ?? string.Empty;
+    }
 
     [Required(ErrorMessage = "El nivel de dificultad es obligatorio.")]
     [StringLength(50, ErrorMessage = "La dificultad no puede superar los 50 caracteres.")]
-    public string Difficulty { get; set; } = string.Empty;
+    public string Difficulty
+    {
+        get => _difficulty;
+        set => _difficulty = value?.Trim() ?? string.Empty;
+    }
 
     [StringLength(255, ErrorMessage = "El enlace de video no puede superar los 255 caracteres.")]
     [Url(ErrorMessage = "El enlace de video debe ser una URL válida (ej. YouTube/Vimeo).")]
-    public string? VideoUrl { get; set; }
+    public string? VideoUrl
+    {
+        get => _videoUrl;
+        set => _videoUrl = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
 
     /// <summary>
     /// Determina si está visible para socios en período de prueba gratuito (Trial 24h).

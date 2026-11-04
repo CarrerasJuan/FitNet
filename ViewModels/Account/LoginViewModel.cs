@@ -4,10 +4,16 @@ namespace FitNet.ViewModels.Account;
 
 public class LoginViewModel
 {
+    private string _email = string.Empty;
+
     [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
     [EmailAddress(ErrorMessage = "Ingresá un correo electrónico válido.")]
     [Display(Name = "Correo Electrónico")]
-    public string Email { get; set; } = string.Empty;
+    public string Email
+    {
+        get => _email;
+        set => _email = value?.Trim() ?? string.Empty;
+    }
 
     [Required(ErrorMessage = "La contraseña es obligatoria.")]
     [DataType(DataType.Password)]

@@ -291,6 +291,9 @@
             {
                 <!-- NAVEGACIÓN PARA ADMINISTRADORES Y DUEÑOS (ADMIN / OWNER) -->
                 <ul class="sidebar-nav-list flex-grow-1">
+                    <li class="sidebar-nav-header px-3 pt-2 pb-1 text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.08em;">
+                        Mostrador Operativo
+                    </li>
                     <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")" asp-controller="Admin" asp-action="Dashboard">
                             <i class="fa-solid fa-gauge-high"></i>
@@ -300,29 +303,35 @@
                     <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Members" ? "active" : "")" asp-controller="Admin" asp-action="Members">
                             <i class="fa-solid fa-users"></i>
-                            <span>Socios del Gym</span>
+                            <span>Socios y Cobros</span>
                         </a>
                     </li>
                     <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Trainers" ? "active" : "")" asp-controller="Admin" asp-action="Trainers">
                             <i class="fa-solid fa-user-tie"></i>
-                            <span>Entrenadores</span>
+                            <span>Staff de Coaches</span>
                         </a>
+                    </li>
+                    <li class="sidebar-nav-header px-3 pt-3 pb-1 text-muted text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.08em;">
+                        Auditoría Deportiva
                     </li>
                     <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Exercises" ? "active" : "")" asp-controller="Admin" asp-action="Exercises">
                             <i class="fa-solid fa-dumbbell"></i>
-                            <span>ABM Ejercicios</span>
+                            <span>Stock Ejercicios</span>
                         </a>
                     </li>
                     <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "WorkoutPlans" ? "active" : "")" asp-controller="Admin" asp-action="WorkoutPlans">
                             <i class="fa-solid fa-clipboard-list"></i>
-                            <span>Rutinas Oficiales</span>
+                            <span>Rutinas del Club</span>
                         </a>
                     </li>
                     @if (isOwner)
                     {
+                        <li class="sidebar-nav-header px-3 pt-3 pb-1 text-warning text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.08em;">
+                            Dirección General
+                        </li>
                         <li class="sidebar-nav-item">
                             <a class="sidebar-nav-link text-warning @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Metrics" ? "active" : "")" asp-controller="Admin" asp-action="Metrics">
                                 <i class="fa-solid fa-chart-pie text-warning"></i>
@@ -330,7 +339,7 @@
                             </a>
                         </li>
                     }
-                    <li class="sidebar-nav-item mt-2">
+                    <li class="sidebar-nav-item mt-3 pt-2 border-top border-secondary border-opacity-25">
                         <a class="sidebar-nav-link" asp-controller="Account" asp-action="Profile">
                             <i class="fa-solid fa-user"></i>
                             <span>Mi Perfil</span>

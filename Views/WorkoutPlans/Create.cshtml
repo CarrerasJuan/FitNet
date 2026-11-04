@@ -461,8 +461,8 @@
         window.__INITIAL_EXERCISES__ = @Html.Raw(initialExercisesJson);
         window.__AVAILABLE_MEMBERS__ = @Html.Raw(availableMembersJson);
         window.__PRESELECTED_MEMBER_ID__ = @(Model.MemberProfileId ?? 0);
-        window.__INITIAL_NAME__ = "@Html.Raw(Model.Name ?? "")";
-        window.__INITIAL_DESCRIPTION__ = "@Html.Raw(Model.Description ?? "")";
+        window.__INITIAL_NAME__ = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Name ?? ""));
+        window.__INITIAL_DESCRIPTION__ = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Description ?? ""));
     </script>
 
     <!-- Aplicación Vue 3 del Constructor de Rutinas -->

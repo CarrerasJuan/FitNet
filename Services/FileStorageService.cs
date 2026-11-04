@@ -131,6 +131,56 @@ public class FileStorageService : IFileStorageService
             return false;
         }
 
+        // Inspección defensiva de cabecera de bytes (Magic Bytes) para evitar ataques de extensión falsa o MIME spoofing
+        try
+        {
+            using var stream = file.OpenReadStream();
+            var headerBytes = new byte[12];
+            var bytesRead = stream.Read(headerBytes, 0, headerBytes.Length);
+            if (bytesRead < 4)
+            {
+                errorMessage = "El archivo está dañado o no contiene suficientes datos para validarse.";
+                return false;
+            }
+
+            var isValidSignature = false;
+
+            // JPEG: FF D8 FF
+            if (headerBytes[0] == 0xFF && headerBytes[1] == 0xD8 && headerBytes[2] == 0xFF)
+            {
+                isValidSignature = extension is ".jpg" or ".jpeg";
+            }
+            // PNG: 89 50 4E 47 0D 0A 1A 0A
+            else if (headerBytes[0] == 0x89 && headerBytes[1] == 0x50 && headerBytes[2] == 0x4E && headerBytes[3] == 0x47)
+            {
+                isValidSignature = extension == ".png";
+            }
+            // GIF: 47 49 46 38 ("GIF8")
+            else if (headerBytes[0] == 0x47 && headerBytes[1] == 0x49 && headerBytes[2] == 0x46 && headerBytes[3] == 0x38)
+            {
+                isValidSignature = extension == ".gif";
+            }
+            // WEBP: RIFF (bytes 0-3) y WEBP (bytes 8-11)
+            else if (headerBytes[0] == 0x52 && headerBytes[1] == 0x49 && headerBytes[2] == 0x46 && headerBytes[3] == 0x46 &&
+                     bytesRead >= 12 &&
+                     headerBytes[8] == 0x57 && headerBytes[9] == 0x45 && headerBytes[10] == 0x42 && headerBytes[11] == 0x50)
+            {
+                isValidSignature = extension == ".webp";
+            }
+
+            if (!isValidSignature)
+            {
+                errorMessage = $"El contenido real del archivo (firma de Magic Bytes) no coincide con la extensión declarada ({extension}). Carga bloqueada por seguridad.";
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Error al verificar la firma física de bytes de la imagen.");
+            errorMessage = "No se pudo verificar la integridad física del archivo.";
+            return false;
+        }
+
         return true;
     }
 }

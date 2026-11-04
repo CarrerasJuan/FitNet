@@ -321,7 +321,9 @@ INSERT INTO `WorkoutExercises` (`WorkoutPlanId`, `ExerciseId`, `Order`, `Sets`, 
 -- Contraseñas estándar:
 -- owner@fitnet.com    -> Owner123!
 -- admin@fitnet.com    -> Admin123!
--- trainer@fitnet.com  -> Trainer123!
+-- trainer@fitnet.com  -> Trainer123! (Lucas Vázquez - sin avatar para testing de subida)
+-- sofia.trainer@fitnet.com -> Trainer123! (Sofía Morales - avatar team3.png)
+-- matias.trainer@fitnet.com -> Trainer123! (Matías Rossi - avatar team2.png)
 -- member@fitnet.com   -> Member123!
 -- premium@fitnet.com  -> Premium123!
 -- trial@fitnet.com    -> Trial123!
@@ -330,6 +332,8 @@ INSERT INTO `AspNetUsers` (`Id`, `UserName`, `NormalizedUserName`, `Email`, `Nor
 ('user-owner', 'owner@fitnet.com', 'OWNER@FITNET.COM', 'owner@fitnet.com', 'OWNER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Guillermo', 'Propietario', NULL, NOW(), 1),
 ('user-admin', 'admin@fitnet.com', 'ADMIN@FITNET.COM', 'admin@fitnet.com', 'ADMIN@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Carlos', 'Administrador', NULL, NOW(), 1),
 ('user-trainer', 'trainer@fitnet.com', 'TRAINER@FITNET.COM', 'trainer@fitnet.com', 'TRAINER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Lucas', 'Vázquez', NULL, NOW(), 1),
+('user-trainer-sofia', 'sofia.trainer@fitnet.com', 'SOFIA.TRAINER@FITNET.COM', 'sofia.trainer@fitnet.com', 'SOFIA.TRAINER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Sofía', 'Morales', '/img/team/team3.png', NOW(), 1),
+('user-trainer-matias', 'matias.trainer@fitnet.com', 'MATIAS.TRAINER@FITNET.COM', 'matias.trainer@fitnet.com', 'MATIAS.TRAINER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Matías', 'Rossi', '/img/team/team2.png', NOW(), 1),
 ('user-member', 'member@fitnet.com', 'MEMBER@FITNET.COM', 'member@fitnet.com', 'MEMBER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Federico', 'Socio', NULL, NOW(), 1),
 ('user-premium', 'premium@fitnet.com', 'PREMIUM@FITNET.COM', 'premium@fitnet.com', 'PREMIUM@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Sofía', 'Atleta', NULL, NOW(), 1),
 ('user-trial', 'trial@fitnet.com', 'TRIAL@FITNET.COM', 'trial@fitnet.com', 'TRIAL@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Juan', 'Prueba', NULL, NOW(), 1),
@@ -340,6 +344,8 @@ INSERT INTO `AspNetUserRoles` (`UserId`, `RoleId`) VALUES
 ('user-owner', 'role-owner'),
 ('user-admin', 'role-admin'),
 ('user-trainer', 'role-trainer'),
+('user-trainer-sofia', 'role-trainer'),
+('user-trainer-matias', 'role-trainer'),
 ('user-member', 'role-member'),
 ('user-premium', 'role-member'),
 ('user-trial', 'role-member'),
@@ -347,7 +353,9 @@ INSERT INTO `AspNetUserRoles` (`UserId`, `RoleId`) VALUES
 
 -- Perfil de Entrenador
 INSERT INTO `TrainerProfiles` (`Id`, `UserId`, `Specialty`, `Biography`, `HireDate`, `IsActive`) VALUES
-(1, 'user-trainer', 'Hipertrofia & Fuerza', 'Licenciado en Educación Física especializado en biomecánica y sobrecarga progresiva.', NOW(), 1);
+(1, 'user-trainer', 'Hipertrofia & Fuerza', 'Licenciado en Educación Física especializado en biomecánica y sobrecarga progresiva.', NOW(), 1),
+(2, 'user-trainer-sofia', 'Cross Training & Acondicionamiento', 'Head Coach CrossFit L2 · Preparadora Física de atletas de alto rendimiento.', NOW(), 1),
+(3, 'user-trainer-matias', 'Rehabilitación & Funcional', 'Kinesiólogo y Entrenador de Movilidad Articular con enfoque en prevención y readaptación deportiva.', NOW(), 1);
 
 -- Perfiles de Miembros
 INSERT INTO `MemberProfiles` (`Id`, `UserId`, `MembershipId`, `Height`, `BirthDate`, `TrialEndsAt`, `IsActive`) VALUES

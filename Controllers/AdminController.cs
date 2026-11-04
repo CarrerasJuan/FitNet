@@ -1,6 +1,7 @@
 using FitNet.Data;
 using FitNet.Models;
 using FitNet.Services;
+using FitNet.ViewModels.Admin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -122,9 +123,57 @@ public class AdminController : Controller
     {
         var trainers = await _context.TrainerProfiles
             .Include(t => t.User)
+            .OrderBy(t => t.Id)
             .ToListAsync();
 
-        return View(trainers);
+        var trainerUserIds = trainers.Select(t => t.UserId).ToList();
+
+        // Conteo de planes creados por cada entrenador
+        var plansCountByTrainer = await _context.WorkoutPlans
+            .Where(wp => wp.TrainerId != null && trainerUserIds.Contains(wp.TrainerId))
+            .GroupBy(wp => wp.TrainerId!)
+            .Select(g => new { TrainerId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(g => g.TrainerId, g => g.Count);
+
+        // Conteo de atletas con asignaciones activas por cada entrenador
+        var activeAthletesByTrainer = await _context.WorkoutAssignments
+            .Where(wa => wa.AssignedByTrainerId != null && trainerUserIds.Contains(wa.AssignedByTrainerId) && wa.IsActive)
+            .GroupBy(wa => wa.AssignedByTrainerId!)
+            .Select(g => new { TrainerId = g.Key, Count = g.Select(x => x.MemberId).Distinct().Count() })
+            .ToDictionaryAsync(g => g.TrainerId, g => g.Count);
+
+        var viewModel = new AdminTrainersViewModel
+        {
+            TotalTrainers = trainers.Count,
+            TotalWorkoutsCreated = await _context.WorkoutPlans.CountAsync(wp => wp.TrainerId != null),
+            TotalActiveAthletes = await _context.WorkoutAssignments
+                .Where(wa => wa.IsActive && wa.AssignedByTrainerId != null)
+                .Select(wa => wa.MemberId)
+                .Distinct()
+                .CountAsync(),
+            Trainers = trainers.Select(t => new TrainerStaffItemViewModel
+            {
+                Id = t.Id,
+                UserId = t.UserId,
+                FullName = t.User?.FullName ?? "Entrenador",
+                Email = t.User?.Email ?? "Sin email",
+                PhoneNumber = t.User?.PhoneNumber,
+                AvatarPath = t.User?.AvatarPath,
+                Specialty = !string.IsNullOrWhiteSpace(t.Specialty) ? t.Specialty : "Acondicionamiento Físico General",
+                Biography = !string.IsNullOrWhiteSpace(t.Biography) ? t.Biography : "Entrenador profesional del staff de FitNet.",
+                CreatedAt = t.CreatedAt,
+                IsActive = t.User?.IsActive ?? true,
+                TotalPlansCount = plansCountByTrainer.GetValueOrDefault(t.UserId, 0),
+                ActiveAthletesCount = activeAthletesByTrainer.GetValueOrDefault(t.UserId, 0),
+                Shift = t.Specialty?.Contains("Cross", StringComparison.OrdinalIgnoreCase) == true
+                    ? "Turno Mañana"
+                    : (t.Specialty?.Contains("Rehab", StringComparison.OrdinalIgnoreCase) == true || t.Specialty?.Contains("Funcional", StringComparison.OrdinalIgnoreCase) == true
+                        ? "Turno Tarde"
+                        : "Turno Completo")
+            }).ToList()
+        };
+
+        return View(viewModel);
     }
 
     // ==========================================

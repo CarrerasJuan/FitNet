@@ -8,6 +8,10 @@ public class ExerciseFilterDto
     private const int MaxPageSize = 50;
     private int _pageSize = 10;
     private int _page = 1;
+    private string? _search;
+    private string? _muscleGroup;
+    private string? _difficulty;
+    private string? _sortBy = "name";
 
     /// <summary>
     /// Número de página (1-indexed).
@@ -30,17 +34,29 @@ public class ExerciseFilterDto
     /// <summary>
     /// Búsqueda textual parcial sobre nombre o descripción.
     /// </summary>
-    public string? Search { get; set; }
+    public string? Search
+    {
+        get => _search;
+        set => _search = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
 
     /// <summary>
     /// Filtro exacto por grupo muscular (Pecho, Espalda, Piernas, Hombros, Brazos, Core).
     /// </summary>
-    public string? MuscleGroup { get; set; }
+    public string? MuscleGroup
+    {
+        get => _muscleGroup;
+        set => _muscleGroup = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
 
     /// <summary>
     /// Filtro exacto por dificultad (Principiante, Intermedio, Avanzado).
     /// </summary>
-    public string? Difficulty { get; set; }
+    public string? Difficulty
+    {
+        get => _difficulty;
+        set => _difficulty = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
 
     /// <summary>
     /// Filtro por visibilidad pública / trial.
@@ -55,7 +71,11 @@ public class ExerciseFilterDto
     /// <summary>
     /// Campo por el cual ordenar: "name", "musclegroup", "difficulty", "createdat".
     /// </summary>
-    public string? SortBy { get; set; } = "name";
+    public string? SortBy
+    {
+        get => _sortBy;
+        set => _sortBy = string.IsNullOrWhiteSpace(value) ? "name" : value.Trim().ToLowerInvariant();
+    }
 
     /// <summary>
     /// Dirección del ordenamiento (true = descendente, false = ascendente).

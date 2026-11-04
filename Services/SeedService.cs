@@ -111,30 +111,108 @@ public static class SeedService
             }
         }
 
-        // 3.3. Usuario Trainer
-        if (await userManager.FindByEmailAsync("trainer@fitnet.com") == null)
+        // 3.3. Staff de Entrenadores (Lucas Vázquez, Sofía Morales, Matías Rossi)
+        
+        // 3.3.1. Coach Lucas Vázquez (Sin avatar inicial para testing manual en defensa)
+        var lucasTrainer = await userManager.FindByEmailAsync("trainer@fitnet.com");
+        if (lucasTrainer == null)
         {
-            var newTrainer = new ApplicationUser
+            lucasTrainer = new ApplicationUser
             {
                 UserName = "trainer@fitnet.com",
                 Email = "trainer@fitnet.com",
                 FirstName = "Lucas",
                 LastName = "Vázquez",
+                PhoneNumber = "351-555-0191",
+                AvatarPath = null, // Sin avatar para prueba de subida en defensa
                 EmailConfirmed = true,
                 IsActive = true
             };
-            var result = await userManager.CreateAsync(newTrainer, "Trainer123!");
+            var result = await userManager.CreateAsync(lucasTrainer, "Trainer123!");
             if (result.Succeeded)
             {
-                await userManager.AddToRoleAsync(newTrainer, "Trainer");
+                await userManager.AddToRoleAsync(lucasTrainer, "Trainer");
                 context.TrainerProfiles.Add(new TrainerProfile
                 {
-                    UserId = newTrainer.Id,
+                    UserId = lucasTrainer.Id,
                     Specialty = "Hipertrofia & Fuerza",
                     Biography = "Licenciado en Educación Física especializado en biomecánica y sobrecarga progresiva."
                 });
                 await context.SaveChangesAsync();
             }
+        }
+        else if (string.IsNullOrEmpty(lucasTrainer.PhoneNumber))
+        {
+            lucasTrainer.PhoneNumber = "351-555-0191";
+            await userManager.UpdateAsync(lucasTrainer);
+        }
+
+        // 3.3.2. Coach Sofía Morales (Avatar cargado: /img/team/team3.png)
+        var sofiaTrainer = await userManager.FindByEmailAsync("sofia.trainer@fitnet.com");
+        if (sofiaTrainer == null)
+        {
+            sofiaTrainer = new ApplicationUser
+            {
+                UserName = "sofia.trainer@fitnet.com",
+                Email = "sofia.trainer@fitnet.com",
+                FirstName = "Sofía",
+                LastName = "Morales",
+                PhoneNumber = "351-555-0192",
+                AvatarPath = "/img/team/team3.png",
+                EmailConfirmed = true,
+                IsActive = true
+            };
+            var result = await userManager.CreateAsync(sofiaTrainer, "Trainer123!");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(sofiaTrainer, "Trainer");
+                context.TrainerProfiles.Add(new TrainerProfile
+                {
+                    UserId = sofiaTrainer.Id,
+                    Specialty = "Cross Training & Acondicionamiento",
+                    Biography = "Head Coach CrossFit L2 · Preparadora Física de atletas de alto rendimiento."
+                });
+                await context.SaveChangesAsync();
+            }
+        }
+        else if (string.IsNullOrEmpty(sofiaTrainer.AvatarPath))
+        {
+            sofiaTrainer.AvatarPath = "/img/team/team3.png";
+            await userManager.UpdateAsync(sofiaTrainer);
+        }
+
+        // 3.3.3. Coach Matías Rossi (Avatar cargado: /img/team/team2.png)
+        var matiasTrainer = await userManager.FindByEmailAsync("matias.trainer@fitnet.com");
+        if (matiasTrainer == null)
+        {
+            matiasTrainer = new ApplicationUser
+            {
+                UserName = "matias.trainer@fitnet.com",
+                Email = "matias.trainer@fitnet.com",
+                FirstName = "Matías",
+                LastName = "Rossi",
+                PhoneNumber = "351-555-0193",
+                AvatarPath = "/img/team/team2.png",
+                EmailConfirmed = true,
+                IsActive = true
+            };
+            var result = await userManager.CreateAsync(matiasTrainer, "Trainer123!");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(matiasTrainer, "Trainer");
+                context.TrainerProfiles.Add(new TrainerProfile
+                {
+                    UserId = matiasTrainer.Id,
+                    Specialty = "Rehabilitación & Funcional",
+                    Biography = "Kinesiólogo y Entrenador de Movilidad Articular con enfoque en prevención y readaptación."
+                });
+                await context.SaveChangesAsync();
+            }
+        }
+        else if (string.IsNullOrEmpty(matiasTrainer.AvatarPath))
+        {
+            matiasTrainer.AvatarPath = "/img/team/team2.png";
+            await userManager.UpdateAsync(matiasTrainer);
         }
 
         // 3.4. Usuario Member (Gold Activo)
@@ -496,6 +574,69 @@ public static class SeedService
                         await context.SaveChangesAsync();
                     }
                 }
+            }
+        }
+
+        // 7. Asegurar Rutinas Generales para Sofía y Matías
+        var coachSofia = await userManager.FindByEmailAsync("sofia.trainer@fitnet.com");
+        if (coachSofia != null && !await context.WorkoutPlans.AnyAsync(wp => wp.TrainerId == coachSofia.Id))
+        {
+            var estocadas = await context.Exercises.FirstOrDefaultAsync(e => e.Name.Contains("Estocadas"));
+            var flexiones = await context.Exercises.FirstOrDefaultAsync(e => e.Name.Contains("Flexiones"));
+            var plancha = await context.Exercises.FirstOrDefaultAsync(e => e.Name.Contains("Plancha"));
+            var fondos = await context.Exercises.FirstOrDefaultAsync(e => e.Name.Contains("Fondos"));
+
+            if (estocadas != null && flexiones != null && plancha != null)
+            {
+                var hiitPlan = new WorkoutPlan
+                {
+                    Name = "Circuito HIIT & Acondicionamiento Metabólico",
+                    Description = "Entrenamiento por intervalos de alta intensidad para potencia aeróbica y resistencia muscular por Coach Sofía.",
+                    IsGeneral = true,
+                    TrainerId = coachSofia.Id,
+                    WorkoutExercises = new List<WorkoutExercise>
+                    {
+                        new() { Exercise = estocadas, Order = 1, Sets = 4, Repetitions = 12, RestSeconds = 45, Notes = "Ritmo constante manteniendo el torso firme." },
+                        new() { Exercise = flexiones, Order = 2, Sets = 4, Repetitions = 15, RestSeconds = 45, Notes = "Bloqueo completo de codos arriba." },
+                        new() { Exercise = plancha, Order = 3, Sets = 3, Repetitions = 60, RestSeconds = 45, Notes = "60 segundos isométricos con tensión en core." }
+                    }
+                };
+                if (fondos != null)
+                {
+                    hiitPlan.WorkoutExercises.Add(new WorkoutExercise { Exercise = fondos, Order = 4, Sets = 3, Repetitions = 12, RestSeconds = 45, Notes = "Descenso controlado a 90 grados." });
+                }
+                context.WorkoutPlans.Add(hiitPlan);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        var coachMatias = await userManager.FindByEmailAsync("matias.trainer@fitnet.com");
+        if (coachMatias != null && !await context.WorkoutPlans.AnyAsync(wp => wp.TrainerId == coachMatias.Id))
+        {
+            var sentadilla = await context.Exercises.FirstOrDefaultAsync(e => e.Name.Contains("Sentadilla con"));
+            var plancha = await context.Exercises.FirstOrDefaultAsync(e => e.Name.Contains("Plancha"));
+            var estocadas = await context.Exercises.FirstOrDefaultAsync(e => e.Name.Contains("Estocadas"));
+
+            if (sentadilla != null && plancha != null)
+            {
+                var movilidadPlan = new WorkoutPlan
+                {
+                    Name = "Movilidad Articular & Estabilidad Lumbar",
+                    Description = "Rutina de descompresión articular y activación de core y cadena posterior diseñada por Coach Matías.",
+                    IsGeneral = true,
+                    TrainerId = coachMatias.Id,
+                    WorkoutExercises = new List<WorkoutExercise>
+                    {
+                        new() { Exercise = plancha, Order = 1, Sets = 3, Repetitions = 40, RestSeconds = 60, Notes = "Activación diafragmática y transverso abdominal." },
+                        new() { Exercise = sentadilla, Order = 2, Sets = 3, Repetitions = 12, RestSeconds = 60, Notes = "Apertura de cadera profunda y dorsiflexión." }
+                    }
+                };
+                if (estocadas != null)
+                {
+                    movilidadPlan.WorkoutExercises.Add(new WorkoutExercise { Exercise = estocadas, Order = 3, Sets = 3, Repetitions = 10, RestSeconds = 60, Notes = "Estiramiento dinámico del psoas." });
+                }
+                context.WorkoutPlans.Add(movilidadPlan);
+                await context.SaveChangesAsync();
             }
         }
     }

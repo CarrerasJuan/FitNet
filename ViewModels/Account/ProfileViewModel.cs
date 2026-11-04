@@ -4,24 +4,42 @@ namespace FitNet.ViewModels.Account;
 
 public class ProfileViewModel
 {
+    private string _firstName = string.Empty;
+    private string _lastName = string.Empty;
+    private string? _phoneNumber;
+    private string? _specialty;
+    private string? _biography;
+
     public string Id { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El nombre es obligatorio.")]
     [StringLength(50)]
     [Display(Name = "Nombre")]
-    public string FirstName { get; set; } = string.Empty;
+    public string FirstName
+    {
+        get => _firstName;
+        set => _firstName = value?.Trim() ?? string.Empty;
+    }
 
     [Required(ErrorMessage = "El apellido es obligatorio.")]
     [StringLength(50)]
     [Display(Name = "Apellido")]
-    public string LastName { get; set; } = string.Empty;
+    public string LastName
+    {
+        get => _lastName;
+        set => _lastName = value?.Trim() ?? string.Empty;
+    }
 
     [Display(Name = "Correo Electrónico")]
     public string Email { get; set; } = string.Empty;
 
     [Phone(ErrorMessage = "Ingresá un número de teléfono válido.")]
     [Display(Name = "Teléfono de Contacto")]
-    public string? PhoneNumber { get; set; }
+    public string? PhoneNumber
+    {
+        get => _phoneNumber;
+        set => _phoneNumber = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
 
     [Range(100, 250, ErrorMessage = "La altura debe estar entre 100 y 250 cm.")]
     [Display(Name = "Altura (cm)")]
@@ -46,6 +64,15 @@ public class ProfileViewModel
         : 0;
 
     // Entrenador
-    public string? Specialty { get; set; }
-    public string? Biography { get; set; }
+    public string? Specialty
+    {
+        get => _specialty;
+        set => _specialty = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    public string? Biography
+    {
+        get => _biography;
+        set => _biography = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
 }

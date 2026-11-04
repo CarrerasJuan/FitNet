@@ -1,0 +1,217 @@
+@model FitNet.ViewModels.Admin.AdminTrainersViewModel
+@{
+    Layout = "_LayoutDashboard";
+    ViewData["Title"] = "Staff de Entrenadores";
+}
+
+<!-- Page Header (Metis UI Pattern) -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-primary-fn text-uppercase font-heading">
+                <i class="fa-solid fa-user-tie me-1"></i> Staff Deportivo
+            </span>
+            <span class="badge bg-secondary font-heading text-uppercase">@Model.TotalTrainers Coaches Activos</span>
+        </div>
+        <h1 class="font-heading display-6 fw-bold text-white mb-1">STAFF DE ENTRENADORES Y PREPARADORES FÍSICOS</h1>
+        <p class="text-muted small mb-0">Supervisión del equipo técnico, especialidades atléticas, rutinas prescritas y atletas a cargo.</p>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-outline-secondary text-white font-heading btn-sm">
+            <i class="fa-solid fa-arrow-left me-1"></i> Volver al Panel Admin
+        </a>
+    </div>
+</div>
+
+<!-- ==========================================
+     FILA DE TARJETAS KPI (Metis Stats Cards)
+     ========================================== -->
+<div class="row g-3 g-lg-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-lime">
+                <i class="fa-solid fa-user-ninja"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Coaches en Nómina</div>
+                <div class="stats-value">@Model.TotalTrainers</div>
+                <div class="stats-sub text-primary-fn"><i class="fa-solid fa-check me-1"></i>Profesores certificados</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-blue">
+                <i class="fa-solid fa-clipboard-list"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Rutinas Prescritas</div>
+                <div class="stats-value">@Model.TotalWorkoutsCreated</div>
+                <div class="stats-sub text-info"><i class="fa-solid fa-dumbbell me-1"></i>Planes de entrenamiento</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-purple">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Atletas Asignados</div>
+                <div class="stats-value">@Model.TotalActiveAthletes</div>
+                <div class="stats-sub text-muted">Socios con coach 1 a 1</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="stats-card">
+            <div class="stats-icon stats-icon-orange">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+            <div class="stats-content">
+                <div class="stats-label">Cobertura Salón</div>
+                <div class="stats-value">100%</div>
+                <div class="stats-sub text-warning"><i class="fa-solid fa-shield-halved me-1"></i>Turno Mañana y Tarde</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     GRILLA DE PERFILES DEL STAFF TÉCNICO
+     ========================================== -->
+<div class="fn-card mb-4">
+    <div class="fn-card-header d-flex justify-content-between align-items-center">
+        <div class="fn-card-title">
+            <i class="fa-solid fa-id-badge text-primary-fn"></i>
+            <span>Nómina Oficial de Entrenadores del Gimnasio</span>
+        </div>
+        <span class="badge bg-surface-fn border border-secondary border-opacity-25 text-muted small">
+            Gestión de Recursos Humanos
+        </span>
+    </div>
+
+    <div class="fn-card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+                <thead class="bg-surface-fn font-heading text-primary-fn small text-uppercase">
+                    <tr class="border-bottom border-secondary border-opacity-25">
+                        <th class="ps-4">Entrenador</th>
+                        <th>Especialidad Deportiva</th>
+                        <th>Contacto</th>
+                        <th>Carga de Alumnos</th>
+                        <th>Rutinas Creadas</th>
+                        <th>Turno</th>
+                        <th class="text-end pe-4">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Trainers.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-user-slash fs-3 d-block mb-2 text-white-50"></i>
+                                No hay entrenadores dados de alta en el sistema actualmente.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var trainer in Model.Trainers)
+                        {
+                            <tr>
+                                <!-- Nombre, Avatar y Rol -->
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        @if (!string.IsNullOrEmpty(trainer.AvatarPath))
+                                        {
+                                            <img src="@trainer.AvatarPath" alt="@trainer.FullName" class="rounded-circle border border-primary-fn" style="width: 44px; height: 44px; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="rounded-circle bg-surface-fn border border-fn d-inline-flex align-items-center justify-content-center text-primary-fn fw-bold font-heading" style="width: 44px; height: 44px; font-size: 1rem;">
+                                                @(trainer.FullName.Length > 0 ? trainer.FullName.Substring(0, 1) : "E")
+                                            </div>
+                                        }
+                                        <div>
+                                            <div class="text-white fw-bold">@trainer.FullName</div>
+                                            <span class="badge bg-secondary text-uppercase font-heading" style="font-size: 0.65rem;">Coach Oficial</span>
+                                            <small class="text-white-50 d-block" style="font-size: 0.72rem;">Alta: @trainer.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Especialidad -->
+                                <td>
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 font-heading">
+                                        <i class="fa-solid fa-medal me-1"></i> @trainer.Specialty
+                                    </span>
+                                    <p class="text-white-50 small mb-0 mt-1" style="font-size: 0.75rem; max-width: 280px;">
+                                        @trainer.Biography
+                                    </p>
+                                </td>
+
+                                <!-- Contacto -->
+                                <td>
+                                    <div class="small">
+                                        <div class="text-white"><i class="fa-solid fa-envelope me-1 text-primary-fn"></i> @trainer.Email</div>
+                                        <div class="text-white-50" style="font-size: 0.75rem;">
+                                            <i class="fa-solid fa-phone me-1"></i> @(string.IsNullOrEmpty(trainer.PhoneNumber) ? "Sin teléfono corporativo" : trainer.PhoneNumber)
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Carga de Alumnos -->
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="fs-5 fw-bold font-heading text-primary-fn">@trainer.ActiveAthletesCount</div>
+                                        <small class="text-muted" style="font-size: 0.75rem;">atletas activos</small>
+                                    </div>
+                                    <div class="progress mt-1" style="height: 4px; width: 100px; background-color: rgba(255,255,255,0.1);">
+                                        <div class="progress-bar bg-primary-fn" role="progressbar" style="width: @(Math.Min(100, trainer.ActiveAthletesCount * 20))%;"></div>
+                                    </div>
+                                </td>
+
+                                <!-- Rutinas Creadas -->
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-surface-fn border border-secondary text-white font-heading">
+                                            <i class="fa-solid fa-clipboard-check text-info me-1"></i> @trainer.TotalPlansCount rutinas
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <!-- Turno -->
+                                <td>
+                                    <span class="badge bg-dark border border-secondary text-white-50 font-heading small">
+                                        <i class="fa-solid fa-sun text-warning me-1"></i> @trainer.Shift
+                                    </span>
+                                </td>
+
+                                <!-- Estado -->
+                                <td class="text-end pe-4">
+                                    @if (trainer.IsActive)
+                                    {
+                                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 font-heading">
+                                            <i class="fa-solid fa-circle-check me-1"></i> En Servicio
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 font-heading">
+                                            <i class="fa-solid fa-circle-xmark me-1"></i> Inactivo
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

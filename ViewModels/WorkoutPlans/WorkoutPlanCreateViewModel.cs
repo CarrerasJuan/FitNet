@@ -4,13 +4,24 @@ namespace FitNet.ViewModels.WorkoutPlans;
 
 public class WorkoutPlanCreateViewModel
 {
+    private string? _name;
+    private string? _description;
+
     [StringLength(100, ErrorMessage = "El nombre no puede superar los 100 caracteres.")]
     [Display(Name = "Nombre de la Rutina")]
-    public string? Name { get; set; }
+    public string? Name
+    {
+        get => _name;
+        set => _name = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
 
     [StringLength(500, ErrorMessage = "La descripción u objetivo no puede superar los 500 caracteres.")]
     [Display(Name = "Objetivo y Descripción")]
-    public string? Description { get; set; }
+    public string? Description
+    {
+        get => _description;
+        set => _description = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
 
     [Display(Name = "¿Es rutina general del gimnasio?")]
     public bool IsGeneral { get; set; } = false;
