@@ -275,18 +275,18 @@ INSERT INTO `Memberships` (`Id`, `Name`, `Description`, `MonthlyPrice`, `Semiann
 
 -- 4.3. Biblioteca Base de Ejercicios
 INSERT INTO `Exercises` (`Id`, `Name`, `Description`, `MuscleGroup`, `Difficulty`, `ImagePath`, `VideoUrl`, `IsPublic`, `IsActive`, `CreatedAt`) VALUES
-(1, 'Press de Banca Plano con Barra', 'Ejercicio multiarticular básico para el desarrollo del pectoral mayor, tríceps y deltoides anterior.', 'Pecho', 'Intermedio', NULL, 'https://www.youtube.com/watch?v=rT7DgCr-3pg', 1, 1, NOW()),
-(2, 'Sentadilla Trasera con Barra', 'Movimiento rey para el tren inferior: cuádriceps, glúteos, femorales y estabilizadores espinales.', 'Piernas', 'Intermedio', NULL, 'https://www.youtube.com/watch?v=bEv6CCg2BC8', 1, 1, NOW()),
-(3, 'Peso Muerto Rumano', 'Enfocado en la cadena posterior: isquiotibiales, glúteos y zona lumbar con control excéntrico.', 'Piernas', 'Avanzado', NULL, 'https://www.youtube.com/watch?v=JCXUYuzwNrM', 1, 1, NOW()),
-(4, 'Dominadas Pronas', 'Tracción vertical con peso corporal para dorsales anchos, bíceps y redondo mayor.', 'Espalda', 'Avanzado', NULL, 'https://www.youtube.com/watch?v=eGo4IYlbE5g', 1, 1, NOW()),
-(5, 'Press Militar con Mancuernas', 'Empuje vertical para fuerza y tamaño en las cabezas anterior y lateral del deltoides.', 'Hombros', 'Intermedio', NULL, 'https://www.youtube.com/watch?v=qEwKCR5JCog', 1, 1, NOW()),
-(6, 'Remo con Barra Inclinado', 'Tracción horizontal para densidad de la espalda media, romboides y trapecios.', 'Espalda', 'Intermedio', NULL, 'https://www.youtube.com/watch?v=FWJR5Ve8gkQ', 0, 1, NOW()),
-(7, 'Curl de Bíceps en Banco Scott', 'Aislamiento estricto de los flexores del codo evitando el balanceo corporal.', 'Brazos', 'Principiante', NULL, 'https://www.youtube.com/watch?v=soxrZlIl35U', 1, 1, NOW()),
-(8, 'Extensiones de Tríceps en Polea', 'Aislamiento del tríceps braquial con cuerda o barra recta para hipertrofia.', 'Brazos', 'Principiante', NULL, 'https://www.youtube.com/watch?v=2-LAMcpzODU', 1, 1, NOW()),
-(9, 'Prensa de Piernas a 45 Grados', 'Trabajo seguro de cuádriceps y glúteos con soporte lumbar y rango de movimiento amplio.', 'Piernas', 'Principiante', NULL, 'https://www.youtube.com/watch?v=IZxyjW7MPJQ', 0, 1, NOW()),
-(10, 'Plancha Abdominal Isométrica', 'Estabilidad del core (transverso abdominal, oblicuos y rectos) manteniendo la pelvis neutra.', 'Core', 'Principiante', NULL, 'https://www.youtube.com/watch?v=pSHjTRCQxIw', 1, 1, NOW()),
-(11, 'Elevaciones Laterales con Mancuerna', 'Aislamiento del deltoides lateral para lograr amplitud de hombros.', 'Hombros', 'Principiante', NULL, 'https://www.youtube.com/watch?v=3VcKaXpzqRo', 0, 1, NOW()),
-(12, 'Fondos en Paralelas (Dips)', 'Empuje con peso corporal para pectoral inferior y tríceps con ligera inclinación hacia adelante.', 'Pecho', 'Avanzado', NULL, 'https://www.youtube.com/watch?v=2z8JmcrW-As', 0, 1, NOW());
+(1, 'Press de Banca Plano con Barra', 'Ejercicio multiarticular básico para el desarrollo del pectoral mayor, tríceps y deltoides anterior.', 'Pecho', 'Intermedio', '/uploads/exercises/0025.gif', 'https://www.youtube.com/watch?v=rT7DgCr-3pg', 1, 1, NOW()),
+(2, 'Sentadilla Trasera con Barra', 'Movimiento rey para el tren inferior: cuádriceps, glúteos, femorales y estabilizadores espinales.', 'Piernas', 'Intermedio', '/uploads/exercises/0043.gif', 'https://www.youtube.com/watch?v=bEv6CCg2BC8', 1, 1, NOW()),
+(3, 'Peso Muerto Rumano', 'Enfocado en la cadena posterior: isquiotibiales, glúteos y zona lumbar con control excéntrico.', 'Piernas', 'Avanzado', '/uploads/exercises/0085.gif', 'https://www.youtube.com/watch?v=JCXUYuzwNrM', 1, 1, NOW()),
+(4, 'Dominadas Pronas', 'Tracción vertical con peso corporal para dorsales anchos, bíceps y redondo mayor.', 'Espalda', 'Avanzado', '/uploads/exercises/0652.gif', 'https://www.youtube.com/watch?v=eGo4IYlbE5g', 1, 1, NOW()),
+(5, 'Press Militar con Mancuernas', 'Empuje vertical para fuerza y tamaño en las cabezas anterior y lateral del deltoides.', 'Hombros', 'Intermedio', '/uploads/exercises/0405.gif', 'https://www.youtube.com/watch?v=qEwKCR5JCog', 1, 1, NOW()),
+(6, 'Remo con Barra Inclinado', 'Tracción horizontal para densidad de la espalda media, romboides y trapecios.', 'Espalda', 'Intermedio', '/uploads/exercises/0027.gif', 'https://www.youtube.com/watch?v=FWJR5Ve8gkQ', 0, 1, NOW()),
+(7, 'Curl de Bíceps en Banco Scott', 'Aislamiento estricto de los flexores del codo evitando el balanceo corporal.', 'Brazos', 'Principiante', '/uploads/exercises/0070.gif', 'https://www.youtube.com/watch?v=soxrZlIl35U', 1, 1, NOW()),
+(8, 'Extensiones de Tríceps en Polea', 'Aislamiento del tríceps braquial con cuerda o barra recta para hipertrofia.', 'Brazos', 'Principiante', '/uploads/exercises/0201.gif', 'https://www.youtube.com/watch?v=2-LAMcpzODU', 1, 1, NOW()),
+(9, 'Prensa de Piernas a 45 Grados', 'Trabajo seguro de cuádriceps y glúteos con soporte lumbar y rango de movimiento amplio.', 'Piernas', 'Principiante', '/uploads/exercises/0739.gif', 'https://www.youtube.com/watch?v=IZxyjW7MPJQ', 0, 1, NOW()),
+(10, 'Plancha Abdominal Isométrica', 'Estabilidad del core (transverso abdominal, oblicuos y rectos) manteniendo la pelvis neutra.', 'Core', 'Principiante', '/uploads/exercises/0464.gif', 'https://www.youtube.com/watch?v=pSHjTRCQxIw', 1, 1, NOW()),
+(11, 'Elevaciones Laterales con Mancuerna', 'Aislamiento del deltoides lateral para lograr amplitud de hombros.', 'Hombros', 'Principiante', '/uploads/exercises/0334.gif', 'https://www.youtube.com/watch?v=3VcKaXpzqRo', 0, 1, NOW()),
+(12, 'Fondos en Paralelas (Dips)', 'Empuje con peso corporal para pectoral inferior y tríceps con ligera inclinación hacia adelante.', 'Pecho', 'Avanzado', '/uploads/exercises/0251.gif', 'https://www.youtube.com/watch?v=2z8JmcrW-As', 0, 1, NOW());
 
 -- 4.4. Rutinas Generales del Gimnasio (Disponibles para socios Gold y Premium)
 INSERT INTO `WorkoutPlans` (`Id`, `Name`, `Description`, `TrainerId`, `IsGeneral`, `CreatedAt`) VALUES
