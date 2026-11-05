@@ -710,6 +710,104 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "5. Diagnóstico y Resiliencia (Health Checks & RFC 7807)",
+			"item": [
+				{
+					"name": "5.1. GET Health Check del Sistema (/health)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP Status 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Respuesta JSON con estado Healthy\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"Healthy\");",
+									"    pm.expect(jsonData.system).to.include(\"FitNet\");",
+									"    pm.expect(jsonData.checks).to.be.an(\"array\");",
+									"    var dbCheck = jsonData.checks.find(c => c.name === \"MySQL - FitNetDb\");",
+									"    pm.expect(dbCheck).to.not.be.undefined;",
+									"    pm.expect(dbCheck.status).to.eql(\"Healthy\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Endpoint de diagnóstico y resiliencia que valida la conectividad en vivo con la base de datos MySQL (FitNetDb) y el estado general de la plataforma."
+					},
+					"response": []
+				},
+				{
+					"name": "5.2. GET Endpoint Inexistente API (RFC 7807 ProblemDetails - 404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP Status 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"Content-Type RFC 7807 application/problem+json\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"problem+json\");",
+									"});",
+									"pm.test(\"Estructura estándar ProblemDetails\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(404);",
+									"    pm.expect(jsonData).to.have.property(\"type\");",
+									"    pm.expect(jsonData).to.have.property(\"title\");",
+									"    pm.expect(jsonData).to.have.property(\"detail\");",
+									"    pm.expect(jsonData).to.have.property(\"traceId\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/ruta-inexistente-diagnostico",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"ruta-inexistente-diagnostico"
+							]
+						},
+						"description": "Prueba de resiliencia del middleware de excepciones: invoca un endpoint de API inexistente y verifica que la respuesta cumpla con la especificación estándar RFC 7807 ProblemDetails."
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"variable": [

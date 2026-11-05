@@ -1,9 +1,13 @@
 using System.Text;
+using System.Text.Json;
 using FitNet.Data;
+using FitNet.Middlewares;
 using FitNet.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +23,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<FitNet.Services.IFileStorageService, FitNet.Services.FileStorageService>();
 builder.Services.AddScoped<FitNet.Services.IMembershipService, FitNet.Services.MembershipService>();
 builder.Services.AddScoped<FitNet.Services.IMetricsService, FitNet.Services.MetricsService>();
+
+// Configuración de Diagnóstico y Health Checks (Resiliencia y Monitoreo de BD)
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ApplicationDbContext>(
+        name: "MySQL - FitNetDb",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "db", "mysql", "persistence" });
 
 // Configuración de ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -87,10 +98,12 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
+// 1. Middleware Global de Excepciones y Resiliencia (RFC 7807 para API, Vista para MVC)
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
@@ -106,6 +119,56 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// Manejo unificado de códigos de estado (404/403 no controlados)
+app.UseStatusCodePages(async statusCodeContext =>
+{
+    var req = statusCodeContext.HttpContext.Request;
+    var isApi = req.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase)
+        || (req.Headers.Accept.ToString().Contains("application/json", StringComparison.OrdinalIgnoreCase)
+            && !req.Headers.Accept.ToString().Contains("text/html", StringComparison.OrdinalIgnoreCase));
+
+    var status = statusCodeContext.HttpContext.Response.StatusCode;
+
+    if (isApi)
+    {
+        statusCodeContext.HttpContext.Response.ContentType = "application/problem+json; charset=utf-8";
+        var problem = new Microsoft.AspNetCore.Mvc.ProblemDetails
+        {
+            Type = $"https://httpstatuses.com/{status}",
+            Title = status switch
+            {
+                401 => "No autenticado",
+                403 => "Acceso prohibido",
+                404 => "Recurso no encontrado",
+                _ => "Error HTTP"
+            },
+            Status = status,
+            Detail = status switch
+            {
+                401 => "Se requiere un token JWT Bearer válido en el encabezado Authorization.",
+                403 => "El usuario autenticado no posee los permisos o roles requeridos para este recurso.",
+                404 => $"El endpoint '{req.Path}' no existe en la API REST de FitNet.",
+                _ => $"La solicitud finalizó con código de estado HTTP {status}."
+            },
+            Instance = req.Path
+        };
+        problem.Extensions["traceId"] = statusCodeContext.HttpContext.TraceIdentifier;
+        problem.Extensions["timestamp"] = DateTime.UtcNow.ToString("o");
+
+        var json = JsonSerializer.Serialize(problem, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        });
+        await statusCodeContext.HttpContext.Response.WriteAsync(json);
+    }
+    else
+    {
+        var redirectUrl = $"/Home/Error?statusCode={status}";
+        statusCodeContext.HttpContext.Response.Redirect(redirectUrl);
+    }
+});
+
 app.UseStaticFiles();
 app.UseRouting();
 
@@ -113,6 +176,40 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+// Endpoint de Diagnóstico y Salud del Sistema (/health)
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    AllowCachingResponses = false,
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json; charset=utf-8";
+        var result = new
+        {
+            status = report.Status.ToString(),
+            system = "FitNet Gym Management Platform",
+            version = "1.0.0",
+            timestamp = DateTime.UtcNow.ToString("o"),
+            totalDuration = $"{report.TotalDuration.TotalMilliseconds:0.##} ms",
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                duration = $"{e.Value.Duration.TotalMilliseconds:0.##} ms",
+                description = e.Value.Description ?? "Verificación de conectividad activa contra base de datos MySQL (FitNetDb)",
+                error = e.Value.Exception?.Message,
+                tags = e.Value.Tags
+            })
+        };
+
+        await context.Response.WriteAsync(
+            JsonSerializer.Serialize(result, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            }));
+    }
+}).AllowAnonymous();
 
 app.MapControllerRoute(
     name: "default",

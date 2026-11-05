@@ -175,17 +175,24 @@ ASPNETCORE_ENVIRONMENT=Development
 cmd /c ""C:\xampp\mysql\bin\mysql.exe" -u root < esquema.sql"
 ```
 
+#### Opción C — Script de un solo clic (`reset.bat`):
+Hacer doble clic sobre el archivo ejecutable `reset.bat` en la raíz de `FitNet`. Detecta automáticamente la instalación de MySQL en XAMPP, recrea la base `FitNetDb` limpia con sus 15 tablas relacionales y precarga todas las cuentas de prueba en menos de 3 segundos.
+
 ## Usuarios de Prueba Precargados (Seed Oficial)
 
-El sistema cuenta con un servicio de inicialización (`SeedService`) y datos en el script SQL para probar los distintos niveles de acceso:
+El sistema cuenta con un servicio de inicialización (`SeedService`) y datos en el script SQL para probar exhaustivamente los distintos niveles de acceso y casos límite:
 
-| Rol | Correo Electrónico | Contraseña | Perfil y Nivel de Acceso |
+| Rol | Correo Electrónico | Contraseña | Perfil y Propósito de Examen |
 |---|---|---|---|
-| **Owner** | `owner@fitnet.com` | `Owner123!` | Propietario. Acceso a métricas de facturación y resumen global del negocio. |
-| **Admin** | `admin@fitnet.com` | `Admin123!` | Administrador. Gestión de socios, activación manual de membresías y catálogo de ejercicios. |
-| **Trainer** | `trainer@fitnet.com` | `Trainer123!` | Entrenador. Perfil profesional configurado y atletas asignados. |
-| **Member** | `member@fitnet.com` | `Member123!` | Socio con membresía **Gold** activa (acceso completo a rutinas y ejercicios). |
-| **Member (Trial)** | `trial@fitnet.com` | `Trial123!` | Socio con membresía **Free** y trial de 24 horas vigente. |
+| **Owner** | `owner@fitnet.com` | `Owner123!` | Propietario. Dashboard financiero de facturación MRR, KPIs analíticos y exportación de padrón en CSV. |
+| **Admin** | `admin@fitnet.com` | `Admin123!` | Administrador. Gestión de socios, activación manual de membresías y ABM interactivo de ejercicios en Vue 3. |
+| **Trainer (Principal)** | `trainer@fitnet.com` | `Trainer123!` | Coach Principal (Lucas Vázquez). Asignación de rutinas, prescripción técnica por zonas musculares y visualización de atletas. *(Sin avatar inicial para probar la subida en la defensa)*. |
+| **Trainer (Staff)** | `sofia.trainer@fitnet.com` | `Trainer123!` | Coach de Cross Training (Sofía Morales) precargada con fotografía oficial. |
+| **Trainer (Staff)** | `matias.trainer@fitnet.com` | `Trainer123!` | Coach de Funcional (Matías Rossi) precargado con fotografía oficial. |
+| **Member (Gold)** | `member@fitnet.com` | `Member123!` | Socio Gold activo. Acceso completo a rutinas del club, catálogo de ejercicios y registro de evolución. |
+| **Member (Premium)** | `premium@fitnet.com` | `Premium123!` | Socia Premium activa. Planificación personalizada 1 a 1 con coach e historial biométrico con fotografías. |
+| **Member (Trial Activo)** | `trial@fitnet.com` | `Trial123!` | Socio Free recién registrado con trial de 24 horas vigente (acceso a bienvenida y ejercicios públicos). |
+| **Member (Trial Vencido)** | `expired@fitnet.com` | `Expired123!` | Socio con período de prueba vencido hace 48 horas. **Caso de prueba de seguridad defensiva (bloqueo HTTP 403 / Redirección a Checkout)**. |
 
 ## Pasos para Levantar la Aplicación
 
@@ -232,20 +239,70 @@ El sistema cuenta con un servicio de inicialización (`SeedService`) y datos en 
 
 ```text
 FitNet/
-├── Controllers/         # Controladores MVC (Home, Account, Exercises, Members, Admin, Billing)
-├── Api/Controllers/     # Controladores API REST desacoplados (Auth, Exercises, Members)
-├── Models/              # Entidades del dominio relacional (ApplicationUser, MemberProfile, etc.)
-├── ViewModels/          # Modelos de vista para formularios e interfaces Razor
-├── Services/            # Lógica de negocio (MembershipService, FileStorageService, SeedService)
+├── Controllers/         # Controladores MVC (Home, Account, Exercises, Members, Admin, Billing, WorkoutPlans, Trainers)
+├── Api/Controllers/     # Controladores API REST desacoplados (AuthApiController, ExercisesApiController)
+├── Middlewares/         # Middleware global de excepciones RFC 7807 (ProblemDetails) y resiliencia MySQL
+├── Models/              # Entidades del dominio relacional (ApplicationUser, MemberProfile, Exercise, etc.)
+├── ViewModels/          # Modelos de vista tipados para formularios e interfaces Razor
+├── Services/            # Lógica de dominio (MembershipService, FileStorageService, MetricsService, SeedService)
 ├── Data/                # ApplicationDbContext, configuraciones Fluent API y migraciones
 ├── Views/               # Vistas Razor estructuradas por controlador y layout compartido
 ├── Diagrama/            # Diagrama Entidad-Relación en alta resolución (der.png)
-├── esquema.sql          # Script SQL de creación e inicialización de FitNetDb
+├── docs/                # Copia oficial de documentación y DER (der.png)
+├── postman/             # Colección oficial REST con tests automáticos (FitNet.postman_collection.json)
+├── esquema.sql          # Script SQL oficial de creación e inicialización de FitNetDb
+├── reset.bat            # Script de restauración de base de datos en un clic para la mesa de examen
 ├── .env                 # Variables de entorno y configuración local XAMPP
 ├── appsettings.json     # Configuración de conexiones y parámetros de la plataforma
-└── wwwroot/             # Recursos estáticos locales
-    ├── css/             # Hojas de estilo propias
-    ├── js/vue-apps/     # Aplicaciones Vue 3 modulares e independientes
-    ├── lib/             # Librerías locales (Vue 3, Axios, Bootstrap 5, Font Awesome)
-    └── uploads/         # Almacenamiento físico de imágenes (avatars, progress, exercises)
+└── wwwroot/             # Recursos estáticos locales 100% offline
+    ├── css/             # Hojas de estilo propias (site.css, landing.css, dashboard.css)
+    ├── js/vue-apps/     # Aplicaciones Vue 3 modulares (ejercicios, rutinas, landing)
+    ├── lib/             # Librerías locales (Vue 3, Axios, Bootstrap 5, Font Awesome 6)
+    └── uploads/         # Almacenamiento físico seguro (avatars, progress, exercises)
 ```
+
+---
+
+# 5. Matriz de Evidencias de Requerimientos Mínimos (Condición de Promoción Directa)
+
+A continuación se detalla la matriz oficial de cumplimiento exigida por la cátedra para la promoción de la asignatura, certificando la ubicación exacta en el código fuente y las evidencias técnicas de cada funcionalidad:
+
+| Requerimiento Mínimo | Estado | Enlace al Código / Controladores | Evidencia Técnica (Ubicación / Prueba) |
+|---|:---:|---|---|
+| **1. 4 Tablas y Relación 1:N** | ✅ **Cumplido** | [`Data/ApplicationDbContext.cs`](Data/ApplicationDbContext.cs)<br>[`Models/WorkoutExercise.cs`](Models/WorkoutExercise.cs) | **15 tablas relacionales** en MySQL (`FitNetDb`). Relaciones 1:1, 1:N y N:M enriquecida con atributos de carga atlética en `WorkoutExercises`. Diagrama DER adjunto en [`docs/der.png`](docs/der.png) y [`Diagrama/der.png`](Diagrama/der.png). |
+| **2. Login, Roles y Avatar** | ✅ **Cumplido** | [`Controllers/AccountController.cs`](Controllers/AccountController.cs)<br>[`Services/FileStorageService.cs`](Services/FileStorageService.cs) | 4 roles Identity (`Owner`, `Admin`, `Trainer`, `Member`). Métricas exclusivas para Owner y mostrador para Admin. Subida y reemplazo físico de avatar con nombres GUID, validación binaria de **Magic Bytes** y borrado físico de huérfanos. |
+| **3. Manejo de Archivos (Extra)** | ✅ **Cumplido** | [`Controllers/MembersController.cs#L145`](Controllers/MembersController.cs)<br>[`Services/FileStorageService.cs`](Services/FileStorageService.cs) | Procesamiento y guardado físico de fotografías periódicas de evolución corporal en el módulo *"Mi Progreso"* (`wwwroot/uploads/progress/`) y fotos/GIFs técnicos de ejercicios en catálogo (`uploads/exercises/`). |
+| **4. ABM en Vue.js + AJAX** | ✅ **Cumplido** | [`Views/Admin/Exercises.cshtml`](Views/Admin/Exercises.cshtml)<br>[`wwwroot/js/vue-apps/ejercicios/app.js`](wwwroot/js/vue-apps/ejercicios/app.js)<br>[`Api/Controllers/ExercisesApiController.cs`](Api/Controllers/ExercisesApiController.cs) | **ABM reactivo completo de ejercicios sin recargas de página**: Alta con previsualización en modal Bootstrap y multipart, Listado dinámico con ordenamiento, Modificación reactiva y Baja confirmada vía Axios contra la Web API. |
+| **5. Paginado por Servidor** | ✅ **Cumplido** | [`DTOs/Common/PagedResultDto.cs`](DTOs/Common/PagedResultDto.cs)<br>[`Api/Controllers/ExercisesApiController.cs#L60`](Api/Controllers/ExercisesApiController.cs) | Paginación directa en MySQL mediante `Skip((page - 1) * pageSize).Take(pageSize)` en Entity Framework Core. Servido con metadatos de paginación y límite defensivo de 50 registros. Paginador reactivo en Vue 3 solicitando `page=N`. |
+| **6. Selección Asíncrona (AJAX)** | ✅ **Cumplido** | [`Views/WorkoutPlans/Create.cshtml`](Views/WorkoutPlans/Create.cshtml)<br>[`wwwroot/js/vue-apps/rutinas/builder.js`](wwwroot/js/vue-apps/rutinas/builder.js)<br>[`Api/Controllers/ExercisesApiController.cs#L430`](Api/Controllers/ExercisesApiController.cs) | Buscador dinámico asíncrono `GET /api/exercises/search?q={texto}&muscle={zona}` consumido con debounce reactivo en el constructor de rutinas para seleccionar ejercicios. **Cero `<select>` masivo en HTML**. |
+| **7. Web API + JWT** | ✅ **Cumplido** | [`Api/Controllers/AuthApiController.cs`](Api/Controllers/AuthApiController.cs)<br>[`Program.cs#L65`](Program.cs)<br>[`postman/FitNet.postman_collection.json`](postman/FitNet.postman_collection.json) | Autenticación híbrida en `Program.cs` (Cookies para MVC + JWT Bearer para API REST). Emisión de tokens HMAC-SHA256 en `/api/auth/login`. Colección oficial de Postman exportada con 5 carpetas y tests automáticos. |
+| **8. Resiliencia y Health Checks** *(Plus de Calidad)* | ✅ **Cumplido** | [`Middlewares/GlobalExceptionMiddleware.cs`](Middlewares/GlobalExceptionMiddleware.cs)<br>[`Program.cs`](Program.cs) | Middleware global que emite **RFC 7807 (`application/problem+json`)** para API y redirección PRG para MVC. Captura de errores MySQL (1451 conflicto FK, 1062 duplicados) y endpoint `/health` de conectividad en vivo. |
+| **9. Reportes de Negocio y Exportación** *(Plus de Calidad)* | ✅ **Cumplido** | [`Controllers/AdminController.cs#L210`](Controllers/AdminController.cs)<br>[`Views/Members/Workouts.cshtml`](Views/Members/Workouts.cshtml) | Ficha deportiva de rutina en hoja A4 blanca con estilos CSS `@media print`, membrete, registro de pesos y firmas de conformidad; y exportación de socios a CSV compatible con Microsoft Excel (**UTF-8 con BOM**) exclusivo para Owner. |
+
+---
+
+# 6. Colección Oficial de Pruebas Postman
+
+El repositorio incluye la colección completa y automatizada lista para ser importada en Postman o ejecutada mediante Newman:
+
+* **Archivo:** [`postman/FitNet.postman_collection.json`](postman/FitNet.postman_collection.json)
+* **Variable de entorno:** `base_url` configurada por defecto en `http://localhost:5179`.
+* **Carpetas temáticas incluidas:**
+  1. `1. Autenticación (Auth API)`: Login como Member, Admin, Trainer, Trial Vencido y control de credenciales inválidas (401).
+  2. `2. Perfil Protegido`: Consulta de claims con Bearer Token vs sin token (401).
+  3. `3. Biblioteca de Ejercicios (Exercises API)`: Paginado server-side, filtros, autocompletado rápido, creación multipart, edición y baja física/lógica.
+  4. `4. Pruebas de Seguridad (RBAC & Trial Vencido)`: Bloqueo de socio con trial vencido (403) y mutación no autorizada por socio regular (403).
+  5. `5. Diagnóstico y Resiliencia (Health Checks & RFC 7807)`: Verificación de estado 200 Healthy en `/health` y estructura normalizada RFC 7807 ante rutas inexistentes.
+
+---
+
+# 7. Herramienta de Restauración Rápida (`reset.bat`)
+
+Para garantizar la máxima agilidad durante la mesa de examen y demostración ante el tribunal docente, se incluye en la raíz del repositorio el script de automatización:
+
+```text
+FitNet/reset.bat
+```
+
+* **Función:** Al ejecutar este archivo (doble clic en Windows o desde terminal), se purga la base de datos `FitNetDb` y se ejecuta de manera atómica el script `esquema.sql` completo contra el motor local de MySQL en XAMPP.
+* **Resultado:** En 3 segundos, la base de datos queda reseteada al estado cero de fábrica, con todas las tablas relacionales creadas y los 9 usuarios de prueba precargados listos para una nueva demostración técnica.

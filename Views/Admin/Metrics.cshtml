@@ -44,7 +44,10 @@
         <p class="text-muted small mb-0">Consolidado financiero, proyecciones de facturación, retención de atletas y embudo de conversión en tiempo real.</p>
     </div>
 
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap">
+        <a asp-controller="Admin" asp-action="ExportMembersCsv" class="btn btn-fn-primary text-dark font-heading btn-sm" title="Descargar padrón completo de socios en formato CSV compatible con Excel">
+            <i class="fa-solid fa-file-csv me-1"></i> Exportar Socios CSV
+        </a>
         <button type="button" class="btn btn-outline-secondary text-white font-heading btn-sm" onclick="window.print()" title="Imprimir informe ejecutivo">
             <i class="fa-solid fa-print me-1"></i> Imprimir Reporte
         </button>

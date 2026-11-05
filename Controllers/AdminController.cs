@@ -1,3 +1,4 @@
+using System.Text;
 using FitNet.Data;
 using FitNet.Models;
 using FitNet.Services;
@@ -202,5 +203,64 @@ public class AdminController : Controller
     public IActionResult WorkoutPlans()
     {
         return RedirectToAction("Index", "WorkoutPlans", new { filter = "general" });
+    }
+
+    // ==========================================
+    // 6. EXPORTACIÓN DE PADRÓN DE SOCIOS EN CSV
+    // Exclusivo para el rol Owner con codificación UTF-8 con BOM (Compatible con Microsoft Excel)
+    // ==========================================
+    [HttpGet]
+    [Authorize(Roles = "Owner")]
+    public async Task<IActionResult> ExportMembersCsv()
+    {
+        var members = await _context.MemberProfiles
+            .Include(m => m.User)
+            .Include(m => m.Membership)
+            .OrderBy(m => m.Id)
+            .ToListAsync();
+
+        var builder = new StringBuilder();
+
+        // Cabecera formal en español delimitada por punto y coma (estándar regional de Excel)
+        builder.AppendLine("ID Socio;Nombre Completo;Correo Electrónico;Teléfono;Plan Actual;Precio Mensual;Estado de Cuenta;Fecha de Registro;Vencimiento Membresía;Trial Vencido");
+
+        foreach (var m in members)
+        {
+            var isFree = m.Membership?.Name == "Free";
+            var isTrialExpired = isFree && DateTime.UtcNow > m.TrialEndsAt;
+            var planStatus = m.User?.IsActive == true ? "Activo" : "Inactivo";
+            var expiration = m.TrialEndsAt.ToString("yyyy-MM-dd HH:mm");
+            var registeredAt = m.CreatedAt.ToString("yyyy-MM-dd HH:mm");
+            var price = m.Membership?.MonthlyPrice ?? 0m;
+
+            builder.AppendLine(string.Join(";",
+                EscapeCsv(m.Id.ToString()),
+                EscapeCsv(m.User?.FullName ?? "—"),
+                EscapeCsv(m.User?.Email ?? "—"),
+                EscapeCsv(m.User?.PhoneNumber ?? "—"),
+                EscapeCsv(m.Membership?.Name ?? "Free"),
+                EscapeCsv($"${price:N2}"),
+                EscapeCsv(planStatus),
+                EscapeCsv(registeredAt),
+                EscapeCsv(expiration),
+                EscapeCsv(isTrialExpired ? "Sí" : "No")
+            ));
+        }
+
+        // Emisión de bytes con BOM (Byte Order Mark) para forzar detección UTF-8 en Excel
+        var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
+        var bytes = encoding.GetBytes(builder.ToString());
+        var fileName = $"FitNet_Socios_{DateTime.Now:yyyyMMdd_HHmm}.csv";
+
+        _logger.LogInformation("Padrón de {Count} socios exportado exitosamente en formato CSV por el Owner '{User}'.", 
+            members.Count, User.Identity?.Name);
+
+        return File(bytes, "text/csv; charset=utf-8", fileName);
+
+        static string EscapeCsv(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return "\"\"";
+            return $"\"{value.Replace("\"", "\"\"")}\"";
+        }
     }
 }

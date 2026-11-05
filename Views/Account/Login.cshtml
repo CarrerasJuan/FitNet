@@ -23,9 +23,14 @@
                     <!-- Mensajes de Error de Validación -->
                     @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
                     {
-                        <div class="alert alert-danger bg-danger bg-opacity-25 border-danger text-white py-2 small mb-3">
-                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
-                            <span asp-validation-summary="ModelOnly"></span>
+                        <div class="alert alert-danger bg-danger bg-opacity-25 border-danger text-white py-2 px-3 small mb-3 d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-danger fs-5"></i>
+                            <div>
+                                @foreach (var err in ViewData.ModelState[string.Empty]!.Errors)
+                                {
+                                    <div>@err.ErrorMessage</div>
+                                }
+                            </div>
                         </div>
                     }
 
@@ -87,26 +92,32 @@
                     </div>
                 </div>
 
-                <!-- Tarjeta Auxiliar para Demostración / Cátedra (Autocompletar cuentas) -->
+                <!-- Tarjeta Auxiliar Cuentas de prueba -->
                 <div class="p-3 mt-3 rounded-3 border border-secondary border-opacity-25 bg-surface-fn text-center">
-                    <span class="text-primary-fn font-heading small fw-bold text-uppercase d-block mb-2">
-                        <i class="fa-solid fa-flask-vial me-1"></i> Cuentas de Prueba para la Cátedra
+                    <span class="text-white-50 font-heading small text-uppercase d-block mb-2" style="letter-spacing: 0.5px;">
+                        Cuentas de prueba para demostración
                     </span>
                     <div class="d-flex flex-wrap gap-1 justify-content-center">
                         <button type="button" class="btn btn-outline-secondary btn-sm text-white px-2 py-1 small" onclick="fillCreds('owner@fitnet.com', 'Owner123!')">
-                            👑 Owner
+                            Dueño
                         </button>
                         <button type="button" class="btn btn-outline-secondary btn-sm text-white px-2 py-1 small" onclick="fillCreds('admin@fitnet.com', 'Admin123!')">
-                            ⚙️ Admin
+                            Administrador
                         </button>
                         <button type="button" class="btn btn-outline-secondary btn-sm text-white px-2 py-1 small" onclick="fillCreds('trainer@fitnet.com', 'Trainer123!')">
-                            🏋️ Trainer
+                            Entrenador
                         </button>
                         <button type="button" class="btn btn-outline-secondary btn-sm text-white px-2 py-1 small" onclick="fillCreds('member@fitnet.com', 'Member123!')">
-                            ⭐ Member (Gold)
+                            Socio Gold
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm text-white px-2 py-1 small" onclick="fillCreds('premium@fitnet.com', 'Premium123!')">
+                            Socia Premium
                         </button>
                         <button type="button" class="btn btn-outline-secondary btn-sm text-white px-2 py-1 small" onclick="fillCreds('trial@fitnet.com', 'Trial123!')">
-                            ⏱️ Member (Trial 24h)
+                            Socio Prueba (Trial)
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm text-white px-2 py-1 small" onclick="fillCreds('expired@fitnet.com', 'Expired123!')">
+                            Socio Vencido
                         </button>
                     </div>
                 </div>

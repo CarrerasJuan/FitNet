@@ -329,15 +329,15 @@ INSERT INTO `WorkoutExercises` (`WorkoutPlanId`, `ExerciseId`, `Order`, `Sets`, 
 -- trial@fitnet.com    -> Trial123!
 -- expired@fitnet.com  -> Expired123!
 INSERT INTO `AspNetUsers` (`Id`, `UserName`, `NormalizedUserName`, `Email`, `NormalizedEmail`, `EmailConfirmed`, `PasswordHash`, `SecurityStamp`, `ConcurrencyStamp`, `PhoneNumberConfirmed`, `TwoFactorEnabled`, `LockoutEnabled`, `AccessFailedCount`, `FirstName`, `LastName`, `AvatarPath`, `CreatedAt`, `IsActive`) VALUES
-('user-owner', 'owner@fitnet.com', 'OWNER@FITNET.COM', 'owner@fitnet.com', 'OWNER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Guillermo', 'Propietario', NULL, NOW(), 1),
-('user-admin', 'admin@fitnet.com', 'ADMIN@FITNET.COM', 'admin@fitnet.com', 'ADMIN@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Carlos', 'Administrador', NULL, NOW(), 1),
-('user-trainer', 'trainer@fitnet.com', 'TRAINER@FITNET.COM', 'trainer@fitnet.com', 'TRAINER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Lucas', 'Vázquez', NULL, NOW(), 1),
-('user-trainer-sofia', 'sofia.trainer@fitnet.com', 'SOFIA.TRAINER@FITNET.COM', 'sofia.trainer@fitnet.com', 'SOFIA.TRAINER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Sofía', 'Morales', '/img/team/team3.png', NOW(), 1),
-('user-trainer-matias', 'matias.trainer@fitnet.com', 'MATIAS.TRAINER@FITNET.COM', 'matias.trainer@fitnet.com', 'MATIAS.TRAINER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Matías', 'Rossi', '/img/team/team2.png', NOW(), 1),
-('user-member', 'member@fitnet.com', 'MEMBER@FITNET.COM', 'member@fitnet.com', 'MEMBER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Federico', 'Socio', NULL, NOW(), 1),
-('user-premium', 'premium@fitnet.com', 'PREMIUM@FITNET.COM', 'premium@fitnet.com', 'PREMIUM@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Sofía', 'Atleta', NULL, NOW(), 1),
-('user-trial', 'trial@fitnet.com', 'TRIAL@FITNET.COM', 'trial@fitnet.com', 'TRIAL@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Juan', 'Prueba', NULL, NOW(), 1),
-('user-expired', 'expired@fitnet.com', 'EXPIRED@FITNET.COM', 'expired@fitnet.com', 'EXPIRED@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEO9YwXN7Gvj5mF1xR7U5v8p9yZ1yq1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1q1', UUID(), UUID(), 0, 0, 1, 0, 'Tomás', 'Vencido', NULL, NOW(), 1);
+('user-owner', 'owner@fitnet.com', 'OWNER@FITNET.COM', 'owner@fitnet.com', 'OWNER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEP/BPwTQR0E22YPlxYw+3kcOO8+HS2fondRgQyOyYpP/T0zKXmQSj0ocD7E0vHcCDA==', UUID(), UUID(), 0, 0, 1, 0, 'Guillermo', 'Propietario', NULL, NOW(), 1),
+('user-admin', 'admin@fitnet.com', 'ADMIN@FITNET.COM', 'admin@fitnet.com', 'ADMIN@FITNET.COM', 1, 'AQAAAAIAAYagAAAAELvHjHjXHZHK5ZHb+CUtN7SKO0kvRRS+Hl1E7J+Sd2CdNRcVLZ+nAy6oG4u8mIa6Rw==', UUID(), UUID(), 0, 0, 1, 0, 'Carlos', 'Administrador', NULL, NOW(), 1),
+('user-trainer', 'trainer@fitnet.com', 'TRAINER@FITNET.COM', 'trainer@fitnet.com', 'TRAINER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEMcHZf6uApXLA/6ZBWyX/F7jOR3FQP6QTBMsOCvnS7GbT2W41Qk4bSv1oISJqdVV9Q==', UUID(), UUID(), 0, 0, 1, 0, 'Lucas', 'Vázquez', NULL, NOW(), 1),
+('user-trainer-sofia', 'sofia.trainer@fitnet.com', 'SOFIA.TRAINER@FITNET.COM', 'sofia.trainer@fitnet.com', 'SOFIA.TRAINER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEMcHZf6uApXLA/6ZBWyX/F7jOR3FQP6QTBMsOCvnS7GbT2W41Qk4bSv1oISJqdVV9Q==', UUID(), UUID(), 0, 0, 1, 0, 'Sofía', 'Morales', '/img/team/team3.png', NOW(), 1),
+('user-trainer-matias', 'matias.trainer@fitnet.com', 'MATIAS.TRAINER@FITNET.COM', 'matias.trainer@fitnet.com', 'MATIAS.TRAINER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEMcHZf6uApXLA/6ZBWyX/F7jOR3FQP6QTBMsOCvnS7GbT2W41Qk4bSv1oISJqdVV9Q==', UUID(), UUID(), 0, 0, 1, 0, 'Matías', 'Rossi', '/img/team/team2.png', NOW(), 1),
+('user-member', 'member@fitnet.com', 'MEMBER@FITNET.COM', 'member@fitnet.com', 'MEMBER@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEKVe+9TWDhUlF1PewJuYcgGvnrq4/bEeh9MD1UYw32D23I8Mbj6z/UEMw4oq75CTIw==', UUID(), UUID(), 0, 0, 1, 0, 'Federico', 'Socio', NULL, NOW(), 1),
+('user-premium', 'premium@fitnet.com', 'PREMIUM@FITNET.COM', 'premium@fitnet.com', 'PREMIUM@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEHwFc48JbkAszfHL97mZL5PZADKLYUW7vc/b0nbT2uEEf1YA2FOZpccCorzPUGi7eg==', UUID(), UUID(), 0, 0, 1, 0, 'Sofía', 'Atleta', NULL, NOW(), 1),
+('user-trial', 'trial@fitnet.com', 'TRIAL@FITNET.COM', 'trial@fitnet.com', 'TRIAL@FITNET.COM', 1, 'AQAAAAIAAYagAAAAEGbNfQKLysvOQY8L6WCziTZssWQqi+brywu2UgvCvQx51SH3ohlDzt2FOe6lWtKEcw==', UUID(), UUID(), 0, 0, 1, 0, 'Juan', 'Prueba', NULL, NOW(), 1),
+('user-expired', 'expired@fitnet.com', 'EXPIRED@FITNET.COM', 'expired@fitnet.com', 'EXPIRED@FITNET.COM', 1, 'AQAAAAIAAYagAAAAECCAk7gPps+by5qZ4FX0ASCCkNURW09TbsRC5gFRj9/lRue9dXmCb3tYTqA6mSDxSA==', UUID(), UUID(), 0, 0, 1, 0, 'Tomás', 'Vencido', NULL, NOW(), 1);
 
 -- Vinculación de Roles
 INSERT INTO `AspNetUserRoles` (`UserId`, `RoleId`) VALUES
@@ -352,17 +352,17 @@ INSERT INTO `AspNetUserRoles` (`UserId`, `RoleId`) VALUES
 ('user-expired', 'role-member');
 
 -- Perfil de Entrenador
-INSERT INTO `TrainerProfiles` (`Id`, `UserId`, `Specialty`, `Biography`, `HireDate`, `IsActive`) VALUES
-(1, 'user-trainer', 'Hipertrofia & Fuerza', 'Licenciado en Educación Física especializado en biomecánica y sobrecarga progresiva.', NOW(), 1),
-(2, 'user-trainer-sofia', 'Cross Training & Acondicionamiento', 'Head Coach CrossFit L2 · Preparadora Física de atletas de alto rendimiento.', NOW(), 1),
-(3, 'user-trainer-matias', 'Rehabilitación & Funcional', 'Kinesiólogo y Entrenador de Movilidad Articular con enfoque en prevención y readaptación deportiva.', NOW(), 1);
+INSERT INTO `TrainerProfiles` (`Id`, `UserId`, `Specialty`, `Biography`, `CreatedAt`) VALUES
+(1, 'user-trainer', 'Hipertrofia & Fuerza', 'Licenciado en Educación Física especializado en biomecánica y sobrecarga progresiva.', NOW()),
+(2, 'user-trainer-sofia', 'Cross Training & Acondicionamiento', 'Head Coach CrossFit L2 · Preparadora Física de atletas de alto rendimiento.', NOW()),
+(3, 'user-trainer-matias', 'Rehabilitación & Funcional', 'Kinesiólogo y Entrenador de Movilidad Articular con enfoque en prevención y readaptación deportiva.', NOW());
 
 -- Perfiles de Miembros
-INSERT INTO `MemberProfiles` (`Id`, `UserId`, `MembershipId`, `Height`, `BirthDate`, `TrialEndsAt`, `IsActive`) VALUES
-(1, 'user-member', 2, 178.00, '1998-05-14', DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
-(2, 'user-premium', 3, 168.00, '1999-11-22', DATE_ADD(NOW(), INTERVAL 1 YEAR), 1),
-(3, 'user-trial', 1, 175.00, '2001-08-20', DATE_ADD(NOW(), INTERVAL 24 HOUR), 1),
-(4, 'user-expired', 1, 180.00, '2000-03-10', DATE_SUB(NOW(), INTERVAL 2 DAY), 1);
+INSERT INTO `MemberProfiles` (`Id`, `UserId`, `MembershipId`, `Height`, `BirthDate`, `TrialEndsAt`, `CreatedAt`) VALUES
+(1, 'user-member', 2, 178, '1998-05-14', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW()),
+(2, 'user-premium', 3, 168, '1999-11-22', DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW()),
+(3, 'user-trial', 1, 175, '2001-08-20', DATE_ADD(NOW(), INTERVAL 24 HOUR), NOW()),
+(4, 'user-expired', 1, 180, '2000-03-10', DATE_SUB(NOW(), INTERVAL 2 DAY), NOW());
 
 -- Asignación de Rutinas a Miembros
 INSERT INTO `WorkoutAssignments` (`Id`, `MemberId`, `WorkoutPlanId`, `AssignedByTrainerId`, `AssignedAt`, `StartDate`, `EndDate`, `IsActive`) VALUES
